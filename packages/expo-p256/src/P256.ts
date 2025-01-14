@@ -1,8 +1,6 @@
 import type { PublicKey, Signature } from 'ox'
+import type { Bytes, Hex } from 'ox'
 import { Errors } from 'ox'
-import type * as Bytes from 'ox/Bytes'
-import type * as Hex from 'ox/Hex'
-
 import ExpoP256 from './ExpoP256'
 import {
   type InvalidKeyFormatError,

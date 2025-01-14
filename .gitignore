@@ -41,4 +41,32 @@ out
 # vercel
 .vercel
 
-/expo/ios
+# expo
+.expo/
+dist/
+web-build/
+
+# native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# ios
+ios/
+pods/
+*.xcodeproj
+*.xcworkspace
+
+# android
+android/
+.gradle/
+local.properties
+*.iml
+
+# packages
+packages/expo-webauthn/build/*
+packages/expo-p256/build/*
+/packages/expo-p256/build

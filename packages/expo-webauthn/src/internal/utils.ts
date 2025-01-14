@@ -1,4 +1,4 @@
-import * as Base64 from 'ox/Base64'
+import { Base64} from 'ox'
 import type { BufferSource } from './webauthn'
 
 /**

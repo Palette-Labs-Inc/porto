@@ -1,7 +1,6 @@
 import type { PublicKey, Signature } from 'ox';
+import type { Bytes, Hex } from 'ox';
 import { Errors } from 'ox';
-import type * as Bytes from 'ox/Bytes';
-import type * as Hex from 'ox/Hex';
 import { type InvalidKeyFormatError, type InvalidKeyPairError, type InvalidSignatureError } from './internal/utils';
 export declare const KEY_PREFIX = "porto-p256-key";
 /** Thrown when P256 operations are attempted on an unsupported platform. */

@@ -1,12 +1,11 @@
-import { StyleSheet } from 'react-native'
-import { Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 
-export default function ProfileScreen() {
+export default function HomeScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Profile</Text>
+      <Text style={styles.title}>Home</Text>
       <View style={styles.separator} />
-      <Text style={styles.text}>Your profile information will go here.</Text>
+      <Text style={styles.text}>Welcome to your new app!</Text>
     </View>
   )
 }

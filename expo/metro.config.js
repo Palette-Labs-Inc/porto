@@ -1,35 +1,41 @@
-// Learn more https://docs.expo.io/guides/customizing-metro
-const { makeMetroConfig } = require('@rnx-kit/metro-config')
-const MetroSymlinksResolver = require('@rnx-kit/metro-resolver-symlinks')
 const path = require('node:path')
+const { FileStore } = require('metro-cache')
+const { makeMetroConfig } = require('@rnx-kit/metro-config')
 const { getDefaultConfig } = require('expo/metro-config')
+const MetroSymlinksResolver = require('@rnx-kit/metro-resolver-symlinks')
 
-const defaultConfig = getDefaultConfig(__dirname)
+const projectDir = __dirname
+const workspaceRoot = path.resolve(projectDir, '../')
+
 const symlinksResolver = MetroSymlinksResolver()
 
+/** @type {import('expo/metro-config').MetroConfig} */
+const expoConfig = getDefaultConfig(projectDir)
+
+/** @type {import('expo/metro-config').MetroConfig} */
 module.exports = makeMetroConfig({
-  projectRoot: __dirname,
+  ...expoConfig,
   resolver: {
-    ...defaultConfig.resolver,
+    ...expoConfig.resolver,
     resolveRequest: (context, moduleName, platform) => {
+      
       try {
-        const resolution = symlinksResolver(context, moduleName, platform)
-        if (resolution) {
-          return resolution
-        }
-      } catch {
-        // If we have an error, we pass it on to the next resolver in the chain
-      }
+        const res = symlinksResolver(context, moduleName, platform)
+        if (res) return res
+      } catch {}
+
       return context.resolveRequest(context, moduleName, platform)
     },
-    unstable_enablePackageExports: true,
+    sourceExts: [...expoConfig.resolver.sourceExts, 'ts', 'tsx'],
     nodeModulesPaths: [
-      path.resolve(__dirname, 'node_modules'),
-      path.resolve(__dirname, '../node_modules'),
+      path.resolve(projectDir, 'node_modules'),
+      path.resolve(workspaceRoot, 'node_modules'),
+      path.resolve(workspaceRoot, 'packages'),
     ],
   },
+  watchFolders: [workspaceRoot, path.resolve(workspaceRoot, 'packages')],
   transformer: {
-    ...defaultConfig.transformer,
+    ...expoConfig.transformer,
     getTransformOptions: async () => ({
       transform: {
         experimentalImportSupport: false,
@@ -37,8 +43,9 @@ module.exports = makeMetroConfig({
       },
     }),
   },
-  watchFolders: [
-    path.resolve(__dirname, '../node_modules'),
-    path.resolve(__dirname, '../packages'),
+  cacheStores: [
+    new FileStore({
+      root: path.join(projectDir, 'node_modules', '.cache', 'metro'),
+    }),
   ],
 })

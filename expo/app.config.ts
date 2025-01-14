@@ -1,19 +1,23 @@
-import type { ConfigContext, ExpoConfig } from 'expo/config'
+import type { ExpoConfig } from 'expo/config'
 
-export default ({ config }: ConfigContext): ExpoConfig => ({
+const config: ExpoConfig = {
   name: 'porto-expo',
   slug: 'porto-expo',
+  scheme: 'porto',
   version: '1.0.0',
   orientation: 'portrait',
   icon: './assets/images/icon.png',
-  scheme: 'porto-expo',
-  userInterfaceStyle: 'automatic',
+  userInterfaceStyle: 'light',
   newArchEnabled: true,
   splash: {
     image: './assets/images/splash-icon.png',
     resizeMode: 'contain',
     backgroundColor: '#ffffff',
   },
+  updates: {
+    fallbackToCacheTimeout: 0,
+  },
+  assetBundlePatterns: ['**/*'],
   ios: {
     supportsTablet: true,
     bundleIdentifier: 'com.perhats.wallet',
@@ -27,7 +31,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     adaptiveIcon: {
-      foregroundImage: './assets/adaptive-icon.png',
+      foregroundImage: './assets/images/adaptive-icon.png',
       backgroundColor: '#FFFFFF',
     },
     intentFilters: [
@@ -42,11 +46,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   web: {
     bundler: 'metro',
-    output: 'static',
     favicon: './assets/images/favicon.png',
   },
   plugins: [
-    'expo-router',
     [
       'expo-splash-screen',
       {
@@ -55,18 +57,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         resizeMode: 'contain',
         backgroundColor: '#ffffff',
       },
-    ],
-    [
-      '@porto/expo-p256',
-      {
-        configureAndroidBackup: true,
-        faceIDPermission:
-          'Allow Porto Wallet to access your Face ID biometric data.',
-      },
-    ],
+    ]
   ],
-  experiments: {
-    typedRoutes: true,
-  },
-})
+}
 
+export default config

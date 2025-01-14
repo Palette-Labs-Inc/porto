@@ -13,16 +13,13 @@ module.exports = makeMetroConfig({
     ...defaultConfig.resolver,
     resolveRequest: (context, moduleName, platform) => {
       try {
-        // First try the symlinks resolver
         const resolution = symlinksResolver(context, moduleName, platform)
         if (resolution) {
           return resolution
         }
       } catch {
-        // If we have an error, we pass it on to the next resolver in the chain,
-        // which should be one of expo's
+        // If we have an error, we pass it on to the next resolver in the chain
       }
-      // Fallback to the default expo resolver
       return context.resolveRequest(context, moduleName, platform)
     },
     unstable_enablePackageExports: true,
@@ -31,4 +28,17 @@ module.exports = makeMetroConfig({
       path.resolve(__dirname, '../node_modules'),
     ],
   },
+  transformer: {
+    ...defaultConfig.transformer,
+    getTransformOptions: async () => ({
+      transform: {
+        experimentalImportSupport: false,
+        inlineRequires: true,
+      },
+    }),
+  },
+  watchFolders: [
+    path.resolve(__dirname, '../node_modules'),
+    path.resolve(__dirname, '../packages'),
+  ],
 })

@@ -41,3 +41,4 @@ out
 # vercel
 .vercel
 
+/expo/ios

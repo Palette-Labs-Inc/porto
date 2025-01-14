@@ -1,7 +1,7 @@
 import { MMKV } from 'react-native-mmkv'
-import type { IStorage } from './types.js'
-import type { State } from '../../Porto.js'
 import type { PersistStorage } from 'zustand/middleware'
+import type { State } from '../../Porto.js'
+import type { IStorage } from './types.js'
 
 // Initialize MMKV storage
 const mmkvStorage = new MMKV()

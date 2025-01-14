@@ -3,10 +3,10 @@ import { base64URLToArrayBuffer, bufferSourceToBase64 } from './utils'
 import type {
   AuthenticatorAssertionResponse,
   AuthenticatorTransport,
-  CredentialRequestOptions as WebAuthnCredentialRequestOptions,
   PublicKeyCredential,
   PublicKeyCredentialDescriptor,
   UserVerificationRequirement,
+  CredentialRequestOptions as WebAuthnCredentialRequestOptions,
 } from './webauthn'
 
 // ============= Types =============

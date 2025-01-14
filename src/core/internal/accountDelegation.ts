@@ -6,7 +6,7 @@ import * as Hex from 'ox/Hex'
 import * as PublicKey from 'ox/PublicKey'
 import * as Secp256k1 from 'ox/Secp256k1'
 import type * as Signature from 'ox/Signature'
-import * as WebAuthnP256 from 'ox/WebAuthnP256'
+import type * as WebAuthnP256 from 'ox/WebAuthnP256'
 import type { Chain, Client, Transport } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { readContract, writeContract } from 'viem/actions'
@@ -17,8 +17,8 @@ import {
 } from 'viem/experimental'
 
 import { experimentalDelegationAbi } from './generated.js'
-import type { OneOf, Undefined } from './types.js'
 import { P256 } from './p256/index.js'
+import type { OneOf, Undefined } from './types.js'
 import { WebAuthN } from './webauthn/index.js'
 
 ////////////////////////////////////////////////////////////
@@ -59,7 +59,6 @@ export type SerializedKey = {
 }
 
 export type WebAuthnKey = BaseKey<'webauthn', WebAuthnP256.P256Credential>
-
 
 export type P256KeyData = OneOf<
   | { platform: 'web'; privateKey: CryptoKey }
@@ -243,13 +242,13 @@ export async function createWebCryptoKey(
 ): Promise<WebCryptoKey> {
   const { expiry } = parameters
   const keyPair = await P256.createKeyPair()
-  
+
   return {
     publicKey: keyPair.publicKey,
     expiry,
     status: 'unlocked',
     type: 'p256',
-    keyData: keyPair.keyData
+    keyData: keyPair.keyData,
   }
 }
 
@@ -641,11 +640,10 @@ export async function sign(parameters: sign.Parameters) {
 
   if (key.type === 'p256') {
     if (!key.keyData) throw new Error('key data not available')
-    
-    
+
     const signature = await P256.sign({
       payload,
-      keyData: key.keyData
+      keyData: key.keyData,
     })
 
     return wrapSignature({

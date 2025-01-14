@@ -13,8 +13,8 @@ import * as TypedData from 'ox/TypedData'
 import type * as Chains from '../Chains.js'
 import type { Config, Store } from '../Porto.js'
 import * as AccountDelegation from './accountDelegation.js'
-import type * as Schema from './rpcSchema.js'
 import { announcer } from './announce/index.js'
+import type * as Schema from './rpcSchema.js'
 
 export type Provider = ox_Provider.Provider<{
   includeEvents: true

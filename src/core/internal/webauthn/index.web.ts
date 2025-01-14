@@ -3,5 +3,5 @@ import type { WebAuthnInterface } from './types.js'
 
 export const WebAuthN: WebAuthnInterface = {
   createCredential: WebAuthnP256.createCredential,
-  sign: WebAuthnP256.sign
-} 
+  sign: WebAuthnP256.sign,
+}

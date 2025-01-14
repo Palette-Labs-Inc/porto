@@ -23,13 +23,16 @@
   "license": "MIT",
   "homepage": "https://github.com/mperhats",
   "dependencies": {
-    "base64-js": "^1.5.1"
+    "ox": "catalog:"
   },
   "devDependencies": {
-    "expo-module-scripts": "catalog:"
+    "expo-module-scripts": "catalog:",
+    "expo-modules-core": "catalog:",
+    "react-native": "catalog:"
   },
   "peerDependencies": {
-    "expo": ">=52.0.0"
+    "expo": "catalog:",
+    "react-native": "catalog:"
   },
   "jest": {
     "preset": "expo-module-scripts"

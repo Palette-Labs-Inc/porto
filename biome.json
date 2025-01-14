@@ -28,7 +28,8 @@
       },
       "style": {
         "noNonNullAssertion": "off",
-        "useTemplate": "off"
+        "useTemplate": "off",
+        "noCommaOperator": "off"
       },
       "suspicious": {
         "noAssignInExpressions": "off",

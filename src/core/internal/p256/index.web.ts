@@ -8,19 +8,21 @@ export const P256: IP256 = {
       publicKey: keyPair.publicKey,
       keyData: {
         platform: 'web',
-        privateKey: keyPair.privateKey
-      }
+        privateKey: keyPair.privateKey,
+      },
     }
   },
 
   async sign(options) {
     if (options.keyData.platform !== 'web') {
-        throw new Error('Invalid key type for web platform, the package is not properly resolving native vs. web file paths.')
+      throw new Error(
+        'Invalid key type for web platform, the package is not properly resolving native vs. web file paths.',
+      )
     }
-    
+
     return WebCryptoP256.sign({
       payload: options.payload,
-      privateKey: options.keyData.privateKey
+      privateKey: options.keyData.privateKey,
     })
-  }
+  },
 }

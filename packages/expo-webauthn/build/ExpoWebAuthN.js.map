@@ -1,0 +1,1 @@
+{"version":3,"file":"ExpoWebAuthN.js","sourceRoot":"","sources":["../src/ExpoWebAuthN.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,mBAAmB,EAAE,MAAM,mBAAmB,CAAA;AACvD,eAAe,mBAAmB,CAAC,cAAc,CAAC,CAAA","sourcesContent":["import { requireNativeModule } from 'expo-modules-core'\nexport default requireNativeModule('ExpoWebAuthN')\n"]}

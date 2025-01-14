@@ -18,4 +18,4 @@ export const storage: IStorage = {
   async setItem(name, value) {
     await set(name, value, store)
   },
-} satisfies PersistStorage<State> 
+} satisfies PersistStorage<State>

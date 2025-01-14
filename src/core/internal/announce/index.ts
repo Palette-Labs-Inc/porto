@@ -4,4 +4,4 @@ export interface Announcer {
   announce: (provider: Provider) => () => void
 }
 
-export { announcer } from './index.web.js' 
+export { announcer } from './index.web.js'

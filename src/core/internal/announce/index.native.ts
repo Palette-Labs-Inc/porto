@@ -1,5 +1,5 @@
-import type { Announcer } from './index'
 import type { Provider } from '../provider'
+import type { Announcer } from './index'
 
 /**
  * Skip provider announcement in React Native.
@@ -14,5 +14,5 @@ export const announcer: Announcer = {
   announce: (_provider: Provider) => {
     // No-op for native platforms
     return () => {}
-  }
-} 
+  },
+}

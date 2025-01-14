@@ -1,5 +1,4 @@
 import { Platform } from 'react-native'
-
 import ExpoWebAuthN from './ExpoWebAuthN'
 import * as assertion from './internal/assertion'
 import * as credential from './internal/credential'
@@ -9,9 +8,9 @@ import { bufferSourceToBase64 } from './internal/utils'
 import type {
   AuthenticatorAssertionResponse,
   AuthenticatorAttestationResponse,
+  PublicKeyCredential,
   CredentialCreationOptions as WebAuthnCredentialCreationOptions,
   CredentialRequestOptions as WebAuthnCredentialRequestOptions,
-  PublicKeyCredential,
 } from './internal/webauthn'
 
 // ============= Errors =============
@@ -49,7 +48,7 @@ export function isSupported(): boolean {
   }
 
   if (Platform.OS === 'ios') {
-    return parseInt(Platform.Version, 10) >= 15
+    return Number.parseInt(Platform.Version, 10) >= 15
   }
 
   return false
@@ -60,7 +59,7 @@ export function isSupported(): boolean {
  * This function is designed to be used with WebAuthnP256.createCredential as a custom createFn.
  *
  * On iOS, this uses ASAuthorizationPlatformPublicKeyCredentialProvider for credential creation.
- * 
+ *
  * Note: While this function accepts undefined options to match WebAuthnP256.ts's type signature,
  * passing undefined will result in an error. This is because the underlying WebAuthn API
  * requires valid credential creation options. The only reason undefined is accepted in the type
@@ -106,20 +105,27 @@ export async function createCredential(
   const nativeOptions = credential.create(options)
   logger.debug('[WebAuthN:createCredential] Native options created:', {
     hasRp: !!(nativeOptions as WebAuthnCredentialCreationOptions).publicKey?.rp,
-    rpId: (nativeOptions as WebAuthnCredentialCreationOptions).publicKey?.rp?.id,
-    hasUser: !!(nativeOptions as WebAuthnCredentialCreationOptions).publicKey?.user,
-    authenticatorSelection: (nativeOptions as WebAuthnCredentialCreationOptions).publicKey?.authenticatorSelection,
-    timeout: (nativeOptions as WebAuthnCredentialCreationOptions).publicKey?.timeout,
+    rpId: (nativeOptions as WebAuthnCredentialCreationOptions).publicKey?.rp
+      ?.id,
+    hasUser: !!(nativeOptions as WebAuthnCredentialCreationOptions).publicKey
+      ?.user,
+    authenticatorSelection: (nativeOptions as WebAuthnCredentialCreationOptions)
+      .publicKey?.authenticatorSelection,
+    timeout: (nativeOptions as WebAuthnCredentialCreationOptions).publicKey
+      ?.timeout,
   })
 
   logger.debug('[WebAuthN:createCredential] Calling native createCredential')
   const nativeResponse = await ExpoWebAuthN.createCredential(nativeOptions)
-  logger.debug('[WebAuthN:createCredential] Native createCredential returned:', {
-    success: !!nativeResponse,
-    type: nativeResponse?.type,
-    hasId: !!nativeResponse?.id,
-    hasResponse: !!nativeResponse?.response,
-  })
+  logger.debug(
+    '[WebAuthN:createCredential] Native createCredential returned:',
+    {
+      success: !!nativeResponse,
+      type: nativeResponse?.type,
+      hasId: !!nativeResponse?.id,
+      hasResponse: !!nativeResponse?.response,
+    },
+  )
 
   // TODO: add zod validation or something here.
   const nativeCredential = nativeResponse as credential.parse.Input
@@ -151,7 +157,7 @@ export declare namespace createCredential {
  * This function is designed to be used with WebAuthnP256.sign as a custom getFn.
  *
  * On iOS, this uses ASAuthorizationPlatformPublicKeyCredentialProvider for credential assertion.
- * 
+ *
  * Note: While this function accepts undefined options to match WebAuthnP256.ts's type signature,
  * passing undefined will result in an error. This is because the underlying WebAuthn API
  * requires valid credential request options. The only reason undefined is accepted in the type
@@ -191,7 +197,9 @@ export async function getCredential(
   logger.debug('Getting credential with options:', {
     options,
     publicKey: options.publicKey,
-    challenge: options.publicKey?.challenge && bufferSourceToBase64(options.publicKey.challenge),
+    challenge:
+      options.publicKey?.challenge &&
+      bufferSourceToBase64(options.publicKey.challenge),
     rpId: options.publicKey?.rpId,
     allowCredentials: options.publicKey?.allowCredentials?.map((cred) => ({
       id: bufferSourceToBase64(cred.id),
@@ -204,7 +212,9 @@ export async function getCredential(
 
   const nativeOptions = assertion.create(options)
   // TODO: add zod validation or something here.
-  const nativeResponse = await ExpoWebAuthN.getCredential(nativeOptions) as assertion.parse.Input
+  const nativeResponse = (await ExpoWebAuthN.getCredential(
+    nativeOptions,
+  )) as assertion.parse.Input
 
   logger.debug('Received native response:', {
     response: nativeResponse,

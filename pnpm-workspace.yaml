@@ -1,6 +1,6 @@
 packages:
   - 'app'
-  - 'mobile'
+  - 'expo'
   - 'examples/*'
   - 'playground'
   - 'packages/*'
@@ -10,8 +10,14 @@ catalog:
   "@tanstack/react-query": "^5.59.20"
   "@types/react": "^18.3.3"
   "@types/react-dom": "^18.3.0"
+  "@types/react-native": "^0.73.0"
+  expo: "^52.0.23"
+  expo-module-scripts: "^4.0.0"
+  expo-modules-core: "^2.1.2"
+  ox: "^0.2.2"
   react: "^18.3.1"
   react-dom: "^18.3.1"
-  typescript: "^5.5.4"
-  viem: "^2.21.51"
-  wagmi: "^2.12.30"
+  react-native: '^0.76.5'
+  typescript: '^5.5.4'
+  viem: '^2.21.51'
+  wagmi: '^2.12.30'

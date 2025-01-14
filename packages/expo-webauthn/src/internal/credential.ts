@@ -9,11 +9,11 @@ import type {
   AuthenticatorAttestationResponse,
   AuthenticatorSelectionCriteria,
   AuthenticatorTransport,
-  CredentialCreationOptions as WebAuthnCredentialCreationOptions,
   PublicKeyCredential,
   PublicKeyCredentialDescriptor,
   PublicKeyCredentialParameters,
   PublicKeyCredentialRpEntity,
+  CredentialCreationOptions as WebAuthnCredentialCreationOptions,
 } from './webauthn'
 
 // ============= Types =============

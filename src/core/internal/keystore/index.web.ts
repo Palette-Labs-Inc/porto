@@ -1,5 +1,5 @@
-import type { KeystoreHost, KeystoreResolver } from './index'
 import * as WebAuthn from '../webauthn.js'
+import type { KeystoreHost, KeystoreResolver } from './index'
 
 export const keystoreResolver: KeystoreResolver = {
   resolveKeystoreHost: (keystoreHost: KeystoreHost): KeystoreHost => {
@@ -9,9 +9,9 @@ export const keystoreResolver: KeystoreResolver = {
       window.location.hostname === 'localhost'
     )
       return undefined
-    
+
     const resolvedHost = keystoreHost
     if (resolvedHost) WebAuthn.touchWellknown({ rpId: resolvedHost })
     return resolvedHost
-  }
-} 
+  },
+}

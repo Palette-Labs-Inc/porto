@@ -22,7 +22,7 @@ const config: ExpoConfig = {
     ],
     config: {
       usesNonExemptEncryption: false,
-    }
+    },
   },
   android: {
     adaptiveIcon: {
@@ -43,12 +43,10 @@ const config: ExpoConfig = {
     bundler: 'metro',
     favicon: './assets/images/favicon.png',
   },
-  plugins: [
-    'expo-router'
-  ],
+  plugins: ['expo-router'],
   experiments: {
-    typedRoutes: true
-  }
+    typedRoutes: true,
+  },
 }
 
 export default config

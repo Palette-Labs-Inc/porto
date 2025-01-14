@@ -18,7 +18,6 @@ module.exports = makeMetroConfig({
   resolver: {
     ...expoConfig.resolver,
     resolveRequest: (context, moduleName, platform) => {
-      
       try {
         const res = symlinksResolver(context, moduleName, platform)
         if (res) return res

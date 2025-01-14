@@ -1,23 +1,18 @@
-import type * as assertion from './internal/assertion'
-import type * as credential from './internal/credential'
-import { WebAuthnError } from './internal/types'
-import type {
-  AuthenticatorAssertionResponse,
-  AuthenticatorAttestationResponse,
-  PublicKeyCredential,
-  CredentialCreationOptions as WebAuthnCredentialCreationOptions,
-  CredentialRequestOptions as WebAuthnCredentialRequestOptions,
-} from './internal/webauthn'
-declare class WebAuthNError extends WebAuthnError {}
+import * as assertion from './internal/assertion';
+import * as credential from './internal/credential';
+import { WebAuthnError } from './internal/types';
+import type { AuthenticatorAssertionResponse, AuthenticatorAttestationResponse, PublicKeyCredential, CredentialCreationOptions as WebAuthnCredentialCreationOptions, CredentialRequestOptions as WebAuthnCredentialRequestOptions } from './internal/webauthn';
+declare class WebAuthNError extends WebAuthnError {
+}
 /** Thrown when WebAuthn is not supported on the device */
 declare class UnsupportedError extends WebAuthNError {
-  readonly name = 'WebAuthN.UnsupportedError'
-  constructor()
+    readonly name = "WebAuthN.UnsupportedError";
+    constructor();
 }
 /** Thrown when required options are missing */
 declare class MissingOptionsError extends WebAuthNError {
-  readonly name = 'WebAuthN.MissingOptionsError'
-  constructor(operation: string)
+    readonly name = "WebAuthN.MissingOptionsError";
+    constructor(operation: string);
 }
 /**
  * Checks if WebAuthn is supported on the current device.
@@ -28,7 +23,7 @@ declare class MissingOptionsError extends WebAuthNError {
  *
  * @returns boolean indicating whether WebAuthn is supported
  */
-export declare function isSupported(): boolean
+export declare function isSupported(): boolean;
 /**
  * Creates a new WebAuthn credential for the specified options.
  * This function is designed to be used with WebAuthnP256.createCredential as a custom createFn.
@@ -58,20 +53,13 @@ export declare function isSupported(): boolean
  * @returns A Promise that resolves with the created credential
  * @throws {MissingOptionsError} When options is undefined
  */
-export declare function createCredential(
-  options: createCredential.Options,
-): Promise<createCredential.ReturnType>
+export declare function createCredential(options: createCredential.Options): Promise<createCredential.ReturnType>;
 export declare namespace createCredential {
-  type Options = WebAuthnCredentialCreationOptions | undefined
-  type ReturnType = PublicKeyCredential & {
-    response: AuthenticatorAttestationResponse
-  }
-  type ErrorType =
-    | MissingOptionsError
-    | UnsupportedError
-    | credential.create.ErrorType
-    | credential.parse.ErrorType
-    | credential.parseSPKIFromAttestation.ErrorType
+    type Options = WebAuthnCredentialCreationOptions | undefined;
+    type ReturnType = PublicKeyCredential & {
+        response: AuthenticatorAttestationResponse;
+    };
+    type ErrorType = MissingOptionsError | UnsupportedError | credential.create.ErrorType | credential.parse.ErrorType | credential.parseSPKIFromAttestation.ErrorType;
 }
 /**
  * Gets an existing WebAuthn credential using the specified options.
@@ -103,18 +91,13 @@ export declare namespace createCredential {
  * @throws {UnsupportedError} When WebAuthn is not supported on the device
  * @throws {MissingOptionsError} When options is undefined
  */
-export declare function getCredential(
-  options: getCredential.Options,
-): Promise<getCredential.ReturnType>
+export declare function getCredential(options: getCredential.Options): Promise<getCredential.ReturnType>;
 export declare namespace getCredential {
-  type Options = WebAuthnCredentialRequestOptions | undefined
-  type ReturnType = PublicKeyCredential & {
-    response: AuthenticatorAssertionResponse
-  }
-  type ErrorType =
-    | MissingOptionsError
-    | UnsupportedError
-    | assertion.create.ErrorType
-    | assertion.parse.ErrorType
+    type Options = WebAuthnCredentialRequestOptions | undefined;
+    type ReturnType = PublicKeyCredential & {
+        response: AuthenticatorAssertionResponse;
+    };
+    type ErrorType = MissingOptionsError | UnsupportedError | assertion.create.ErrorType | assertion.parse.ErrorType;
 }
+export {};
 //# sourceMappingURL=WebAuthN.d.ts.map

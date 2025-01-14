@@ -1,119 +1,103 @@
-type COSEAlgorithmIdentifier = number
+type COSEAlgorithmIdentifier = number;
 /** @internal */
-export type AuthenticatorTransport =
-  | 'ble'
-  | 'hybrid'
-  | 'internal'
-  | 'nfc'
-  | 'usb'
+export type AuthenticatorTransport = 'ble' | 'hybrid' | 'internal' | 'nfc' | 'usb';
 /** @internal */
-export type PublicKeyCredentialType = 'public-key'
+export type PublicKeyCredentialType = 'public-key';
 /** @internal */
-export type CredentialMediationRequirement =
-  | 'conditional'
-  | 'optional'
-  | 'required'
-  | 'silent'
+export type CredentialMediationRequirement = 'conditional' | 'optional' | 'required' | 'silent';
 /** @internal */
 export interface Credential {
-  readonly id: string
-  readonly type: string
+    readonly id: string;
+    readonly type: string;
 }
 /** @internal */
 export interface PublicKeyCredential extends Credential {
-  readonly authenticatorAttachment: string | null
-  readonly rawId: ArrayBuffer
-  readonly response: AuthenticatorResponse
-  getClientExtensionResults(): AuthenticationExtensionsClientOutputs
+    readonly authenticatorAttachment: string | null;
+    readonly rawId: ArrayBuffer;
+    readonly response: AuthenticatorResponse;
+    getClientExtensionResults(): AuthenticationExtensionsClientOutputs;
 }
 /** @internal */
 export interface CredentialCreationOptions {
-  publicKey?: PublicKeyCredentialCreationOptions
-  signal?: AbortSignal
+    publicKey?: PublicKeyCredentialCreationOptions;
+    signal?: AbortSignal;
 }
 /** @internal */
 export interface CredentialRequestOptions {
-  mediation?: CredentialMediationRequirement
-  publicKey?: PublicKeyCredentialRequestOptions
-  signal?: AbortSignal
+    mediation?: CredentialMediationRequirement;
+    publicKey?: PublicKeyCredentialRequestOptions;
+    signal?: AbortSignal;
 }
 /** @internal */
-export type AttestationConveyancePreference =
-  | 'direct'
-  | 'enterprise'
-  | 'indirect'
-  | 'none'
+export type AttestationConveyancePreference = 'direct' | 'enterprise' | 'indirect' | 'none';
 /** @internal */
 export interface AuthenticatorSelectionCriteria {
-  authenticatorAttachment?: AuthenticatorAttachment
-  requireResidentKey?: boolean
-  residentKey?: ResidentKeyRequirement
-  userVerification?: UserVerificationRequirement
+    authenticatorAttachment?: AuthenticatorAttachment;
+    requireResidentKey?: boolean;
+    residentKey?: ResidentKeyRequirement;
+    userVerification?: UserVerificationRequirement;
 }
 /** @internal */
-export type ResidentKeyRequirement = 'discouraged' | 'preferred' | 'required'
+export type ResidentKeyRequirement = 'discouraged' | 'preferred' | 'required';
 /** @internal */
-export type UserVerificationRequirement =
-  | 'discouraged'
-  | 'preferred'
-  | 'required'
+export type UserVerificationRequirement = 'discouraged' | 'preferred' | 'required';
 /** @internal */
-export type AuthenticatorAttachment = 'cross-platform' | 'platform'
+export type AuthenticatorAttachment = 'cross-platform' | 'platform';
 /** @internal */
 export interface PublicKeyCredentialCreationOptions {
-  attestation?: AttestationConveyancePreference
-  authenticatorSelection?: AuthenticatorSelectionCriteria
-  challenge: BufferSource
-  excludeCredentials?: PublicKeyCredentialDescriptor[]
-  extensions?: AuthenticationExtensionsClientInputs
-  pubKeyCredParams: PublicKeyCredentialParameters[]
-  rp: PublicKeyCredentialRpEntity
-  timeout?: number
-  user: PublicKeyCredentialUserEntity
+    attestation?: AttestationConveyancePreference;
+    authenticatorSelection?: AuthenticatorSelectionCriteria;
+    challenge: BufferSource;
+    excludeCredentials?: PublicKeyCredentialDescriptor[];
+    extensions?: AuthenticationExtensionsClientInputs;
+    pubKeyCredParams: PublicKeyCredentialParameters[];
+    rp: PublicKeyCredentialRpEntity;
+    timeout?: number;
+    user: PublicKeyCredentialUserEntity;
 }
 /** @internal */
 export interface AuthenticationExtensionsClientInputs {
-  appid?: string
-  credProps?: boolean
-  hmacCreateSecret?: boolean
-  minPinLength?: boolean
+    appid?: string;
+    credProps?: boolean;
+    hmacCreateSecret?: boolean;
+    minPinLength?: boolean;
 }
 /** @internal */
 export interface PublicKeyCredentialRequestOptions {
-  allowCredentials?: PublicKeyCredentialDescriptor[]
-  challenge: BufferSource
-  extensions?: AuthenticationExtensionsClientInputs
-  rpId?: string
-  timeout?: number
-  userVerification?: UserVerificationRequirement
+    allowCredentials?: PublicKeyCredentialDescriptor[];
+    challenge: BufferSource;
+    extensions?: AuthenticationExtensionsClientInputs;
+    rpId?: string;
+    timeout?: number;
+    userVerification?: UserVerificationRequirement;
 }
 /** @internal */
 export interface PublicKeyCredentialParameters {
-  type: PublicKeyCredentialType
-  alg: number
+    type: PublicKeyCredentialType;
+    alg: number;
 }
 /** @internal */
 export interface PublicKeyCredentialRpEntity {
-  id?: string
-  name: string
+    id?: string;
+    name: string;
 }
 /** @internal */
 export interface PublicKeyCredentialUserEntity {
-  displayName: string
-  id: BufferSource
-  name: string
+    displayName: string;
+    id: BufferSource;
+    name: string;
 }
 /** @internal */
 export interface PublicKeyCredentialDescriptor {
-  id: BufferSource
-  type: PublicKeyCredentialType
-  transports?: AuthenticatorTransport[]
+    id: BufferSource;
+    type: PublicKeyCredentialType;
+    transports?: AuthenticatorTransport[];
 }
 /** @internal */
-export type BufferSource = ArrayBufferView | ArrayBuffer
+export type BufferSource = ArrayBufferView | ArrayBuffer;
 /** @internal */
 export interface AuthenticatorResponse {
-  readonly clientDataJSON: ArrayBuffer
+    readonly clientDataJSON: ArrayBuffer;
 }
 /**
  * Available only in secure contexts.
@@ -121,34 +105,34 @@ export interface AuthenticatorResponse {
  * [MDN Reference](https://developer.mozilla.org/docs/Web/API/AuthenticatorAssertionResponse)
  */
 export interface AuthenticatorAssertionResponse extends AuthenticatorResponse {
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AuthenticatorAssertionResponse/authenticatorData) */
-  readonly authenticatorData: ArrayBuffer
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AuthenticatorAssertionResponse/signature) */
-  readonly signature: ArrayBuffer
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AuthenticatorAssertionResponse/userHandle) */
-  readonly userHandle: ArrayBuffer | null
+    /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AuthenticatorAssertionResponse/authenticatorData) */
+    readonly authenticatorData: ArrayBuffer;
+    /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AuthenticatorAssertionResponse/signature) */
+    readonly signature: ArrayBuffer;
+    /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AuthenticatorAssertionResponse/userHandle) */
+    readonly userHandle: ArrayBuffer | null;
 }
 /** @internal */
-export interface AuthenticatorAttestationResponse
-  extends AuthenticatorResponse {
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AuthenticatorAttestationResponse/attestationObject) */
-  readonly attestationObject: ArrayBuffer
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AuthenticatorAttestationResponse/getAuthenticatorData) */
-  getAuthenticatorData(): ArrayBuffer
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AuthenticatorAttestationResponse/getPublicKey) */
-  getPublicKey(): ArrayBuffer | null
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AuthenticatorAttestationResponse/getPublicKeyAlgorithm) */
-  getPublicKeyAlgorithm(): COSEAlgorithmIdentifier
-  /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AuthenticatorAttestationResponse/getTransports) */
-  getTransports(): string[]
+export interface AuthenticatorAttestationResponse extends AuthenticatorResponse {
+    /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AuthenticatorAttestationResponse/attestationObject) */
+    readonly attestationObject: ArrayBuffer;
+    /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AuthenticatorAttestationResponse/getAuthenticatorData) */
+    getAuthenticatorData(): ArrayBuffer;
+    /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AuthenticatorAttestationResponse/getPublicKey) */
+    getPublicKey(): ArrayBuffer | null;
+    /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AuthenticatorAttestationResponse/getPublicKeyAlgorithm) */
+    getPublicKeyAlgorithm(): COSEAlgorithmIdentifier;
+    /** [MDN Reference](https://developer.mozilla.org/docs/Web/API/AuthenticatorAttestationResponse/getTransports) */
+    getTransports(): string[];
 }
 /** @internal */
 export interface AuthenticationExtensionsClientOutputs {
-  appid?: boolean
-  credProps?: {
-    rk: boolean
-  }
-  hmacCreateSecret?: boolean
-  prf?: Record<string, ArrayBuffer>
+    appid?: boolean;
+    credProps?: {
+        rk: boolean;
+    };
+    hmacCreateSecret?: boolean;
+    prf?: Record<string, ArrayBuffer>;
 }
+export {};
 //# sourceMappingURL=webauthn.d.ts.map

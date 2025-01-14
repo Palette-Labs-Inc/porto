@@ -8,7 +8,6 @@ import type * as AccountDelegation from './internal/accountDelegation.js'
 import { keystoreResolver } from './internal/keystore/index.js'
 import * as Provider from './internal/provider.js'
 import * as Storage from './internal/storage/index.js'
-import * as WebAuthn from './internal/webauthn.js'
 
 export const defaultConfig = {
   announceProvider: true,

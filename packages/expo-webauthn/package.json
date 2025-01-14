@@ -1,9 +1,9 @@
 {
   "name": "@porto/expo-webauthn",
   "version": "0.0.1",
-  "description": "expo passkeys",
+  "description": "expo webauthn",
   "source": {
-    "git": "https://github.com/Palette-Labs-Inc/porto-expo.git"
+    "git": "https://github.com/Palette-Labs-Inc/porto.git"
   },
   "summary": "An expo module for passkeys",
   "type": "module",

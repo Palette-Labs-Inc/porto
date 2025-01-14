@@ -1,13 +1,22 @@
 {
-  "name": "mobile",
+  "name": "expo",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
-    "test": "jest --watchAll"
+    "restart:ios": "EXPO_USE_METRO_WORKSPACE_ROOT=1 pnpm install && cd ios && pod install && cd .. && pnpm prebuild:ios && pnpm start",
+    "restart:android": "EXPO_USE_METRO_WORKSPACE_ROOT=1 pnpm install && pnpm prebuild:android && pnpm run:android",
+    "start": "EXPO_USE_METRO_WORKSPACE_ROOT=1 expo start --dev-client",
+    "android": "EXPO_USE_METRO_WORKSPACE_ROOT=1 expo run:android",
+    "ios": "EXPO_USE_METRO_WORKSPACE_ROOT=1 expo run:ios",
+    "eject": "expo eject",
+    "prebuild": "expo prebuild",
+    "prebuild:ios": "expo prebuild --platform ios",
+    "prebuild:android": "expo prebuild --platform android",
+    "clean": "rm -rf .expo .turbo node_modules ios android dist build",
+    "run:android": "EXPO_USE_METRO_WORKSPACE_ROOT=1 expo run:android",
+    "run:ios": "EXPO_USE_METRO_WORKSPACE_ROOT=1 expo run:ios",
+    "build:android": "expo build:android",
+    "build:ios": "expo build:ios"
   },
   "jest": {
     "preset": "jest-expo"
@@ -15,7 +24,7 @@
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
     "@react-navigation/native": "^7.0.14",
-    "expo": "~52.0.25",
+    "expo": "catalog:",
     "expo-font": "~13.0.3",
     "expo-linking": "~7.0.4",
     "expo-router": "~4.0.16",
@@ -23,9 +32,9 @@
     "expo-status-bar": "~2.0.1",
     "expo-system-ui": "~4.0.7",
     "expo-web-browser": "~14.0.2",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "react-native": "0.76.6",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-native": "catalog:",
     "react-native-reanimated": "~3.16.1",
     "react-native-safe-area-context": "4.12.0",
     "react-native-screens": "~4.4.0",

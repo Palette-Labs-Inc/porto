@@ -1,25 +1,26 @@
-import { Platform } from 'react-native'
-import ExpoWebAuthN from './ExpoWebAuthN'
-import * as assertion from './internal/assertion'
-import * as credential from './internal/credential'
-import { logger } from './internal/logger'
-import { WebAuthnError } from './internal/types'
-import { bufferSourceToBase64 } from './internal/utils'
+import { Platform } from 'react-native';
+import ExpoWebAuthN from './ExpoWebAuthN';
+import * as assertion from './internal/assertion';
+import * as credential from './internal/credential';
+import { logger } from './internal/logger';
+import { WebAuthnError } from './internal/types';
+import { bufferSourceToBase64 } from './internal/utils';
 // ============= Errors =============
-class WebAuthNError extends WebAuthnError {}
+class WebAuthNError extends WebAuthnError {
+}
 /** Thrown when WebAuthn is not supported on the device */
 class UnsupportedError extends WebAuthNError {
-  name = 'WebAuthN.UnsupportedError'
-  constructor() {
-    super('WebAuthn is not supported on this device')
-  }
+    name = 'WebAuthN.UnsupportedError';
+    constructor() {
+        super('WebAuthn is not supported on this device');
+    }
 }
 /** Thrown when required options are missing */
 class MissingOptionsError extends WebAuthNError {
-  name = 'WebAuthN.MissingOptionsError'
-  constructor(operation) {
-    super(`${operation} options are required`)
-  }
+    name = 'WebAuthN.MissingOptionsError';
+    constructor(operation) {
+        super(`${operation} options are required`);
+    }
 }
 /**
  * Checks if WebAuthn is supported on the current device.
@@ -31,13 +32,13 @@ class MissingOptionsError extends WebAuthNError {
  * @returns boolean indicating whether WebAuthn is supported
  */
 export function isSupported() {
-  if (Platform.OS === 'android') {
-    return Platform.Version >= 28
-  }
-  if (Platform.OS === 'ios') {
-    return Number.parseInt(Platform.Version, 10) >= 15
-  }
-  return false
+    if (Platform.OS === 'android') {
+        return Platform.Version >= 28;
+    }
+    if (Platform.OS === 'ios') {
+        return Number.parseInt(Platform.Version, 10) >= 15;
+    }
+    return false;
 }
 /**
  * Creates a new WebAuthn credential for the specified options.
@@ -69,47 +70,48 @@ export function isSupported() {
  * @throws {MissingOptionsError} When options is undefined
  */
 export async function createCredential(options) {
-  logger.debug('[WebAuthN:createCredential] Starting credential creation:', {
-    hasOptions: !!options,
-    hasPublicKey: !!options?.publicKey,
-    rpId: options?.publicKey?.rp?.id,
-  })
-  if (!options) {
-    logger.error('[WebAuthN:createCredential] No options provided')
-    throw new MissingOptionsError('Credential creation')
-  }
-  if (!isSupported()) {
-    throw new UnsupportedError()
-  }
-  logger.debug('[WebAuthN:createCredential] Creating native options')
-  const nativeOptions = credential.create(options)
-  logger.debug('[WebAuthN:createCredential] Native options created:', {
-    hasRp: !!nativeOptions.publicKey?.rp,
-    rpId: nativeOptions.publicKey?.rp?.id,
-    hasUser: !!nativeOptions.publicKey?.user,
-    authenticatorSelection: nativeOptions.publicKey?.authenticatorSelection,
-    timeout: nativeOptions.publicKey?.timeout,
-  })
-  logger.debug('[WebAuthN:createCredential] Calling native createCredential')
-  const nativeResponse = await ExpoWebAuthN.createCredential(nativeOptions)
-  logger.debug(
-    '[WebAuthN:createCredential] Native createCredential returned:',
-    {
-      success: !!nativeResponse,
-      type: nativeResponse?.type,
-      hasId: !!nativeResponse?.id,
-      hasResponse: !!nativeResponse?.response,
-    },
-  )
-  // TODO: add zod validation or something here.
-  const nativeCredential = nativeResponse
-  logger.debug('[WebAuthN:createCredential] Credential parsed:', {
-    type: nativeCredential.type,
-    hasResponse: !!nativeCredential.response,
-    hasAttestationObject: !!nativeCredential.response.attestationObject,
-    hasClientData: !!nativeCredential.response.clientDataJSON,
-  })
-  return credential.parse(nativeResponse)
+    logger.debug('[WebAuthN:createCredential] Starting credential creation:', {
+        hasOptions: !!options,
+        hasPublicKey: !!options?.publicKey,
+        rpId: options?.publicKey?.rp?.id,
+    });
+    if (!options) {
+        logger.error('[WebAuthN:createCredential] No options provided');
+        throw new MissingOptionsError('Credential creation');
+    }
+    if (!isSupported()) {
+        throw new UnsupportedError();
+    }
+    logger.debug('[WebAuthN:createCredential] Creating native options');
+    const nativeOptions = credential.create(options);
+    logger.debug('[WebAuthN:createCredential] Native options created:', {
+        hasRp: !!nativeOptions.publicKey?.rp,
+        rpId: nativeOptions.publicKey?.rp
+            ?.id,
+        hasUser: !!nativeOptions.publicKey
+            ?.user,
+        authenticatorSelection: nativeOptions
+            .publicKey?.authenticatorSelection,
+        timeout: nativeOptions.publicKey
+            ?.timeout,
+    });
+    logger.debug('[WebAuthN:createCredential] Calling native createCredential');
+    const nativeResponse = await ExpoWebAuthN.createCredential(nativeOptions);
+    logger.debug('[WebAuthN:createCredential] Native createCredential returned:', {
+        success: !!nativeResponse,
+        type: nativeResponse?.type,
+        hasId: !!nativeResponse?.id,
+        hasResponse: !!nativeResponse?.response,
+    });
+    // TODO: add zod validation or something here.
+    const nativeCredential = nativeResponse;
+    logger.debug('[WebAuthN:createCredential] Credential parsed:', {
+        type: nativeCredential.type,
+        hasResponse: !!nativeCredential.response,
+        hasAttestationObject: !!nativeCredential.response.attestationObject,
+        hasClientData: !!nativeCredential.response.clientDataJSON,
+    });
+    return credential.parse(nativeResponse);
 }
 /**
  * Gets an existing WebAuthn credential using the specified options.
@@ -142,38 +144,37 @@ export async function createCredential(options) {
  * @throws {MissingOptionsError} When options is undefined
  */
 export async function getCredential(options) {
-  if (!isSupported()) {
-    throw new UnsupportedError()
-  }
-  if (!options) {
-    logger.error('[WebAuthN:getCredential] No options provided')
-    throw new MissingOptionsError('Credential request')
-  }
-  logger.debug('Getting credential with options:', {
-    options,
-    publicKey: options.publicKey,
-    challenge:
-      options.publicKey?.challenge &&
-      bufferSourceToBase64(options.publicKey.challenge),
-    rpId: options.publicKey?.rpId,
-    allowCredentials: options.publicKey?.allowCredentials?.map((cred) => ({
-      id: bufferSourceToBase64(cred.id),
-      type: cred.type,
-      transports: cred.transports,
-    })),
-    userVerification: options.publicKey?.userVerification,
-    timeout: options.publicKey?.timeout,
-  })
-  const nativeOptions = assertion.create(options)
-  // TODO: add zod validation or something here.
-  const nativeResponse = await ExpoWebAuthN.getCredential(nativeOptions)
-  logger.debug('Received native response:', {
-    response: nativeResponse,
-    responseType: typeof nativeResponse,
-    hasAuthenticatorData: 'authenticatorData' in nativeResponse.response,
-    hasClientDataJSON: 'clientDataJSON' in nativeResponse.response,
-    hasSignature: 'signature' in nativeResponse.response,
-  })
-  return assertion.parse(nativeResponse)
+    if (!isSupported()) {
+        throw new UnsupportedError();
+    }
+    if (!options) {
+        logger.error('[WebAuthN:getCredential] No options provided');
+        throw new MissingOptionsError('Credential request');
+    }
+    logger.debug('Getting credential with options:', {
+        options,
+        publicKey: options.publicKey,
+        challenge: options.publicKey?.challenge &&
+            bufferSourceToBase64(options.publicKey.challenge),
+        rpId: options.publicKey?.rpId,
+        allowCredentials: options.publicKey?.allowCredentials?.map((cred) => ({
+            id: bufferSourceToBase64(cred.id),
+            type: cred.type,
+            transports: cred.transports,
+        })),
+        userVerification: options.publicKey?.userVerification,
+        timeout: options.publicKey?.timeout,
+    });
+    const nativeOptions = assertion.create(options);
+    // TODO: add zod validation or something here.
+    const nativeResponse = (await ExpoWebAuthN.getCredential(nativeOptions));
+    logger.debug('Received native response:', {
+        response: nativeResponse,
+        responseType: typeof nativeResponse,
+        hasAuthenticatorData: 'authenticatorData' in nativeResponse.response,
+        hasClientDataJSON: 'clientDataJSON' in nativeResponse.response,
+        hasSignature: 'signature' in nativeResponse.response,
+    });
+    return assertion.parse(nativeResponse);
 }
 //# sourceMappingURL=WebAuthN.js.map

@@ -1,5 +1,4 @@
-import { fromByteArray, toByteArray } from 'base64-js'
-
+import * as Base64 from 'ox/Base64'
 import type { BufferSource } from './webauthn'
 
 /**
@@ -13,7 +12,7 @@ export function bufferSourceToBase64(buffer: BufferSource): string {
     buffer instanceof Uint8Array
       ? buffer
       : new Uint8Array(buffer instanceof ArrayBuffer ? buffer : buffer.buffer)
-  return fromByteArray(uint8Array)
+  return Base64.fromBytes(uint8Array)
 }
 
 /**
@@ -21,16 +20,20 @@ export function bufferSourceToBase64(buffer: BufferSource): string {
  * @internal
  */
 export function base64ToArrayBuffer(base64: string): ArrayBuffer {
-  const uint8Array = toByteArray(base64)
-  return uint8Array.buffer as ArrayBuffer
+  const uint8Array = Base64.toBytes(base64)
+  return uint8Array.buffer
 }
 
+/**
+ * Converts a base64url string to an ArrayBuffer, handling URL-safe characters
+ * and padding appropriately.
+ */
 export function base64URLToArrayBuffer(base64url: string): ArrayBuffer {
-  const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/')
-  const padded = base64.padEnd(
-    base64.length + ((4 - (base64.length % 4)) % 4),
+  // Base64.toBytes already handles URL-safe characters, just need to handle padding
+  const padded = base64url.padEnd(
+    base64url.length + ((4 - (base64url.length % 4)) % 4),
     '=',
   )
-  const uint8Array = toByteArray(padded)
-  return uint8Array.buffer as ArrayBuffer
+  const uint8Array = Base64.toBytes(padded)
+  return uint8Array.buffer
 }

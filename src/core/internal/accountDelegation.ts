@@ -7,7 +7,6 @@ import * as PublicKey from 'ox/PublicKey'
 import * as Secp256k1 from 'ox/Secp256k1'
 import type * as Signature from 'ox/Signature'
 import * as WebAuthnP256 from 'ox/WebAuthnP256'
-import * as WebCryptoP256 from 'ox/WebCryptoP256'
 import type { Chain, Client, Transport } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { readContract, writeContract } from 'viem/actions'
@@ -19,6 +18,8 @@ import {
 
 import { experimentalDelegationAbi } from './generated.js'
 import type { OneOf, Undefined } from './types.js'
+import { P256 } from './p256/index.js'
+import { WebAuthN } from './webauthn/index.js'
 
 ////////////////////////////////////////////////////////////
 // Types
@@ -59,12 +60,25 @@ export type SerializedKey = {
 
 export type WebAuthnKey = BaseKey<'webauthn', WebAuthnP256.P256Credential>
 
+
+export type P256KeyData = OneOf<
+  | { platform: 'web'; privateKey: CryptoKey }
+  | { platform: 'native'; privateKeyStorageKey: string }
+>
+
 export type WebCryptoKey = BaseKey<
   'p256',
   {
-    privateKey: CryptoKey
+    keyData: P256KeyData
   }
 >
+/*
+export type WebCryptoKey = BaseKey<
+  'p256',
+  { // this might have been more maintainable, but idk if lib.dom is available to react-native. Might have cause runtime errors?
+    privateKey: CryptoKey & { storageKey?: string }
+  }
+>*/
 
 ////////////////////////////////////////////////////////////////
 // Constants
@@ -183,7 +197,7 @@ export async function createWebAuthnKey(
 ): Promise<WebAuthnKey> {
   const { expiry = 0n, rpId, label, userId } = parameters
 
-  const key = await WebAuthnP256.createCredential({
+  const key = await WebAuthN.createCredential({
     authenticatorSelection: {
       requireResidentKey: false,
       residentKey: 'preferred',
@@ -228,12 +242,14 @@ export async function createWebCryptoKey(
   parameters: createWebCryptoKey.Parameters,
 ): Promise<WebCryptoKey> {
   const { expiry } = parameters
-  const keyPair = await WebCryptoP256.createKeyPair()
+  const keyPair = await P256.createKeyPair()
+  
   return {
-    ...keyPair,
+    publicKey: keyPair.publicKey,
     expiry,
     status: 'unlocked',
     type: 'p256',
+    keyData: keyPair.keyData
   }
 }
 
@@ -407,7 +423,7 @@ export async function load<chain extends Chain | undefined>(
   } else {
     // We will sign a random challenge. We need to do this to extract the
     // user id (ie. the address) to query for the Account's keys.
-    const credential = await WebAuthnP256.sign({
+    const credential = await WebAuthN.sign({
       challenge: '0x',
       rpId,
     })
@@ -427,7 +443,7 @@ export async function load<chain extends Chain | undefined>(
       keys: authorizeKeys ?? [],
     })
 
-    const { signature, metadata, ...rest } = await WebAuthnP256.sign({
+    const { signature, metadata, ...rest } = await WebAuthN.sign({
       challenge: payload,
       credentialId,
       rpId,
@@ -618,15 +634,29 @@ export function serializeKeys(keys: readonly Key[]) {
 /** Signs a payload with a key on the Account. */
 export async function sign(parameters: sign.Parameters) {
   const { account, payload, keyIndex = 0, rpId } = parameters
-
   const key = account.keys[keyIndex]
 
-  // If the key is not found, or is locked, we cannot sign.
   if (!key) throw new Error('key not found')
   if (key.status === 'locked') throw new Error('key is locked')
 
+  if (key.type === 'p256') {
+    if (!key.keyData) throw new Error('key data not available')
+    
+    
+    const signature = await P256.sign({
+      payload,
+      keyData: key.keyData
+    })
+
+    return wrapSignature({
+      signature,
+      keyIndex,
+      prehash: true,
+    })
+  }
+
   if (key.type === 'webauthn') {
-    const { signature, metadata } = await WebAuthnP256.sign({
+    const { signature, metadata } = await WebAuthN.sign({
       challenge: payload,
       credentialId: key.id,
       rpId,
@@ -635,19 +665,6 @@ export async function sign(parameters: sign.Parameters) {
     return wrapSignature({
       metadata: getWebAuthnMetadata(metadata),
       signature,
-    })
-  }
-
-  if (key.type === 'p256') {
-    const signature = await WebCryptoP256.sign({
-      payload,
-      privateKey: key.privateKey,
-    })
-
-    return wrapSignature({
-      signature,
-      keyIndex,
-      prehash: true,
     })
   }
 

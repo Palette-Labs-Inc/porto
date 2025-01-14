@@ -5,8 +5,9 @@ import { type Mutate, type StoreApi, createStore } from 'zustand/vanilla'
 
 import * as Chains from './Chains.js'
 import type * as AccountDelegation from './internal/accountDelegation.js'
+import { keystoreResolver } from './internal/keystore/index.js'
 import * as Provider from './internal/provider.js'
-import * as Storage from './internal/storage.js'
+import * as Storage from './internal/storage/index.js'
 import * as WebAuthn from './internal/webauthn.js'
 
 export const defaultConfig = {
@@ -46,17 +47,7 @@ export function create(config: Config | undefined = {}): Porto {
     transports = defaultConfig.transports,
   } = config
 
-  const keystoreHost = (() => {
-    if (keystoreHost_ === 'self') return undefined
-    if (
-      typeof window !== 'undefined' &&
-      window.location.hostname === 'localhost'
-    )
-      return undefined
-    return keystoreHost_
-  })()
-
-  if (headless && keystoreHost) WebAuthn.touchWellknown({ rpId: keystoreHost })
+  const keystoreHost = keystoreResolver.resolveKeystoreHost(keystoreHost_)
 
   const store = createStore(
     subscribeWithSelector(
@@ -97,7 +88,7 @@ export function create(config: Config | undefined = {}): Porto {
               chain: state.chain,
             } as unknown as State
           },
-          storage: Storage.idb,
+          storage: Storage.storage,
         },
       ),
     ),

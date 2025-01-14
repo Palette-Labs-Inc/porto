@@ -17,8 +17,8 @@ import {
 } from 'wagmi'
 import {
   type ConnectReturnType,
-  getConnectorClient,
   disconnect as wagmi_disconnect,
+  getConnectorClient,
 } from 'wagmi/actions'
 
 import type {

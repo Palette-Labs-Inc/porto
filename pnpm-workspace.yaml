@@ -1,7 +1,9 @@
 packages:
   - 'app'
+  - 'mobile'
   - 'examples/*'
   - 'playground'
+  - 'packages/*'
   - 'src'
 
 catalog:

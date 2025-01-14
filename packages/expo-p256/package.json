@@ -1,0 +1,42 @@
+{
+  "name": "@porto/expo-p256",
+  "version": "0.0.1",
+  "description": "Provides a way to encrypt and securely store key-value pairs locally on the device.",
+  "main": "build/P256.js",
+  "types": "build/P256.d.ts",
+  "source": {
+    "git": "https://github.com/Palette-Labs-Inc/porto-expo.git"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "npm_config_user_agent=yarn expo-module build",
+    "clean": "npm_config_user_agent=yarn expo-module clean",
+    "lint": "npm_config_user_agent=yarn expo-module lint",
+    "test": "npm_config_user_agent=yarn expo-module test",
+    "prepare": "npm_config_user_agent=yarn expo-module prepare",
+    "prepublishOnly": "npm_config_user_agent=yarn expo-module prepublishOnly",
+    "postinstall": "pnpm build"
+  },
+  "keywords": ["react-native", "expo", "expo-p256", "p256"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Palette-Labs-Inc/porto-expo.git",
+    "directory": "packages/expo-p256"
+  },
+  "author": "mike perhats",
+  "license": "MIT",
+  "homepage": "https://github.com/mperhats",
+  "jest": {
+    "preset": "expo-module-scripts"
+  },
+  "dependencies": {
+    "ox": "catalog:",
+    "base64-js": "^1.5.1"
+  },
+  "devDependencies": {
+    "expo-module-scripts": "catalog:"
+  },
+  "peerDependencies": {
+    "expo": "catalog:"
+  }
+}

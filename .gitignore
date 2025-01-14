@@ -70,3 +70,4 @@ local.properties
 packages/expo-webauthn/build/*
 packages/expo-p256/build/*
 /packages/expo-p256/build
+/packages/expo-p256/plugin/build

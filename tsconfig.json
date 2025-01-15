@@ -4,6 +4,7 @@
   "include": ["scripts", "src"],
   "exclude": ["src/_dist"],
   "compilerOptions": {
+    "strict": true,
     "baseUrl": "."
   }
 }

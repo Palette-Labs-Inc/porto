@@ -5,7 +5,7 @@ import { type Mutate, type StoreApi, createStore } from 'zustand/vanilla'
 
 import * as Chains from './Chains.js'
 import type * as AccountDelegation from './internal/accountDelegation.js'
-import { keystoreResolver } from './internal/keystore/index.js'
+import { keystoreResolver } from './internal/keystore'
 import * as Provider from './internal/provider.js'
 import * as Storage from './internal/storage/index.js'
 

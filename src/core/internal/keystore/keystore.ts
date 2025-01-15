@@ -1,5 +1,5 @@
 import * as WebAuthn from '../webauthn.js'
-import type { KeystoreHost, KeystoreResolver } from './index'
+import type { KeystoreHost, KeystoreResolver } from './types.js'
 
 export const keystoreResolver: KeystoreResolver = {
   resolveKeystoreHost: (keystoreHost: KeystoreHost): KeystoreHost => {

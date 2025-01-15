@@ -1,5 +1,4 @@
 import * as ExpoP256 from '@porto/expo-p256'
-import { KEY_PREFIX } from '@porto/expo-p256'
 import type { IP256 } from './types.js'
 
 export const P256: IP256 = {
@@ -29,7 +28,7 @@ export const P256: IP256 = {
       privateKeyStorageKey: options.keyData.privateKeyStorageKey,
       payload: options.payload,
       requireAuthentication: false,
-      keychainService: KEY_PREFIX,
+      keychainService:  ExpoP256.KEY_PREFIX,
     })
   },
 }

@@ -229,6 +229,9 @@ importers:
       expo-status-bar:
         specifier: ~2.0.0
         version: 2.0.1(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@react-native-community/cli-server-api@12.3.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(@types/react@18.3.18)(bufferutil@4.0.9)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)
+      ox:
+        specifier: ^0.2.2
+        version: 0.2.2(typescript@5.3.3)(zod@3.24.1)
       porto:
         specifier: workspace:*
         version: link:../src
@@ -14883,6 +14886,11 @@ snapshots:
       typescript: 5.6.3
       zod: 3.24.1
 
+  abitype@1.0.8(typescript@5.3.3)(zod@3.24.1):
+    optionalDependencies:
+      typescript: 5.3.3
+      zod: 3.24.1
+
   abitype@1.0.8(typescript@5.6.3)(zod@3.24.1):
     optionalDependencies:
       typescript: 5.6.3
@@ -20147,6 +20155,20 @@ snapshots:
       get-intrinsic: 1.2.7
       object-keys: 1.1.1
       safe-push-apply: 1.0.0
+
+  ox@0.2.2(typescript@5.3.3)(zod@3.24.1):
+    dependencies:
+      '@adraffy/ens-normalize': 1.11.0
+      '@noble/curves': 1.8.0
+      '@noble/hashes': 1.7.0
+      '@scure/bip32': 1.6.1
+      '@scure/bip39': 1.5.1
+      abitype: 1.0.8(typescript@5.3.3)(zod@3.24.1)
+      eventemitter3: 5.0.1
+    optionalDependencies:
+      typescript: 5.3.3
+    transitivePeerDependencies:
+      - zod
 
   ox@0.2.2(typescript@5.6.3)(zod@3.24.1):
     dependencies:

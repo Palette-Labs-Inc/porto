@@ -20,12 +20,13 @@
     "dev": "pnpm preconstruct && pnpm --filter playground dev",
     "dev:wagmi": "pnpm preconstruct && pnpm --filter wagmi-example dev",
     "format": "biome format --write",
-    "postinstall": "pnpm preconstruct",
+    "postinstall": "pnpm build:packages",
     "preconstruct": "tsx ./scripts/preconstruct.ts",
-    "preinstall": "pnpx only-allow pnpm",
+    "preinstall": "npx only-allow pnpm",
     "prepare": "pnpm simple-git-hooks",
     "dev:playground": "pnpm --filter playground dev",
-    "dev:expo": "pnpm --filter expo start"
+    "dev:expo": "pnpm --filter porto-expo start",
+    "build:packages": "pnpm --filter \"@porto/expo-*\" build && pnpm --filter porto build"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.17.1",

@@ -1,16 +1,18 @@
-import { Porto } from 'porto'
+import { ExperimentERC20 } from '@/src/contracts'
+import { Stack } from 'expo-router'
 import { AbiFunction, Hex, Json, PublicKey, TypedData, Value } from 'ox'
+import { Porto } from 'porto'
 import * as React from 'react'
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import {
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Switch,
   Text,
   TextInput,
   View,
-  Pressable,
 } from 'react-native'
 import { createClient, custom } from 'viem'
 import {
@@ -19,8 +21,6 @@ import {
   privateKeyToAddress,
 } from 'viem/accounts'
 import { verifyMessage, verifyTypedData } from 'viem/actions'
-import { ExperimentERC20 } from '@/src/contracts'
-import { Stack } from 'expo-router'
 
 let porto: { provider: any; _internal: any; destroy?: () => void }
 try {
@@ -49,7 +49,11 @@ const client = createClient({
 })
 
 // Custom Button component to replace @repo/ui Button
-function Button({ onPress, text, variant = 'primary' }: { onPress: () => void; text: string; variant?: 'primary' | 'secondary' }) {
+function Button({
+  onPress,
+  text,
+  variant = 'primary',
+}: { onPress: () => void; text: string; variant?: 'primary' | 'secondary' }) {
   return (
     <Pressable
       onPress={onPress}
@@ -58,10 +62,14 @@ function Button({ onPress, text, variant = 'primary' }: { onPress: () => void; t
         variant === 'primary' ? styles.buttonPrimary : styles.buttonSecondary,
       ]}
     >
-      <Text style={[
-        styles.buttonText,
-        variant === 'primary' ? styles.buttonTextPrimary : styles.buttonTextSecondary,
-      ]}>
+      <Text
+        style={[
+          styles.buttonText,
+          variant === 'primary'
+            ? styles.buttonTextPrimary
+            : styles.buttonTextSecondary,
+        ]}
+      >
         {text}
       </Text>
     </Pressable>
@@ -155,7 +163,6 @@ function Events() {
   const [responses, setResponses] = useState<Record<string, unknown>>({})
 
   useEffect(() => {
-
     const handleResponse = (event: string) => (response: unknown) => {
       setResponses((responses) => ({
         ...responses,
@@ -885,4 +892,4 @@ const typedData = {
       isCool: true,
     },
   },
-} as const 
+} as const

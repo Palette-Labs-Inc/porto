@@ -28,7 +28,7 @@ export const P256: IP256 = {
       privateKeyStorageKey: options.keyData.privateKeyStorageKey,
       payload: options.payload,
       requireAuthentication: false,
-      keychainService:  ExpoP256.KEY_PREFIX,
+      keychainService: ExpoP256.KEY_PREFIX,
     })
   },
 }

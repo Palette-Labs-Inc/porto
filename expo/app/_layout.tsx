@@ -1,5 +1,5 @@
-import { polyfillWebCrypto } from 'expo-standard-web-crypto';
-polyfillWebCrypto();
+import { polyfillWebCrypto } from 'expo-standard-web-crypto'
+polyfillWebCrypto()
 // crypto is now globally defined
 import { Stack } from 'expo-router'
 

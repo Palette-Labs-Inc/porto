@@ -1,13 +1,15 @@
-import { View, Text, StyleSheet, Pressable } from 'react-native'
 import { router } from 'expo-router'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 
 export default function HomePage() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome to Porto</Text>
-      <Text style={styles.subtitle}>Navigate to the Playground tab to test Porto functionality</Text>
-      <Pressable 
-        style={styles.button} 
+      <Text style={styles.subtitle}>
+        Navigate to the Playground tab to test Porto functionality
+      </Text>
+      <Pressable
+        style={styles.button}
         onPress={() => router.push('/playground')}
       >
         <Text style={styles.buttonText}>Go to Playground</Text>

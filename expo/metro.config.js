@@ -32,7 +32,10 @@ module.exports = makeMetroConfig({
       path.resolve(workspaceRoot, 'packages'),
     ],
   },
-  watchFolders: [workspaceRoot, path.resolve(workspaceRoot, 'packages')],
+  watchFolders: [
+    workspaceRoot, path.resolve(workspaceRoot, 'packages'),
+    workspaceRoot, path.resolve(workspaceRoot, 'src'),
+  ],
   transformer: {
     ...expoConfig.transformer,
     getTransformOptions: async () => ({

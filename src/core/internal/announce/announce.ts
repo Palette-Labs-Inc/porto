@@ -1,6 +1,6 @@
 import * as Mipd from 'mipd'
 import type { Provider } from '../provider'
-import type { Announcer } from './index'
+import type { Announcer } from './types'
 
 export const announcer: Announcer = {
   announce: (provider: Provider) => {

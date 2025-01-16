@@ -1,5 +1,3 @@
-export type { IStorage } from './types.js'
-
 /**
  * Platform-specific storage implementation.
  *
@@ -15,4 +13,4 @@ export type { IStorage } from './types.js'
  * - .web.ts for web platforms
  * - .native.ts for React Native
  */
-export { storage } from './index.web.js'
+export { storage } from './storage'

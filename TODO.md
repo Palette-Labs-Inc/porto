@@ -11,3 +11,10 @@
 - [ ] standardize polyfills into a standard package.
 - [ ] clean up warnings in P256 module when running pod install
 - [ ] Need better type assertions with responses from the native bridge, or explore JSI.
+
+- [ ] Module resolution to native requires the following config. Might be able to establish separate build configs with different module resolution settings for web vs. native.
+```json
+// Language and environment
+"moduleResolution": "node",
+"module": "ES2020",
+```

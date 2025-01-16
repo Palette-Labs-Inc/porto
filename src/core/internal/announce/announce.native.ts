@@ -1,5 +1,5 @@
 import type { Provider } from '../provider'
-import type { Announcer } from './index'
+import type { Announcer } from './types'
 
 /**
  * Skip provider announcement in React Native.

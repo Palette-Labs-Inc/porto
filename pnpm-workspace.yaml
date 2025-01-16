@@ -17,7 +17,7 @@ catalog:
   ox: "^0.2.2"
   react: "18.2.0"
   react-dom: "18.2.0"
-  react-native: "0.73.2"
+  react-native: "0.76.5"
   typescript: "^5.3.0"
   viem: "^2.21.51"
   wagmi: "^2.12.30"

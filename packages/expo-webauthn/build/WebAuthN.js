@@ -97,19 +97,13 @@ export async function createCredential(options) {
     });
     logger.debug('[WebAuthN:createCredential] Calling native createCredential');
     const nativeResponse = await ExpoWebAuthN.createCredential(nativeOptions);
-    logger.debug('[WebAuthN:createCredential] Native createCredential returned:', {
-        success: !!nativeResponse,
-        type: nativeResponse?.type,
-        hasId: !!nativeResponse?.id,
-        hasResponse: !!nativeResponse?.response,
+    logger.debug('[WebAuthN:nativeResponse] Native createCredential returned:', {
+        nativeResponse: JSON.stringify(nativeResponse, null, 2),
     });
     // TODO: add zod validation or something here.
     const nativeCredential = nativeResponse;
-    logger.debug('[WebAuthN:createCredential] Credential parsed:', {
-        type: nativeCredential.type,
-        hasResponse: !!nativeCredential.response,
-        hasAttestationObject: !!nativeCredential.response.attestationObject,
-        hasClientData: !!nativeCredential.response.clientDataJSON,
+    logger.debug('[WebAuthN:nativeCredential] Credential parsed:', {
+        nativeCredential: JSON.stringify(nativeCredential, null, 2),
     });
     return credential.parse(nativeResponse);
 }

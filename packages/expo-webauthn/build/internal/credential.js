@@ -55,6 +55,8 @@ export function parseSPKIFromAttestation(attestationObject) {
         };
         const xStart = findStart(0x21);
         const yStart = findStart(0x22);
+        console.info('[parseSPKIFromAttestation]:xStart', xStart);
+        console.info('[parseSPKIFromAttestation]:yStart', yStart);
         if (!xStart || !yStart) {
             throw new Error('Could not find public key coordinates in attestation object');
         }
@@ -219,6 +221,12 @@ export function create(options) {
 export function parse(response) {
     try {
         const publicKeyBuffer = parseSPKIFromAttestation(response.response.attestationObject);
+        // Log the public key buffer in different formats
+        console.info('[parseSPKIFromAttestation]:publicKeyBuffer length:', publicKeyBuffer.byteLength);
+        console.info('[parseSPKIFromAttestation]:publicKeyBuffer hex:', Array.from(new Uint8Array(publicKeyBuffer))
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join(''));
+        console.info('[parseSPKIFromAttestation]:publicKeyBuffer base64:', bufferSourceToBase64(publicKeyBuffer));
         return {
             id: response.id,
             rawId: base64URLToArrayBuffer(response.rawId),

@@ -141,40 +141,50 @@ export async function create<chain extends Chain | undefined>(
   client: Client<Transport, chain>,
   parameters: create.Parameters,
 ) {
-  // Generate a random private key to instantiate the Account.
-  // We will only hold onto the private key for the duration of this lexical scope
-  // (we will not persist it).
-  const privateKey = Secp256k1.randomPrivateKey()
+  try {
+    // Generate a random private key to instantiate the Account.
+    // We will only hold onto the private key for the duration of this lexical scope
+    // (we will not persist it).
+    const privateKey = Secp256k1.randomPrivateKey()
 
-  // Derive the Account's address from the private key. We will use this as the
-  // Transaction target, as well as for the label/id on the WebAuthn credential.
-  const address = Address.fromPublicKey(Secp256k1.getPublicKey({ privateKey }))
+    // Derive the Account's address from the private key. We will use this as the
+    // Transaction target, as well as for the label/id on the WebAuthn credential.
+    const address = Address.fromPublicKey(Secp256k1.getPublicKey({ privateKey }))
 
-  // Prepare values needed to fill the initialize call, and extract the payloads
-  // to sign over.
-  const result = await prepareInitialize(client, {
-    ...parameters,
-    address,
-  })
+    // Prepare values needed to fill the initialize call, and extract the payloads
+    // to sign over.
+    const result = await prepareInitialize(client, {
+      ...parameters,
+      address,
+    })
 
-  // Sign the authorization to designate the delegation contract onto the
-  // account.
-  const authorization = await signAuthorization(client, {
-    account: privateKeyToAccount(privateKey),
-    ...result.authorization,
-  })
+    // Sign the authorization to designate the delegation contract onto the
+    // account.
+    const authorization = await signAuthorization(client, {
+      account: privateKeyToAccount(privateKey),
+      ...result.authorization,
+    })
 
-  // Sign the `initialize` payload for account initialization.
-  const signature = Secp256k1.sign({
-    payload: result.signPayload,
-    privateKey,
-  })
 
-  return initialize(client, {
-    ...result,
-    authorization,
-    signature,
-  })
+    console.info('[AccountDelegation.create]: authorization received');
+
+    // Sign the `initialize` payload for account initialization.
+    const signature = Secp256k1.sign({
+      payload: result.signPayload,
+      privateKey,
+    })
+
+    console.info('[AccountDelegation.create]: Secp256k1 signature received');
+
+    return initialize(client, {
+      ...result,
+      authorization,
+      signature,
+    })
+  } catch (error) {
+    console.error('[AccountDelegation.create]:error', error);
+    throw error;
+  }
 }
 
 export declare namespace create {
@@ -196,6 +206,8 @@ export async function createWebAuthnKey(
 ): Promise<WebAuthnKey> {
   const { expiry = 0n, rpId, label, userId } = parameters
 
+  console.info('[AccountDelegation.createWebAuthnKey]:start');
+
   const key = await WebAuthN.createCredential({
     authenticatorSelection: {
       requireResidentKey: false,
@@ -214,6 +226,8 @@ export async function createWebAuthnKey(
       id: userId,
     },
   })
+
+  console.info('[AccountDelegation.createCredential]:key',key);
 
   return {
     ...key,
@@ -562,6 +576,8 @@ export async function prepareInitialize<chain extends Chain | undefined>(
     rpId,
     userId: Bytes.from(address),
   })
+
+  console.info('[AccountDelegation.createWebAuthnKey]:key',key);
 
   const keys = [key, ...(authorizeKeys ?? [])]
 

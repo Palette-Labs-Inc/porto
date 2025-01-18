@@ -224,7 +224,7 @@ export function parse(response) {
         // Log the public key buffer in different formats
         console.info('[parseSPKIFromAttestation]:publicKeyBuffer length:', publicKeyBuffer.byteLength);
         console.info('[parseSPKIFromAttestation]:publicKeyBuffer hex:', Array.from(new Uint8Array(publicKeyBuffer))
-            .map(b => b.toString(16).padStart(2, '0'))
+            .map((b) => b.toString(16).padStart(2, '0'))
             .join(''));
         console.info('[parseSPKIFromAttestation]:publicKeyBuffer base64:', bufferSourceToBase64(publicKeyBuffer));
         return {

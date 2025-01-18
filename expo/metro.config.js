@@ -14,12 +14,13 @@ const usePortoSource = process.env.USE_PORTO_SOURCE === 'true'
 function resolvePortoModule(context, moduleName) {
   // Handle porto module resolution
   if (moduleName === 'porto' || moduleName.startsWith('porto/')) {
-    const relativePath = moduleName === 'porto' 
-      ? 'index.ts'
-      : moduleName.replace('porto/', '').replace('.js', '.ts')
-    
+    const relativePath =
+      moduleName === 'porto'
+        ? 'index.ts'
+        : moduleName.replace('porto/', '').replace('.js', '.ts')
+
     const portoPath = path.join(portoRoot, relativePath)
-    
+
     return {
       filePath: portoPath,
       type: 'sourceFile',
@@ -27,10 +28,13 @@ function resolvePortoModule(context, moduleName) {
   }
 
   // Handle internal .js to .ts resolution for porto package
-  if (context.originModulePath.includes(portoRoot) && moduleName.endsWith('.js')) {
+  if (
+    context.originModulePath.includes(portoRoot) &&
+    moduleName.endsWith('.js')
+  ) {
     const tsPath = path.join(
       path.dirname(context.originModulePath),
-      moduleName.replace('.js', '.ts')
+      moduleName.replace('.js', '.ts'),
     )
     return {
       filePath: tsPath,
@@ -67,16 +71,18 @@ module.exports = makeMetroConfig({
       path.resolve(projectDir, 'node_modules'),
       path.resolve(workspaceRoot, 'node_modules'),
       path.resolve(workspaceRoot, 'packages'),
-      ...(usePortoSource ? [portoRoot] : [])
+      ...(usePortoSource ? [portoRoot] : []),
     ],
-    extraNodeModules: usePortoSource ? {
-      'porto': portoRoot
-    } : undefined
+    extraNodeModules: usePortoSource
+      ? {
+          porto: portoRoot,
+        }
+      : undefined,
   },
   watchFolders: [
     workspaceRoot,
     path.resolve(workspaceRoot, 'packages'),
-    ...(usePortoSource ? [portoRoot] : [])
+    ...(usePortoSource ? [portoRoot] : []),
   ],
   transformer: {
     ...expoConfig.transformer,

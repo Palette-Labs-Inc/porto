@@ -149,7 +149,6 @@ export function from<
         case 'experimental_connect': {
           if (!headless) throw new ox_Provider.UnsupportedMethodError()
 
-        
           const [{ capabilities }] = (params as RpcSchema.ExtractParams<
             Schema.Schema,
             'experimental_connect'
@@ -163,8 +162,8 @@ export function from<
                 expiry: BigInt(expiry),
               })
             : undefined
-          
-          console.info('[Provider.from]:key',key);
+
+          console.info('[Provider.from]:key', key)
           const { account } = await (async () => {
             if (createAccount) {
               const { label } =

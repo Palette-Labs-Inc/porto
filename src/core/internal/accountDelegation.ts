@@ -149,7 +149,9 @@ export async function create<chain extends Chain | undefined>(
 
     // Derive the Account's address from the private key. We will use this as the
     // Transaction target, as well as for the label/id on the WebAuthn credential.
-    const address = Address.fromPublicKey(Secp256k1.getPublicKey({ privateKey }))
+    const address = Address.fromPublicKey(
+      Secp256k1.getPublicKey({ privateKey }),
+    )
 
     // Prepare values needed to fill the initialize call, and extract the payloads
     // to sign over.
@@ -165,8 +167,7 @@ export async function create<chain extends Chain | undefined>(
       ...result.authorization,
     })
 
-
-    console.info('[AccountDelegation.create]: authorization received');
+    console.info('[AccountDelegation.create]: authorization received')
 
     // Sign the `initialize` payload for account initialization.
     const signature = Secp256k1.sign({
@@ -174,7 +175,7 @@ export async function create<chain extends Chain | undefined>(
       privateKey,
     })
 
-    console.info('[AccountDelegation.create]: Secp256k1 signature received');
+    console.info('[AccountDelegation.create]: Secp256k1 signature received')
 
     return initialize(client, {
       ...result,
@@ -182,8 +183,8 @@ export async function create<chain extends Chain | undefined>(
       signature,
     })
   } catch (error) {
-    console.error('[AccountDelegation.create]:error', error);
-    throw error;
+    console.error('[AccountDelegation.create]:error', error)
+    throw error
   }
 }
 
@@ -206,7 +207,7 @@ export async function createWebAuthnKey(
 ): Promise<WebAuthnKey> {
   const { expiry = 0n, rpId, label, userId } = parameters
 
-  console.info('[AccountDelegation.createWebAuthnKey]:start');
+  console.info('[AccountDelegation.createWebAuthnKey]:start')
 
   const key = await WebAuthN.createCredential({
     authenticatorSelection: {
@@ -227,7 +228,7 @@ export async function createWebAuthnKey(
     },
   })
 
-  console.info('[AccountDelegation.createCredential]:key',key);
+  console.info('[AccountDelegation.createCredential]:key', key)
 
   return {
     ...key,
@@ -577,7 +578,7 @@ export async function prepareInitialize<chain extends Chain | undefined>(
     userId: Bytes.from(address),
   })
 
-  console.info('[AccountDelegation.createWebAuthnKey]:key',key);
+  console.info('[AccountDelegation.createWebAuthnKey]:key', key)
 
   const keys = [key, ...(authorizeKeys ?? [])]
 

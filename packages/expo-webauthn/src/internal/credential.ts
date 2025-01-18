@@ -118,8 +118,8 @@ export function parseSPKIFromAttestation(
 
     const xStart = findStart(0x21)
     const yStart = findStart(0x22)
-    console.info('[parseSPKIFromAttestation]:xStart',xStart);
-    console.info('[parseSPKIFromAttestation]:yStart',yStart);
+    console.info('[parseSPKIFromAttestation]:xStart', xStart)
+    console.info('[parseSPKIFromAttestation]:yStart', yStart)
     if (!xStart || !yStart) {
       throw new Error(
         'Could not find public key coordinates in attestation object',
@@ -335,13 +335,20 @@ export function parse(response: parse.Input): parse.ReturnType {
     )
 
     // Log the public key buffer in different formats
-    console.info('[parseSPKIFromAttestation]:publicKeyBuffer length:', publicKeyBuffer.byteLength);
-    console.info('[parseSPKIFromAttestation]:publicKeyBuffer hex:', 
+    console.info(
+      '[parseSPKIFromAttestation]:publicKeyBuffer length:',
+      publicKeyBuffer.byteLength,
+    )
+    console.info(
+      '[parseSPKIFromAttestation]:publicKeyBuffer hex:',
       Array.from(new Uint8Array(publicKeyBuffer))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join(''));
-    console.info('[parseSPKIFromAttestation]:publicKeyBuffer base64:', 
-      bufferSourceToBase64(publicKeyBuffer));
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join(''),
+    )
+    console.info(
+      '[parseSPKIFromAttestation]:publicKeyBuffer base64:',
+      bufferSourceToBase64(publicKeyBuffer),
+    )
 
     return {
       id: response.id,

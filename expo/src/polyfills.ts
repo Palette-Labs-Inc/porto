@@ -1,7 +1,7 @@
 import 'react-native-get-random-values' // needs to precede the other imports
-import { Crypto } from '@peculiar/webcrypto'
 // biome-ignore lint/style/useNodejsImportProtocol: <explanation>
 import { Buffer } from 'buffer'
+import { Crypto } from '@peculiar/webcrypto'
 
 if (typeof window === 'undefined') {
   global.window = {} as any

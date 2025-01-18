@@ -74,7 +74,7 @@ module.exports = makeMetroConfig({
       ...(usePortoSource ? [portoRoot] : []),
     ],
     extraNodeModules: {
-      ...usePortoSource ? { porto: portoRoot } : undefined,
+      ...(usePortoSource ? { porto: portoRoot } : undefined),
       // Add node core modules polyfills
       crypto: require.resolve('react-native-quick-crypto'),
       buffer: require.resolve('buffer'),

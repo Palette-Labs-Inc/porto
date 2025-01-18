@@ -73,11 +73,14 @@ module.exports = makeMetroConfig({
       path.resolve(workspaceRoot, 'packages'),
       ...(usePortoSource ? [portoRoot] : []),
     ],
-    extraNodeModules: usePortoSource
-      ? {
-          porto: portoRoot,
-        }
-      : undefined,
+    extraNodeModules: {
+      ...usePortoSource ? { porto: portoRoot } : undefined,
+      // Add node core modules polyfills
+      crypto: require.resolve('react-native-quick-crypto'),
+      buffer: require.resolve('buffer'),
+      stream: require.resolve('stream-browserify'),
+      util: require.resolve('util'),
+    },
   },
   watchFolders: [
     workspaceRoot,

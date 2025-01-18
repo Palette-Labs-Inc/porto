@@ -141,42 +141,40 @@ export async function create<chain extends Chain | undefined>(
   client: Client<Transport, chain>,
   parameters: create.Parameters,
 ) {
-    // Generate a random private key to instantiate the Account.
-    // We will only hold onto the private key for the duration of this lexical scope
-    // (we will not persist it).
-    const privateKey = Secp256k1.randomPrivateKey()
+  // Generate a random private key to instantiate the Account.
+  // We will only hold onto the private key for the duration of this lexical scope
+  // (we will not persist it).
+  const privateKey = Secp256k1.randomPrivateKey()
 
-    // Derive the Account's address from the private key. We will use this as the
-    // Transaction target, as well as for the label/id on the WebAuthn credential.
-    const address = Address.fromPublicKey(
-      Secp256k1.getPublicKey({ privateKey }),
-    )
+  // Derive the Account's address from the private key. We will use this as the
+  // Transaction target, as well as for the label/id on the WebAuthn credential.
+  const address = Address.fromPublicKey(Secp256k1.getPublicKey({ privateKey }))
 
-    // Prepare values needed to fill the initialize call, and extract the payloads
-    // to sign over.
-    const result = await prepareInitialize(client, {
-      ...parameters,
-      address,
-    })
+  // Prepare values needed to fill the initialize call, and extract the payloads
+  // to sign over.
+  const result = await prepareInitialize(client, {
+    ...parameters,
+    address,
+  })
 
-    // Sign the authorization to designate the delegation contract onto the
-    // account.
-    const authorization = await signAuthorization(client, {
-      account: privateKeyToAccount(privateKey),
-      ...result.authorization,
-    })
-    
-    // Sign the `initialize` payload for account initialization.
-    const signature = Secp256k1.sign({
-      payload: result.signPayload,
-      privateKey,
-    })
+  // Sign the authorization to designate the delegation contract onto the
+  // account.
+  const authorization = await signAuthorization(client, {
+    account: privateKeyToAccount(privateKey),
+    ...result.authorization,
+  })
 
-    return initialize(client, {
-      ...result,
-      authorization,
-      signature,
-    })
+  // Sign the `initialize` payload for account initialization.
+  const signature = Secp256k1.sign({
+    payload: result.signPayload,
+    privateKey,
+  })
+
+  return initialize(client, {
+    ...result,
+    authorization,
+    signature,
+  })
 }
 
 export declare namespace create {
@@ -532,7 +530,7 @@ export async function load<chain extends Chain | undefined>(
       label,
       keys,
     },
-    }
+  }
 }
 
 export declare namespace load {

@@ -29,10 +29,7 @@ export function base64URLToArrayBuffer(base64url: string): ArrayBuffer {
     .replace(/-/g, '+')
     .replace(/_/g, '/')
     .replace(/=+$/, '')
-    .padEnd(
-      base64url.length + ((4 - (base64url.length % 4)) % 4),
-      '='
-    )
+    .padEnd(base64url.length + ((4 - (base64url.length % 4)) % 4), '=')
 
   return new Uint8Array(Base64.toBytes(base64)).buffer
 }

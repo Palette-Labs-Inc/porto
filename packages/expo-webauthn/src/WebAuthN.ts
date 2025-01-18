@@ -117,12 +117,9 @@ export async function createCredential(
 
   logger.debug('[WebAuthN:createCredential] Calling native createCredential')
   const nativeResponse = await ExpoWebAuthN.createCredential(nativeOptions)
-  logger.debug(
-    '[WebAuthN:nativeResponse] Native createCredential returned:',
-    {
-      nativeResponse: JSON.stringify(nativeResponse, null, 2),
-    },
-  )
+  logger.debug('[WebAuthN:nativeResponse] Native createCredential returned:', {
+    nativeResponse: JSON.stringify(nativeResponse, null, 2),
+  })
 
   // TODO: add zod validation or something here.
   const nativeCredential = nativeResponse as credential.parse.Input

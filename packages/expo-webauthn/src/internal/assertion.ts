@@ -166,10 +166,14 @@ export function parse(response: parse.Input): parse.ReturnType {
       id: response.id,
       rawId: base64URLToArrayBuffer(response.rawId),
       response: {
-        authenticatorData: base64URLToArrayBuffer(response.response.authenticatorData),
-        clientDataJSON: base64URLToArrayBuffer(response.response.clientDataJSON),
+        authenticatorData: base64URLToArrayBuffer(
+          response.response.authenticatorData,
+        ),
+        clientDataJSON: base64URLToArrayBuffer(
+          response.response.clientDataJSON,
+        ),
         signature: base64URLToArrayBuffer(response.response.signature),
-        userHandle: response.response.userHandle 
+        userHandle: response.response.userHandle
           ? base64URLToArrayBuffer(response.response.userHandle)
           : null,
       },

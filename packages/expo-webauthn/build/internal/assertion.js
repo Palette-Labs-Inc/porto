@@ -87,12 +87,6 @@ export function create(options) {
 /**
  * Parses a native iOS assertion response into WebAuthn format
  *
- * @example
- * ```ts
- * const assertion = assertion.parse(nativeResponse)
- * // Returns WebAuthn formatted assertion
- * ```
- *
  * @param response - Native iOS assertion response
  * @returns WebAuthn formatted assertion
  * @throws {ParseError} If assertion cannot be parsed

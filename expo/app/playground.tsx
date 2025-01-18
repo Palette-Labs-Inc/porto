@@ -384,6 +384,10 @@ function Disconnect() {
 function Accounts() {
   const [result, setResult] = useState<readonly string[] | null>(null)
 
+  useEffect(() => {
+    console.info('[PlaygroundScreen:Accounts] result', result)
+  }, [result])
+
   return (
     <View style={styles.section}>
       <Text style={styles.sectionHeader}>eth_accounts</Text>

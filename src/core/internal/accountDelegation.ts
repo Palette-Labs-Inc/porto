@@ -141,7 +141,6 @@ export async function create<chain extends Chain | undefined>(
   client: Client<Transport, chain>,
   parameters: create.Parameters,
 ) {
-  try {
     // Generate a random private key to instantiate the Account.
     // We will only hold onto the private key for the duration of this lexical scope
     // (we will not persist it).
@@ -166,26 +165,18 @@ export async function create<chain extends Chain | undefined>(
       account: privateKeyToAccount(privateKey),
       ...result.authorization,
     })
-
-    console.info('[AccountDelegation.create]: authorization received')
-
+    
     // Sign the `initialize` payload for account initialization.
     const signature = Secp256k1.sign({
       payload: result.signPayload,
       privateKey,
     })
 
-    console.info('[AccountDelegation.create]: Secp256k1 signature received')
-
     return initialize(client, {
       ...result,
       authorization,
       signature,
     })
-  } catch (error) {
-    console.error('[AccountDelegation.create]:error', error)
-    throw error
-  }
 }
 
 export declare namespace create {
@@ -541,7 +532,7 @@ export async function load<chain extends Chain | undefined>(
       label,
       keys,
     },
-  }
+    }
 }
 
 export declare namespace load {

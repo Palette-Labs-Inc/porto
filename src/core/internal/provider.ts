@@ -61,7 +61,7 @@ export function from<
 
         case 'eth_requestAccounts': {
           if (!headless) throw new ox_Provider.UnsupportedMethodError()
-
+          
           const { account } = await AccountDelegation.load(state.client, {
             rpId: keystoreHost,
           })
@@ -163,7 +163,6 @@ export function from<
               })
             : undefined
 
-          console.info('[Provider.from]:key', key)
           const { account } = await (async () => {
             if (createAccount) {
               const { label } =

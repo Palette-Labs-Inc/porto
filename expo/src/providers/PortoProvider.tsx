@@ -24,12 +24,6 @@ export function PortoProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const porto = portoRef.current
-    console.info('[Porto] Initialized successfully:', {
-      hasProvider: !!porto.provider,
-      hasInternal: !!porto._internal,
-      hasStore: !!porto._internal?.store,
-    })
-
     return () => {
       porto.destroy?.()
     }

@@ -93,7 +93,7 @@ public final class P256Module: Module {
         accessControl: accessControl
       )
       
-      // Store private key bytes WITHOUT authentication requirement
+      // Store private key bytes WITHOUT authentication requirement.
       let noAuthOptions: P256Options = options
       noAuthOptions.requireAuthentication = false
       

@@ -1,5 +1,6 @@
 import * as fs from 'node:fs'
-import { matchesGlob, resolve } from 'node:path'
+import { resolve } from 'node:path'
+import { minimatch } from 'minimatch'
 
 const exclude = [
   '_dist',
@@ -25,7 +26,7 @@ export function getExports({
     .readdirSync(resolve(import.meta.dirname, '../../src'), {
       withFileTypes: true,
     })
-    .filter((entry) => !exclude.some((x) => matchesGlob(entry.name, x)))
+    .filter((entry) => !exclude.some((x) => minimatch(entry.name, x)))
 
   for (const parentEntry of entries) {
     if (!parentEntry.isDirectory()) {

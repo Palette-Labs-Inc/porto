@@ -1,0 +1,40 @@
+{
+  "name": "@porto/expo-webauthn",
+  "version": "0.0.1",
+  "description": "expo webauthn",
+  "source": {
+    "git": "https://github.com/Palette-Labs-Inc/porto.git"
+  },
+  "summary": "An expo module for passkeys",
+  "type": "module",
+  "main": "./build/WebAuthN.js",
+  "types": "./build/WebAuthN.d.ts",
+  "scripts": {
+    "build": "npm_config_user_agent=yarn expo-module build",
+    "clean": "npm_config_user_agent=yarn expo-module clean",
+    "lint": "npm_config_user_agent=yarn expo-module lint",
+    "test": "npm_config_user_agent=yarn expo-module test",
+    "prepare": "npm_config_user_agent=yarn expo-module prepare",
+    "prepublishOnly": "npm_config_user_agent=yarn expo-module prepublishOnly",
+    "postinstall": "pnpm build"
+  },
+  "keywords": ["react-native", "expo", "passkeys"],
+  "author": "mike perhats",
+  "license": "MIT",
+  "homepage": "https://github.com/mperhats",
+  "dependencies": {
+    "ox": "catalog:"
+  },
+  "devDependencies": {
+    "expo-module-scripts": "catalog:",
+    "expo-modules-core": "catalog:",
+    "react-native": "catalog:"
+  },
+  "peerDependencies": {
+    "expo": "catalog:",
+    "react-native": "catalog:"
+  },
+  "jest": {
+    "preset": "expo-module-scripts"
+  }
+}

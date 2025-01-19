@@ -3,7 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "wipe": "rm -rf **/node_modules **/.turbo .next .expo .parcel-cache **/dist **/_dist **/.cache pnpm-lock.yaml **/pnpm-lock.yaml **/.pnpm-store .pnpm-store **/tsconfig.tsbuildinfo **/*.tsbuildinfo && pnpm store prune",
     "build": "pnpm clean && tsc --project ./tsconfig.build.json",
     "build:contracts": "forge build --config-path ./contracts/foundry.toml",
     "changeset:prepublish": "pnpm build && tsx ./scripts/prepublish.ts",

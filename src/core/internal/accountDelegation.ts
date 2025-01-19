@@ -119,7 +119,6 @@ export async function authorize<chain extends Chain | undefined>(
     account: null,
     chain: null,
   })
-
   return { hash }
 }
 
@@ -196,8 +195,6 @@ export async function createWebAuthnKey(
 ): Promise<WebAuthnKey> {
   const { expiry = 0n, rpId, label, userId } = parameters
 
-  console.info('[AccountDelegation.createWebAuthnKey]:start')
-
   const key = await WebAuthN.createCredential({
     authenticatorSelection: {
       requireResidentKey: false,
@@ -216,8 +213,6 @@ export async function createWebAuthnKey(
       id: userId,
     },
   })
-
-  console.info('[AccountDelegation.createCredential]:key', key)
 
   return {
     ...key,
@@ -298,13 +293,7 @@ export async function execute<chain extends Chain | undefined>(
     AbiParameters.encodePacked(['uint256', 'bytes'], [nonce, encodedCalls]),
   )
 
-  // Sign the payload with a provided key index (we will use the key at the
-  // provided index to sign).
-  console.info('[AccountDelegation.execute]:signature', payload)
-
   const signature = await sign({ account, payload, keyIndex, rpId })
-
-  console.info('[AccountDelegation.execute]:signature', signature)
 
   // Execute the calls.
   return await writeContract(client, {
@@ -440,7 +429,6 @@ export async function load<chain extends Chain | undefined>(
     credentialId = credential.raw.id
     raw = credential.raw
   }
-
   // If there are extra keys to authorize (ie. session keys), sign over them.
   const authorizeKeysResult = await (async () => {
     if (authorizeKeys.length === 0) return undefined
@@ -571,8 +559,6 @@ export async function prepareInitialize<chain extends Chain | undefined>(
     userId: Bytes.from(address),
   })
 
-  console.info('[AccountDelegation.createWebAuthnKey]:key', key)
-
   const keys = [key, ...(authorizeKeys ?? [])]
 
   // Serialize keys into format for contract.
@@ -655,8 +641,6 @@ export async function sign(parameters: sign.Parameters) {
       payload,
       keyData: key.keyData,
     })
-
-    console.info('[AccountDelegation.sign]:signature', signature)
 
     return wrapSignature({
       signature,

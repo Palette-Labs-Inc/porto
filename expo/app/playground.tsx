@@ -656,12 +656,37 @@ function SignMessage() {
   const [signature, setSignature] = useState<string | null>(null)
   const [message, setMessage] = useState<string>('hello world')
   const [valid, setValid] = useState<boolean | null>(null)
-  const [messageToVerify, setMessageToVerify] = useState<string>('')
-  const [verifySignature, setVerifySignature] = useState<string>('')
+
+  const resetState = () => {
+    setSignature(null)
+    setMessage('hello world')
+    setValid(null)
+  }
+
+  const handleVerify = async () => {
+    if (!signature || !message) return
+    try {
+      const [account] = await porto.provider.request({
+        method: 'eth_accounts',
+      })
+      const valid = await verifyMessage(client, {
+        address: account,
+        message: message,
+        signature: signature as `0x${string}`,
+      })
+      setValid(valid)
+    } catch (error) {
+      console.error('Verification failed:', error)
+      setValid(false)
+    }
+  }
 
   return (
     <View style={styles.section}>
       <Text style={styles.sectionHeader}>personal_sign</Text>
+      <View style={styles.row}>
+        <Button onPress={resetState} text="Reset" variant="secondary" />
+      </View>
       <TextInput
         style={styles.input}
         value={message}
@@ -681,42 +706,17 @@ function SignMessage() {
         }}
         text="Sign"
       />
-      {signature && <Text style={styles.codeBlock}>{signature}</Text>}
-
-      <View style={styles.section}>
-        <Text style={styles.sectionHeader}>Verify Message</Text>
-        <TextInput
-          style={styles.input}
-          value={messageToVerify}
-          onChangeText={setMessageToVerify}
-          placeholder="Message"
-        />
-        <TextInput
-          style={styles.input}
-          value={verifySignature}
-          onChangeText={setVerifySignature}
-          placeholder="Signature"
-        />
-        <Button
-          onPress={async () => {
-            const [account] = await porto.provider.request({
-              method: 'eth_accounts',
-            })
-            const valid = await verifyMessage(client, {
-              address: account,
-              message: messageToVerify,
-              signature: verifySignature as `0x${string}`,
-            })
-            setValid(valid)
-          }}
-          text="Verify"
-        />
-        {valid !== null && (
-          <Text style={valid ? styles.successText : styles.errorText}>
-            {valid ? 'Valid signature' : 'Invalid signature'}
-          </Text>
-        )}
-      </View>
+      {signature && (
+        <>
+          <Text style={styles.codeBlock}>{signature}</Text>
+          <Button onPress={handleVerify} text="Verify Signature" />
+          {valid !== null && (
+            <Text style={valid ? styles.successText : styles.errorText}>
+              {valid ? 'Valid signature' : 'Invalid signature'}
+            </Text>
+          )}
+        </>
+      )}
     </View>
   )
 }
@@ -724,11 +724,36 @@ function SignMessage() {
 function SignTypedData() {
   const [signature, setSignature] = useState<string | null>(null)
   const [valid, setValid] = useState<boolean | null>(null)
-  const [verifySignature, setVerifySignature] = useState<string>('')
+
+  const resetState = () => {
+    setSignature(null)
+    setValid(null)
+  }
+
+  const handleVerify = async () => {
+    if (!signature) return
+    try {
+      const [account] = await porto.provider.request({
+        method: 'eth_accounts',
+      })
+      const valid = await verifyTypedData(client, {
+        ...typedData,
+        address: account,
+        signature: signature as `0x${string}`,
+      })
+      setValid(valid)
+    } catch (error) {
+      console.error('Verification failed:', error)
+      setValid(false)
+    }
+  }
 
   return (
     <View style={styles.section}>
       <Text style={styles.sectionHeader}>eth_signTypedData_v4</Text>
+      <View style={styles.row}>
+        <Button onPress={resetState} text="Reset" variant="secondary" />
+      </View>
       <Button
         onPress={async () => {
           const [account] = await porto.provider.request({
@@ -742,36 +767,17 @@ function SignTypedData() {
         }}
         text="Sign"
       />
-      {signature && <Text style={styles.codeBlock}>{signature}</Text>}
-
-      <View style={styles.section}>
-        <Text style={styles.sectionHeader}>Verify Typed Data</Text>
-        <TextInput
-          style={styles.input}
-          value={verifySignature}
-          onChangeText={setVerifySignature}
-          placeholder="Signature"
-        />
-        <Button
-          onPress={async () => {
-            const [account] = await porto.provider.request({
-              method: 'eth_accounts',
-            })
-            const valid = await verifyTypedData(client, {
-              ...typedData,
-              address: account,
-              signature: verifySignature as `0x${string}`,
-            })
-            setValid(valid)
-          }}
-          text="Verify"
-        />
-        {valid !== null && (
-          <Text style={valid ? styles.successText : styles.errorText}>
-            {valid ? 'Valid signature' : 'Invalid signature'}
-          </Text>
-        )}
-      </View>
+      {signature && (
+        <>
+          <Text style={styles.codeBlock}>{signature}</Text>
+          <Button onPress={handleVerify} text="Verify Signature" />
+          {valid !== null && (
+            <Text style={valid ? styles.successText : styles.errorText}>
+              {valid ? 'Valid signature' : 'Invalid signature'}
+            </Text>
+          )}
+        </>
+      )}
     </View>
   )
 }

@@ -40,3 +40,5 @@ out
 
 # vercel
 .vercel
+/packages/expo-p256/plugin/build
+/packages/expo-p256/plugin/build

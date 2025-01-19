@@ -484,6 +484,8 @@ export function from<
 
           requireParameter(from, 'from')
 
+          console.info('[Provider.from]:from', from)
+
           const account = state.accounts.find((account) =>
             Address.isEqual(account.address, from),
           )
@@ -496,6 +498,8 @@ export function from<
             : undefined
           if (typeof keyIndex !== 'number')
             throw new ox_Provider.UnauthorizedError()
+
+          console.info('[Provider.from]:keyIndex', keyIndex)
 
           return (await AccountDelegation.execute(state.client, {
             account,

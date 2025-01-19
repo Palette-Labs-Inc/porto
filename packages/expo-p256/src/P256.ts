@@ -167,17 +167,19 @@ export async function createKeyPair(
     throw new BiometricAuthenticationError()
   }
 
-  const storageKey = generateStorageKey(KEY_PREFIX)
+  const storageKey = generateStorageKey()
   const nativeResponse = await ExpoP256.createP256KeyPair(storageKey, options)
-  return adaptCreateP256KeyPairReturnType(nativeResponse)
+  return adaptCreateP256KeyPairReturnType(storageKey,nativeResponse)
 }
 
 export declare namespace createKeyPair {
   type Options = P256Options
+
   type NativeResponse = {
     privateKey: string
     publicKey: string
   }
+
   type ReturnType = {
     privateKeyStorageKey: string
     publicKey: PublicKey.PublicKey
@@ -214,21 +216,24 @@ export async function getKeyPair(
     privateKeyStorageKey,
     p256Options,
   )
-  return adaptGetP256KeyPairReturnType(nativeResponse)
+  return adaptGetP256KeyPairReturnType(privateKeyStorageKey,nativeResponse)
 }
 
 export declare namespace getKeyPair {
   type Options = P256Options & {
     privateKeyStorageKey: string
   }
+
   type NativeResponse = {
     privateKey: string
     publicKey: string
   } | null
+
   type ReturnType = {
     privateKeyStorageKey: string
     publicKey: PublicKey.PublicKey
   } | null
+
   type ErrorType =
     | UnsupportedPlatformError
     | InvalidKeyFormatError
@@ -267,7 +272,7 @@ export async function sign(options: sign.Options): Promise<sign.ReturnType> {
   if (options.requireAuthentication && !canUseBiometricAuthentication()) {
     throw new BiometricAuthenticationError()
   }
-
+  
   const { privateKeyStorageKey, payload, ...p256Options } = options
   ensureValidKey(privateKeyStorageKey)
   const base64Payload = convertPayloadToBase64(payload)

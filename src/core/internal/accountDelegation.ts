@@ -300,7 +300,11 @@ export async function execute<chain extends Chain | undefined>(
 
   // Sign the payload with a provided key index (we will use the key at the
   // provided index to sign).
+  console.info('[AccountDelegation.execute]:signature', payload)
+
   const signature = await sign({ account, payload, keyIndex, rpId })
+
+  console.info('[AccountDelegation.execute]:signature', signature)
 
   // Execute the calls.
   return await writeContract(client, {
@@ -651,6 +655,8 @@ export async function sign(parameters: sign.Parameters) {
       payload,
       keyData: key.keyData,
     })
+
+    console.info('[AccountDelegation.sign]:signature', signature)
 
     return wrapSignature({
       signature,

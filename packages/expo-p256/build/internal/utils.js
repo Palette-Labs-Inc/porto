@@ -4,12 +4,12 @@ import { Base64, Errors, Hex, PublicKey, Signature } from 'ox';
  * Converts a native key pair response to the WebCryptoP256-compatible format.
  * @internal
  */
-function convertNativeKeyPairToWebCrypto(nativeKeyPair) {
+function convertNativeKeyPairToWebCrypto(privateKeyStorageKey, nativeKeyPair) {
     if (!nativeKeyPair.privateKey || !nativeKeyPair.publicKey) {
         throw new InvalidKeyPairError();
     }
     return {
-        privateKeyStorageKey: nativeKeyPair.privateKey,
+        privateKeyStorageKey: privateKeyStorageKey,
         publicKey: PublicKey.from(Base64.toBytes(nativeKeyPair.publicKey)),
     };
 }
@@ -17,17 +17,17 @@ function convertNativeKeyPairToWebCrypto(nativeKeyPair) {
  * Adapts the native response from createKeyPair to the WebCryptoP256-compatible format.
  * Converts the base64 encoded public key to the ox PublicKey format.
  */
-export function adaptCreateP256KeyPairReturnType(nativeResponse) {
-    return convertNativeKeyPairToWebCrypto(nativeResponse);
+export function adaptCreateP256KeyPairReturnType(privateKeyStorageKey, nativeResponse) {
+    return convertNativeKeyPairToWebCrypto(privateKeyStorageKey, nativeResponse);
 }
 /**
  * Adapts the native response from getKeyPair to the WebCryptoP256-compatible format.
  * Returns null if no key pair exists, otherwise converts to the WebCryptoP256 format.
  */
-export function adaptGetP256KeyPairReturnType(nativeResponse) {
+export function adaptGetP256KeyPairReturnType(privateKeyStorageKey, nativeResponse) {
     if (!nativeResponse)
         return null;
-    return convertNativeKeyPairToWebCrypto(nativeResponse);
+    return convertNativeKeyPairToWebCrypto(privateKeyStorageKey, nativeResponse);
 }
 /**
  * Adapts the native signature response to the WebCryptoP256-compatible format.
@@ -59,12 +59,14 @@ export function convertPayloadToBase64(payload) {
  */
 export const P256_KEY_PREFIX = 'p256';
 /**
- * Generates a unique storage key for a P256 key pair.
- * Uses a timestamp for uniqueness.
+ * Generates a shorter unique storage key for a P256 key pair.
+ * Combines timestamp base36 with random values for uniqueness.
  */
 export function generateStorageKey(prefix = P256_KEY_PREFIX) {
     ensureValidKey(prefix);
-    return `${prefix}-${Date.now()}`;
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).slice(2, 6);
+    return `${prefix}-${timestamp}${random}`;
 }
 /**
  * Validates that a key meets the required format.

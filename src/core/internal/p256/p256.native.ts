@@ -24,11 +24,15 @@ export const P256: IP256 = {
       )
     }
 
-    return ExpoP256.sign({
+    console.info('[P256-PORTO.sign]:options', options)
+
+    const signOptions = {
       privateKeyStorageKey: options.keyData.privateKeyStorageKey,
       payload: options.payload,
       requireAuthentication: false,
       keychainService: ExpoP256.KEY_PREFIX,
-    })
+    }
+
+    return ExpoP256.sign(signOptions)
   },
 }

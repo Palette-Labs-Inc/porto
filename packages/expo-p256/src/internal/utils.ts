@@ -8,7 +8,7 @@ import type { createKeyPair, getKeyPair, sign } from '../P256'
  * Converts a native key pair response to the WebCryptoP256-compatible format.
  * @internal
  */
-function convertNativeKeyPairToWebCrypto(nativeKeyPair: {
+function convertNativeKeyPairToWebCrypto(privateKeyStorageKey: string, nativeKeyPair: {
   privateKey: string
   publicKey: string
 }): createKeyPair.ReturnType {
@@ -17,7 +17,7 @@ function convertNativeKeyPairToWebCrypto(nativeKeyPair: {
   }
 
   return {
-    privateKeyStorageKey: nativeKeyPair.privateKey,
+    privateKeyStorageKey: privateKeyStorageKey,
     publicKey: PublicKey.from(
       Base64.toBytes(nativeKeyPair.publicKey),
     ) as PublicKey.PublicKey,
@@ -29,9 +29,10 @@ function convertNativeKeyPairToWebCrypto(nativeKeyPair: {
  * Converts the base64 encoded public key to the ox PublicKey format.
  */
 export function adaptCreateP256KeyPairReturnType(
+  privateKeyStorageKey: string,
   nativeResponse: createKeyPair.NativeResponse,
 ): createKeyPair.ReturnType {
-  return convertNativeKeyPairToWebCrypto(nativeResponse)
+  return convertNativeKeyPairToWebCrypto(privateKeyStorageKey, nativeResponse)
 }
 
 /**
@@ -39,10 +40,11 @@ export function adaptCreateP256KeyPairReturnType(
  * Returns null if no key pair exists, otherwise converts to the WebCryptoP256 format.
  */
 export function adaptGetP256KeyPairReturnType(
+  privateKeyStorageKey: string,
   nativeResponse: getKeyPair.NativeResponse,
 ): getKeyPair.ReturnType {
   if (!nativeResponse) return null
-  return convertNativeKeyPairToWebCrypto(nativeResponse)
+  return convertNativeKeyPairToWebCrypto(privateKeyStorageKey, nativeResponse)
 }
 
 /**
@@ -84,12 +86,15 @@ export function convertPayloadToBase64(payload: Hex.Hex | Bytes.Bytes): string {
 export const P256_KEY_PREFIX = 'p256'
 
 /**
- * Generates a unique storage key for a P256 key pair.
- * Uses a timestamp for uniqueness.
+ * Generates a shorter unique storage key for a P256 key pair.
+ * Combines timestamp base36 with random values for uniqueness.
  */
 export function generateStorageKey(prefix: string = P256_KEY_PREFIX): string {
   ensureValidKey(prefix)
-  return `${prefix}-${Date.now()}`
+  const timestamp = Date.now().toString(36)
+  const random = Math.random().toString(36).slice(2, 6)
+  
+  return `${prefix}-${timestamp}${random}`
 }
 
 /**

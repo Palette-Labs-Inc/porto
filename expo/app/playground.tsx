@@ -487,7 +487,13 @@ function GetSessions() {
 
 function SendCalls() {
   const [hash, setHash] = useState<string | null>(null)
-  const [action, setAction] = useState<string>('mint')
+  const [selectedAction, setSelectedAction] = useState<string>('mint')
+
+  const callOptions = [
+    { id: 'mint', label: 'Mint 100 EXP' },
+    { id: 'approve-transfer', label: 'Approve + Transfer 50 EXP' },
+    { id: 'noop', label: 'Noop Calls' },
+  ]
 
   const handleSendCalls = async () => {
     const [account] = await porto.provider.request({
@@ -495,7 +501,7 @@ function SendCalls() {
     })
 
     const calls = (() => {
-      if (action === 'mint')
+      if (selectedAction === 'mint')
         return [
           {
             to: ExperimentERC20.address,
@@ -506,7 +512,7 @@ function SendCalls() {
           },
         ]
 
-      if (action === 'approve-transfer')
+      if (selectedAction === 'approve-transfer')
         return [
           {
             to: ExperimentERC20.address,
@@ -556,22 +562,19 @@ function SendCalls() {
   return (
     <View style={styles.section}>
       <Text style={styles.sectionHeader}>wallet_sendCalls</Text>
-      <View style={styles.buttonGroup}>
-        <Button
-          onPress={() => setAction('mint')}
-          text="Mint 100 EXP"
-          variant={action === 'mint' ? 'primary' : 'secondary'}
-        />
-        <Button
-          onPress={() => setAction('approve-transfer')}
-          text="Approve + Transfer 50 EXP"
-          variant={action === 'approve-transfer' ? 'primary' : 'secondary'}
-        />
-        <Button
-          onPress={() => setAction('noop')}
-          text="Noop Calls"
-          variant={action === 'noop' ? 'primary' : 'secondary'}
-        />
+      <View style={styles.optionsContainer}>
+        {callOptions.map((option) => (
+          <Pressable
+            key={option.id}
+            style={styles.checkboxContainer}
+            onPress={() => setSelectedAction(option.id)}
+          >
+            <View style={styles.checkbox}>
+              {selectedAction === option.id && <View style={styles.checkboxInner} />}
+            </View>
+            <Text style={styles.checkboxLabel}>{option.label}</Text>
+          </Pressable>
+        ))}
       </View>
       <Button onPress={handleSendCalls} text="Send" />
       {hash && <Text style={styles.codeBlock}>{hash}</Text>}
@@ -581,7 +584,12 @@ function SendCalls() {
 
 function SendTransaction() {
   const [hash, setHash] = useState<Hex.Hex | null>(null)
-  const [action, setAction] = useState<string>('mint')
+  const [selectedAction, setSelectedAction] = useState<string>('mint')
+
+  const transactionOptions = [
+    { id: 'mint', label: 'Mint 100 EXP' },
+    { id: 'noop', label: 'Noop' },
+  ]
 
   const handleSendTransaction = async () => {
     const [account] = await porto.provider.request({
@@ -589,7 +597,7 @@ function SendTransaction() {
     })
 
     const params = (() => {
-      if (action === 'mint')
+      if (selectedAction === 'mint')
         return [
           {
             from: account,
@@ -620,17 +628,19 @@ function SendTransaction() {
   return (
     <View style={styles.section}>
       <Text style={styles.sectionHeader}>eth_sendTransaction</Text>
-      <View style={styles.buttonGroup}>
-        <Button
-          onPress={() => setAction('mint')}
-          text="Mint 100 EXP"
-          variant={action === 'mint' ? 'primary' : 'secondary'}
-        />
-        <Button
-          onPress={() => setAction('noop')}
-          text="Noop"
-          variant={action === 'noop' ? 'primary' : 'secondary'}
-        />
+      <View style={styles.optionsContainer}>
+        {transactionOptions.map((option) => (
+          <Pressable
+            key={option.id}
+            style={styles.checkboxContainer}
+            onPress={() => setSelectedAction(option.id)}
+          >
+            <View style={styles.checkbox}>
+              {selectedAction === option.id && <View style={styles.checkboxInner} />}
+            </View>
+            <Text style={styles.checkboxLabel}>{option.label}</Text>
+          </Pressable>
+        ))}
       </View>
       <Button onPress={handleSendTransaction} text="Send" />
       {hash && <Text style={styles.codeBlock}>{hash}</Text>}
@@ -840,6 +850,33 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#F44336',
     fontWeight: 'bold',
+  },
+  optionsContainer: {
+    marginBottom: 16,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 8,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#2196F3',
+    marginRight: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#2196F3',
+  },
+  checkboxLabel: {
+    fontSize: 16,
   },
 })
 

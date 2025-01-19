@@ -4,12 +4,12 @@ import type { createKeyPair, getKeyPair, sign } from '../P256';
  * Adapts the native response from createKeyPair to the WebCryptoP256-compatible format.
  * Converts the base64 encoded public key to the ox PublicKey format.
  */
-export declare function adaptCreateP256KeyPairReturnType(nativeResponse: createKeyPair.NativeResponse): createKeyPair.ReturnType;
+export declare function adaptCreateP256KeyPairReturnType(privateKeyStorageKey: string, nativeResponse: createKeyPair.NativeResponse): createKeyPair.ReturnType;
 /**
  * Adapts the native response from getKeyPair to the WebCryptoP256-compatible format.
  * Returns null if no key pair exists, otherwise converts to the WebCryptoP256 format.
  */
-export declare function adaptGetP256KeyPairReturnType(nativeResponse: getKeyPair.NativeResponse): getKeyPair.ReturnType;
+export declare function adaptGetP256KeyPairReturnType(privateKeyStorageKey: string, nativeResponse: getKeyPair.NativeResponse): getKeyPair.ReturnType;
 /**
  * Adapts the native signature response to the WebCryptoP256-compatible format.
  * Extracts r and s values from the ASN.1 DER encoded signature.
@@ -25,8 +25,8 @@ export declare function convertPayloadToBase64(payload: Hex.Hex | Bytes.Bytes): 
  */
 export declare const P256_KEY_PREFIX = "p256";
 /**
- * Generates a unique storage key for a P256 key pair.
- * Uses a timestamp for uniqueness.
+ * Generates a shorter unique storage key for a P256 key pair.
+ * Combines timestamp base36 with random values for uniqueness.
  */
 export declare function generateStorageKey(prefix?: string): string;
 /**

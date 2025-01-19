@@ -92,9 +92,9 @@ export async function createKeyPair(options = {}) {
     if (options.requireAuthentication && !canUseBiometricAuthentication()) {
         throw new BiometricAuthenticationError();
     }
-    const storageKey = generateStorageKey(KEY_PREFIX);
+    const storageKey = generateStorageKey();
     const nativeResponse = await ExpoP256.createP256KeyPair(storageKey, options);
-    return adaptCreateP256KeyPairReturnType(nativeResponse);
+    return adaptCreateP256KeyPairReturnType(storageKey, nativeResponse);
 }
 /**
  * Retrieves a stored P256 key pair.
@@ -114,7 +114,7 @@ export async function getKeyPair(options) {
     const { privateKeyStorageKey, ...p256Options } = options;
     ensureValidKey(privateKeyStorageKey);
     const nativeResponse = await ExpoP256.getP256KeyPair(privateKeyStorageKey, p256Options);
-    return adaptGetP256KeyPairReturnType(nativeResponse);
+    return adaptGetP256KeyPairReturnType(privateKeyStorageKey, nativeResponse);
 }
 /**
  * Signs data using a stored P256 key pair.

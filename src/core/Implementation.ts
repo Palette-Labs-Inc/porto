@@ -18,9 +18,9 @@ import * as Call from './internal/call.js'
 import * as Delegation from './internal/delegation.js'
 import { delegationAbi } from './internal/generated.js'
 import * as Key from './internal/key.js'
+import { keystoreResolver } from './internal/keystore/index.js'
 import type * as RpcSchema from './internal/rpcSchema.js'
 import type { Compute } from './internal/types.js'
-import { keystoreResolver } from './internal/keystore/index.js'
 
 type Request = Pick<RpcRequest.RpcRequest, 'method' | 'params'>
 
@@ -183,7 +183,9 @@ export function from<const implementation extends Implementation>(
 export function local(parameters: local.Parameters = {}) {
   const defaultExpiry = Math.floor(Date.now() / 1000) + 60 * 60 // 1 hour
 
-  const keystoreHost = keystoreResolver.resolveKeystoreHost(parameters.keystoreHost)
+  const keystoreHost = keystoreResolver.resolveKeystoreHost(
+    parameters.keystoreHost,
+  )
 
   return from({
     actions: {

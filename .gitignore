@@ -40,5 +40,9 @@ out
 
 # vercel
 .vercel
+
+
+# expo packages build
 /packages/expo-p256/plugin/build
-/packages/expo-p256/plugin/build
+/packages/expo-webauthn/build
+/packages/expo-p256/build

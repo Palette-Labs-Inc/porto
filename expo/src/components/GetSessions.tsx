@@ -9,37 +9,37 @@ interface Session {
   expiry: number
 }
 
-function useSessionFetcher() {
+function useKeyFetcher() {
   const porto = usePorto()
   const [sessions, setSessions] = useState<Session[]>([])
 
-  const fetchSessions = async () => {
+  const fetchKeys = async () => {
     try {
-      console.info('[GetSessions] Fetching sessions')
+      console.info('[GetKeys] Fetching keys')
       const result = await porto.provider.request({
-        method: 'experimental_getSessions',
+        method: 'experimental_keys',
       })
-      console.info('[GetSessions] Sessions fetched:', result)
+      console.info('[GetKeys] Keys fetched:', result)
       setSessions(result)
     } catch (error) {
-      console.error('[GetSessions] Failed to fetch sessions:', error)
+      console.error('[GetKeys] Failed to fetch keys:', error)
       throw error
     }
   }
 
   return {
     sessions,
-    fetchSessions,
+    fetchKeys,
   }
 }
 
-export function GetSessions() {
-  const { sessions, fetchSessions } = useSessionFetcher()
+export function GetKeys() {
+  const { sessions, fetchKeys } = useKeyFetcher()
 
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionHeader}>experimental_getSessions</Text>
-      <Button onPress={fetchSessions} text="Get Sessions" />
+      <Text style={styles.sectionHeader}>experimental_keys</Text>
+      <Button onPress={fetchKeys} text="Get Keys" />
       {sessions.length > 0 && (
         <View style={styles.codeBlock}>
           {sessions.map((session, index) => (

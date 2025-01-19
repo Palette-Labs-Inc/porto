@@ -67,8 +67,8 @@ function useAccountImporter(privateKey: string, grantSession: boolean) {
     account: ReturnType<typeof privateKeyToAccount>,
   ) => {
     const { context, signPayloads } = (await porto.provider.request({
-      method: 'experimental_prepareImportAccount',
-      params: [{ address: account.address, capabilities: { grantSession } }],
+      method: 'experimental_prepareCreateAccount',
+      params: [{ address: account.address, capabilities: { authorizeKey: grantSession } }],
     })) as ImportContext
 
     return { context, signPayloads }
@@ -83,7 +83,7 @@ function useAccountImporter(privateKey: string, grantSession: boolean) {
 
   const finalizeImport = async (context: unknown, signatures: string[]) => {
     const address = await porto.provider.request({
-      method: 'experimental_importAccount',
+      method: 'experimental_createAccount',
       params: [{ context, signatures }],
     })
     setResult(address)
@@ -114,7 +114,7 @@ export function ImportAccount() {
 
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionHeader}>experimental_importAccount</Text>
+      <Text style={styles.sectionHeader}>experimental_createAccount</Text>
       <Button onPress={generateAccount} text="Create Account" />
       {accountData && (
         <Text style={styles.codeBlock}>

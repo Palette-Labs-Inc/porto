@@ -11,25 +11,27 @@ function useSessionGrant() {
 
   const grantSession = async () => {
     try {
-      console.info('[GrantSession] Fetching account')
+      console.info('[AuthorizeKey] Fetching account')
       const [account] = await porto.provider.request({
         method: 'eth_accounts',
       })
 
-      console.info('[GrantSession] Granting session')
-      const { id } = await porto.provider.request({
-        method: 'experimental_grantSession',
+      console.info('[AuthorizeKey] Authorizing key')
+      const result = await porto.provider.request({
+        method: 'experimental_authorizeKey',
         params: [
           {
             address: account,
-            expiry: Math.floor(Date.now() / 1000) + Number(expiry),
+            key: {
+              expiry: Math.floor(Date.now() / 1000) + Number(expiry),
+            },
           },
         ],
       })
-      console.info('[GrantSession] Session granted:', id)
-      setSessionId(id)
+      console.info('[AuthorizeKey] Key authorized:', result)
+      setSessionId(result)
     } catch (error) {
-      console.error('[GrantSession] Failed to grant session:', error)
+      console.error('[AuthorizeKey] Failed to authorize key:', error)
       throw error
     }
   }
@@ -47,7 +49,7 @@ export function GrantSession() {
 
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionHeader}>experimental_grantSession</Text>
+      <Text style={styles.sectionHeader}>experimental_authorizeKey</Text>
       <TextInput
         style={styles.input}
         placeholder="expiry (seconds)"
@@ -55,9 +57,9 @@ export function GrantSession() {
         onChangeText={setExpiry}
         keyboardType="numeric"
       />
-      <Button onPress={grantSession} text="Grant Session" />
+      <Button onPress={grantSession} text="Authorize Key" />
       {sessionId && (
-        <Text style={styles.codeBlock}>session id: {sessionId}</Text>
+        <Text style={styles.codeBlock}>key: {sessionId}</Text>
       )}
     </View>
   )

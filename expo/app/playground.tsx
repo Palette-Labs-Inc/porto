@@ -3,7 +3,7 @@ import { Connect } from '@/src/components/Connect'
 import { Disconnect } from '@/src/components/Disconnect'
 import { Events } from '@/src/components/Events'
 import { GetCapabilities } from '@/src/components/GetCapabilities'
-import { GetSessions } from '@/src/components/GetSessions'
+import { GetKeys } from '@/src/components/GetSessions'
 import { GrantSession } from '@/src/components/GrantSession'
 import { ImportAccount } from '@/src/components/ImportAccount'
 import { Login } from '@/src/components/Login'
@@ -16,6 +16,8 @@ import { State } from '@/src/components/State'
 import { PortoProvider } from '@/src/providers/PortoProvider'
 import { Stack } from 'expo-router'
 import { ScrollView, StyleSheet, Text } from 'react-native'
+
+
 export default function PlaygroundScreen() {
   return (
     <PortoProvider>
@@ -32,7 +34,7 @@ export default function PlaygroundScreen() {
         <Accounts />
         <GetCapabilities />
         <GrantSession />
-        <GetSessions />
+        <GetKeys />
         <SendCalls />
         <SendTransaction />
         <SignMessage />

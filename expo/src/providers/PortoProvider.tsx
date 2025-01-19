@@ -6,7 +6,6 @@ import {
   useEffect,
   useRef,
 } from 'react'
-import { Platform } from 'react-native'
 
 type PortoContextType = {
   provider: any
@@ -19,7 +18,7 @@ const PortoContext = createContext<PortoContextType | null>(null)
 export function PortoProvider({ children }: { children: ReactNode }) {
   const portoRef = useRef(
     Porto.create({
-      keystoreHost: 'mperhats.github.io',
+      keystoreHost: 'mperhats.github.io', // TODO, add to env and use here and in app.config.ts
     }),
   )
 

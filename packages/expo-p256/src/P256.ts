@@ -266,33 +266,24 @@ export declare namespace getKeyPair {
  * @throws {BiometricAuthenticationError} When biometric authentication is required but not available
  */
 export async function sign(options: sign.Options): Promise<sign.ReturnType> {
-  try {
-    console.info('[P256.sign]:options', options)
-    if (!(await isAvailableAsync())) {
-      throw new UnsupportedPlatformError()
-    }
-
-    if (options.requireAuthentication && !canUseBiometricAuthentication()) {
-      throw new BiometricAuthenticationError()
-    }
-
-    const { privateKeyStorageKey, payload, ...p256Options } = options
-    ensureValidKey(privateKeyStorageKey)
-    console.info('[P256.sign]:privateKeyStorageKey', privateKeyStorageKey)
-    const base64Payload = convertPayloadToBase64(payload)
-    console.info('[P256.sign]:base64Payload', base64Payload)
-    const nativeResponse = await ExpoP256.signWithP256KeyPair(
-      privateKeyStorageKey,
-      base64Payload,
-      p256Options,
-    )
-
-    console.info('[P256.sign]:nativeResponse', nativeResponse)
-    return adaptSignWithP256KeyPairReturnType(nativeResponse)
-  } catch (error) {
-    console.error('[P256.sign]:error', error)
-    throw error
+  if (!(await isAvailableAsync())) {
+    throw new UnsupportedPlatformError()
   }
+
+  if (options.requireAuthentication && !canUseBiometricAuthentication()) {
+    throw new BiometricAuthenticationError()
+  }
+
+  const { privateKeyStorageKey, payload, ...p256Options } = options
+  ensureValidKey(privateKeyStorageKey)
+  const base64Payload = convertPayloadToBase64(payload)
+  const nativeResponse = await ExpoP256.signWithP256KeyPair(
+    privateKeyStorageKey,
+    base64Payload,
+    p256Options,
+  )
+
+  return adaptSignWithP256KeyPairReturnType(nativeResponse)
 }
 
 export declare namespace sign {

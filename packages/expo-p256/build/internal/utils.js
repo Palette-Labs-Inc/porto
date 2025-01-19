@@ -8,7 +8,6 @@ function convertNativeKeyPairToWebCrypto(privateKeyStorageKey, nativeKeyPair) {
     if (!nativeKeyPair.privateKey || !nativeKeyPair.publicKey) {
         throw new InvalidKeyPairError();
     }
-    console.info('[P256-NATIVE.convertNativeKeyPairToWebCrypto]:privateKeyStorageKey', privateKeyStorageKey);
     return {
         privateKeyStorageKey: privateKeyStorageKey,
         publicKey: PublicKey.from(Base64.toBytes(nativeKeyPair.publicKey)),

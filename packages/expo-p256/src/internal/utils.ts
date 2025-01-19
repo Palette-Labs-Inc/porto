@@ -19,7 +19,6 @@ function convertNativeKeyPairToWebCrypto(
     throw new InvalidKeyPairError()
   }
 
-  console.info('[P256-NATIVE.convertNativeKeyPairToWebCrypto]:privateKeyStorageKey', privateKeyStorageKey)
   return {
     privateKeyStorageKey: privateKeyStorageKey,
     publicKey: PublicKey.from(
@@ -61,7 +60,7 @@ export function adaptSignWithP256KeyPairReturnType(
   if (!nativeResponse?.signature) {
     throw new InvalidSignatureError()
   }
-  
+
   const signatureBytes = Base64.toBytes(nativeResponse.signature)
   const signatureHex = Hex.fromBytes(signatureBytes)
 
@@ -81,7 +80,6 @@ export function convertPayloadToBase64(payload: Hex.Hex | Bytes.Bytes): string {
   }
   return Base64.fromHex(payload)
 }
-
 
 // ============= Key Management =============
 

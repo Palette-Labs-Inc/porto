@@ -1,10 +1,10 @@
 // TODO: Export from wagmi internals
 export function filterQueryOptions<type extends Record<string, unknown>>(
-    options: type,
-  ): type {
-    // destructuring is super fast
-    // biome-ignore format: no formatting
-    const {
+  options: type,
+): type {
+  // destructuring is super fast
+  // biome-ignore format: no formatting
+  const {
       // import('@tanstack/query-core').QueryOptions
       _defaulted, behavior, gcTime, initialData, initialDataUpdatedAt, maxPages, meta, networkMode, queryFn, queryHash, queryKey, queryKeyHashFn, retry, retryDelay, structuralSharing,
   
@@ -20,6 +20,6 @@ export function filterQueryOptions<type extends Record<string, unknown>>(
       config, connector, query,
       ...rest
     } = options
-  
-    return rest as type
-  }
+
+  return rest as type
+}

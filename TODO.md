@@ -4,16 +4,10 @@
 
 ## 🚨 High Priority:
 - [ ] Need to add Android records for WebAuthN.
-
-## P256 Native Module Misimplementation:
-- [ ] We are returning the derRepresentation of the P256 key gen, not the keychain storage key. 
-- [ ] Would it just be easier to store some data of the publicKey as the keychain Key? Is this guaranteed to be unique?
-- [ ] I think we are failing to convert from a base64Url.
-- [ ] It does not make sense to generate the native key, send to native module and then use native response. 
-- [ ] we should either just use the javascript key and pass it to the response converter or generate the key in the native module and then use the response converter.  
-
+- [ ] Fix signing issue.
 
 ## General:
+- [ ] Standardize error handling in native modules
 - [ ] Add platform specific exports, i.e. `porto-expo`.
 - [ ] platform specific export like `porto-expo` which handles native module resolution.
 

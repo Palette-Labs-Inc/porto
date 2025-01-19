@@ -92,3 +92,9 @@ internal class InvalidPayloadException: Exception {
     "The provided payload is invalid or not properly base64 encoded"
   }
 }
+
+internal class SigningOperationException: GenericException<String> {
+  override var reason: String {
+    "Failed to generate signature: \(param)"
+  }
+}

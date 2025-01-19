@@ -150,12 +150,16 @@ public final class P256Module: Module {
         guard let payloadData: Data = Data(base64Encoded: payload) else {
           throw InvalidSigningPayloadException()
         }
-        
-        // Sign the payload
-        let signature = try privateKey.signature(for: payloadData)
+          
+        let signature: P256.Signing.ECDSASignature
+        do {
+          signature = try privateKey.signature(for: payloadData)
+        } catch {
+          throw SigningOperationException(error.localizedDescription)
+        }
         
         return [
-          "signature": signature.rawRepresentation.base64EncodedString(),
+          "signature": signature.derRepresentation.base64EncodedString(),
           "publicKey": privateKey.publicKey.derRepresentation.base64EncodedString()
         ]
       }

@@ -63,11 +63,13 @@ function useAccountImporter(privateKey: string, grantSession: boolean) {
   const porto = usePorto()
   const [result, setResult] = useState<unknown | null>(null)
 
-  const prepareImport = async (account: ReturnType<typeof privateKeyToAccount>) => {
-    const { context, signPayloads } = await porto.provider.request({
+  const prepareImport = async (
+    account: ReturnType<typeof privateKeyToAccount>,
+  ) => {
+    const { context, signPayloads } = (await porto.provider.request({
       method: 'experimental_prepareImportAccount',
       params: [{ address: account.address, capabilities: { grantSession } }],
-    }) as ImportContext
+    })) as ImportContext
 
     return { context, signPayloads }
   }

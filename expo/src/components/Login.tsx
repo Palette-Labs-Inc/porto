@@ -35,7 +35,9 @@ export function Login() {
       <Text style={styles.sectionHeader}>eth_requestAccounts</Text>
       <Button onPress={handleLogin} text="Login" />
       {accounts && (
-        <Text style={styles.codeBlock}>{JSON.stringify(accounts, null, 2)}</Text>
+        <Text style={styles.codeBlock}>
+          {JSON.stringify(accounts, null, 2)}
+        </Text>
       )}
     </View>
   )

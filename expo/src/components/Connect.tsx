@@ -18,7 +18,8 @@ interface ConnectOptions {
 function useConnect() {
   const porto = usePorto()
   const [grantSession, setGrantSession] = useState<boolean>(true)
-  const [connectResponse, setConnectResponse] = useState<ConnectResponse | null>(null)
+  const [connectResponse, setConnectResponse] =
+    useState<ConnectResponse | null>(null)
 
   const handleConnect = async (shouldCreateAccount: boolean) => {
     try {
@@ -31,10 +32,10 @@ function useConnect() {
       }
 
       console.info('[Connect] Requesting connection with options:', options)
-      const response = await porto.provider.request({
+      const response = (await porto.provider.request({
         method: 'experimental_connect',
         params: [options],
-      }) as ConnectResponse
+      })) as ConnectResponse
 
       console.info('[Connect] Connection successful:', response)
       setConnectResponse(response)

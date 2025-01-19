@@ -33,7 +33,9 @@ export function Accounts() {
       <Text style={styles.sectionHeader}>eth_accounts</Text>
       <Button onPress={fetchAccounts} text="Get Accounts" />
       {accounts && (
-        <Text style={styles.codeBlock}>{JSON.stringify(accounts, null, 2)}</Text>
+        <Text style={styles.codeBlock}>
+          {JSON.stringify(accounts, null, 2)}
+        </Text>
       )}
     </View>
   )

@@ -1,9 +1,9 @@
+import { ExperimentERC20 } from '@/src/contracts'
+import { AbiFunction, type Hex, Value } from 'ox'
 import { useState } from 'react'
-import { Platform, StyleSheet, Text, View, Pressable } from 'react-native'
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
-import { ExperimentERC20 } from '@/src/contracts'
-import { AbiFunction, Value, type Hex } from 'ox'
 
 type Call = {
   to: string
@@ -102,8 +102,13 @@ function useSendCalls() {
 }
 
 export function SendCalls() {
-  const { result, selectedAction, setSelectedAction, callOptions, handleSendCalls } =
-    useSendCalls()
+  const {
+    result,
+    selectedAction,
+    setSelectedAction,
+    callOptions,
+    handleSendCalls,
+  } = useSendCalls()
 
   return (
     <View style={styles.section}>

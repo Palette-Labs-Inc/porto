@@ -2,7 +2,12 @@ import { useEffect, useState } from 'react'
 import { Platform, StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 
-type EventName = 'accountsChanged' | 'chainChanged' | 'connect' | 'disconnect' | 'message'
+type EventName =
+  | 'accountsChanged'
+  | 'chainChanged'
+  | 'connect'
+  | 'disconnect'
+  | 'message'
 
 interface EventResponses {
   accountsChanged?: string[]
@@ -19,13 +24,14 @@ function useEvents() {
   useEffect(() => {
     console.info('[Events] Setting up event listeners')
 
-    const createEventHandler = (eventName: EventName) => (response: unknown) => {
-      console.info(`[Events] Received ${eventName} event:`, response)
-      setResponses(prev => ({
-        ...prev,
-        [eventName]: response,
-      }))
-    }
+    const createEventHandler =
+      (eventName: EventName) => (response: unknown) => {
+        console.info(`[Events] Received ${eventName} event:`, response)
+        setResponses((prev) => ({
+          ...prev,
+          [eventName]: response,
+        }))
+      }
 
     const eventHandlers = {
       accountsChanged: createEventHandler('accountsChanged'),

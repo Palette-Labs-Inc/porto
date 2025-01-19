@@ -44,9 +44,12 @@ export function GetSessions() {
         <View style={styles.codeBlock}>
           {sessions.map((session, index) => (
             <Text key={session.id} style={styles.sessionText}>
-              {index + 1}. id: {session.id}{'\n'}
-              address: {session.address}{'\n'}
-              expiry: {session.expiry}{'\n'}
+              {index + 1}. id: {session.id}
+              {'\n'}
+              address: {session.address}
+              {'\n'}
+              expiry: {session.expiry}
+              {'\n'}
             </Text>
           ))}
         </View>

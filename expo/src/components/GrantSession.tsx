@@ -56,7 +56,9 @@ export function GrantSession() {
         keyboardType="numeric"
       />
       <Button onPress={grantSession} text="Grant Session" />
-      {sessionId && <Text style={styles.codeBlock}>session id: {sessionId}</Text>}
+      {sessionId && (
+        <Text style={styles.codeBlock}>session id: {sessionId}</Text>
+      )}
     </View>
   )
 }

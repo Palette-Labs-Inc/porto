@@ -56,13 +56,8 @@ function useMessageVerifier(message: string, signature: string | null) {
 }
 
 export function SignMessage() {
-  const {
-    message,
-    setMessage,
-    signature,
-    handleReset,
-    handleSign,
-  } = useMessageSigner()
+  const { message, setMessage, signature, handleReset, handleSign } =
+    useMessageSigner()
 
   const { isValid, handleVerify } = useMessageVerifier(message, signature)
 

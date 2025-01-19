@@ -58,9 +58,7 @@ export function GrantSession() {
         keyboardType="numeric"
       />
       <Button onPress={grantSession} text="Authorize Key" />
-      {sessionId && (
-        <Text style={styles.codeBlock}>key: {sessionId}</Text>
-      )}
+      {sessionId && <Text style={styles.codeBlock}>key: {sessionId}</Text>}
     </View>
   )
 }

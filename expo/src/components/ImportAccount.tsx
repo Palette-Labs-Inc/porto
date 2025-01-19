@@ -68,7 +68,12 @@ function useAccountImporter(privateKey: string, grantSession: boolean) {
   ) => {
     const { context, signPayloads } = (await porto.provider.request({
       method: 'experimental_prepareCreateAccount',
-      params: [{ address: account.address, capabilities: { authorizeKey: grantSession } }],
+      params: [
+        {
+          address: account.address,
+          capabilities: { authorizeKey: grantSession },
+        },
+      ],
     })) as ImportContext
 
     return { context, signPayloads }

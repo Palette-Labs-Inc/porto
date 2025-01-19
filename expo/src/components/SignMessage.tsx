@@ -3,28 +3,14 @@ import { Platform, StyleSheet, Text, TextInput, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
 
-function useSignMessage() {
+function useMessageSigner() {
   const porto = usePorto()
   const [message, setMessage] = useState('')
   const [signature, setSignature] = useState<string | null>(null)
-  const [isValid, setIsValid] = useState<boolean | null>(null)
 
   const handleReset = () => {
     setMessage('')
     setSignature(null)
-    setIsValid(null)
-  }
-
-  const handleVerify = async () => {
-    if (!signature) return
-    const [account] = await porto.provider.request({
-      method: 'eth_accounts',
-    })
-    const result = await porto.provider.request({
-      method: 'personal_ecRecover',
-      params: [message, signature],
-    })
-    setIsValid(result.toLowerCase() === account.toLowerCase())
   }
 
   const handleSign = async () => {
@@ -42,10 +28,30 @@ function useSignMessage() {
     message,
     setMessage,
     signature,
-    isValid,
     handleReset,
-    handleVerify,
     handleSign,
+  }
+}
+
+function useMessageVerifier(message: string, signature: string | null) {
+  const porto = usePorto()
+  const [isValid, setIsValid] = useState<boolean | null>(null)
+
+  const handleVerify = async () => {
+    if (!signature) return
+    const [account] = await porto.provider.request({
+      method: 'eth_accounts',
+    })
+    const result = await porto.provider.request({
+      method: 'personal_ecRecover',
+      params: [message, signature],
+    })
+    setIsValid(result.toLowerCase() === account.toLowerCase())
+  }
+
+  return {
+    isValid,
+    handleVerify,
   }
 }
 
@@ -54,27 +60,33 @@ export function SignMessage() {
     message,
     setMessage,
     signature,
-    isValid,
     handleReset,
-    handleVerify,
     handleSign,
-  } = useSignMessage()
+  } = useMessageSigner()
+
+  const { isValid, handleVerify } = useMessageVerifier(message, signature)
 
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionHeader}>personal_sign</Text>
-      <Button onPress={handleReset} text="Reset" />
+      <View style={styles.header}>
+        <Text style={styles.sectionHeader}>personal_sign</Text>
+        <Button onPress={handleReset} text="Reset" variant="secondary" />
+      </View>
       <TextInput
         style={styles.input}
         placeholder="Message to sign"
         value={message}
         onChangeText={setMessage}
       />
-      <Button onPress={handleSign} text="Sign Message" />
+      <View style={styles.buttonSpacing}>
+        <Button onPress={handleSign} text="Sign Message" />
+      </View>
       {signature && (
         <>
           <Text style={styles.codeBlock}>{signature}</Text>
-          <Button onPress={handleVerify} text="Verify Signature" />
+          <View style={styles.buttonSpacing}>
+            <Button onPress={handleVerify} text="Verify Signature" />
+          </View>
           {isValid !== null && (
             <Text style={styles.codeBlock}>
               Signature is {isValid ? 'valid' : 'invalid'}
@@ -93,10 +105,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
     borderRadius: 8,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   sectionHeader: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 12,
   },
   input: {
     borderWidth: 1,
@@ -104,6 +121,9 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     padding: 8,
     marginBottom: 8,
+  },
+  buttonSpacing: {
+    marginVertical: 12,
   },
   codeBlock: {
     fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace' }),

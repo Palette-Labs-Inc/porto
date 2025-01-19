@@ -4,10 +4,46 @@ import { Platform, StyleSheet, Text, TextInput, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
 
-export function GrantSession() {
+function useSessionGrant() {
   const porto = usePorto()
-  const [result, setResult] = useState<Hex.Hex | null>(null)
+  const [sessionId, setSessionId] = useState<Hex.Hex | null>(null)
   const [expiry, setExpiry] = useState<string>('')
+
+  const grantSession = async () => {
+    try {
+      console.info('[GrantSession] Fetching account')
+      const [account] = await porto.provider.request({
+        method: 'eth_accounts',
+      })
+
+      console.info('[GrantSession] Granting session')
+      const { id } = await porto.provider.request({
+        method: 'experimental_grantSession',
+        params: [
+          {
+            address: account,
+            expiry: Math.floor(Date.now() / 1000) + Number(expiry),
+          },
+        ],
+      })
+      console.info('[GrantSession] Session granted:', id)
+      setSessionId(id)
+    } catch (error) {
+      console.error('[GrantSession] Failed to grant session:', error)
+      throw error
+    }
+  }
+
+  return {
+    sessionId,
+    expiry,
+    setExpiry,
+    grantSession,
+  }
+}
+
+export function GrantSession() {
+  const { sessionId, expiry, setExpiry, grantSession } = useSessionGrant()
 
   return (
     <View style={styles.section}>
@@ -19,25 +55,8 @@ export function GrantSession() {
         onChangeText={setExpiry}
         keyboardType="numeric"
       />
-      <Button
-        onPress={async () => {
-          const [account] = await porto.provider.request({
-            method: 'eth_accounts',
-          })
-          const { id } = await porto.provider.request({
-            method: 'experimental_grantSession',
-            params: [
-              {
-                address: account,
-                expiry: Math.floor(Date.now() / 1000) + Number(expiry),
-              },
-            ],
-          })
-          setResult(id)
-        }}
-        text="Grant Session"
-      />
-      {result && <Text style={styles.codeBlock}>session id: {result}</Text>}
+      <Button onPress={grantSession} text="Grant Session" />
+      {sessionId && <Text style={styles.codeBlock}>session id: {sessionId}</Text>}
     </View>
   )
 }

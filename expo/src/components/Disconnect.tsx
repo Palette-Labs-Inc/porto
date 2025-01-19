@@ -1,18 +1,33 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { Platform, StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
 
-export function Disconnect() {
+function useDisconnect() {
   const porto = usePorto()
+
+  const handleDisconnect = async () => {
+    try {
+      console.info('[Disconnect] Disconnecting')
+      await porto.provider.request({ method: 'experimental_disconnect' })
+      console.info('[Disconnect] Successfully disconnected')
+    } catch (error) {
+      console.error('[Disconnect] Failed to disconnect:', error)
+      throw error
+    }
+  }
+
+  return {
+    handleDisconnect,
+  }
+}
+
+export function Disconnect() {
+  const { handleDisconnect } = useDisconnect()
+
   return (
     <View style={styles.section}>
       <Text style={styles.sectionHeader}>experimental_disconnect</Text>
-      <Button
-        onPress={() =>
-          porto.provider.request({ method: 'experimental_disconnect' })
-        }
-        text="Disconnect"
-      />
+      <Button onPress={handleDisconnect} text="Disconnect" />
     </View>
   )
 }

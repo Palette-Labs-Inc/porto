@@ -3,12 +3,8 @@ import { useState } from 'react'
 import { Platform, StyleSheet, Text, View } from 'react-native'
 import { createClient, custom } from 'viem'
 import { verifyTypedData } from 'viem/actions'
-import { porto } from '../porto'
+import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
-
-const client = createClient({
-  transport: custom(porto.provider),
-})
 
 const typedData = {
   domain: {
@@ -65,14 +61,39 @@ const typedData = {
   },
 } as const
 
-export function SignTypedData() {
+function useTypedDataSigner() {
+  const porto = usePorto()
   const [signature, setSignature] = useState<string | null>(null)
+
+  const handleReset = () => {
+    setSignature(null)
+  }
+
+  const handleSign = async () => {
+    const [account] = await porto.provider.request({
+      method: 'eth_accounts',
+    })
+    const result = await porto.provider.request({
+      method: 'eth_signTypedData_v4',
+      params: [account, TypedData.serialize(typedData)],
+    })
+    setSignature(result)
+  }
+
+  return {
+    signature,
+    handleReset,
+    handleSign,
+  }
+}
+
+function useTypedDataVerifier(signature: string | null) {
+  const porto = usePorto()
   const [valid, setValid] = useState<boolean | null>(null)
 
-  const resetState = () => {
-    setSignature(null)
-    setValid(null)
-  }
+  const client = createClient({
+    transport: custom(porto.provider),
+  })
 
   const handleVerify = async () => {
     if (!signature) return
@@ -92,25 +113,23 @@ export function SignTypedData() {
     }
   }
 
+  return {
+    valid,
+    handleVerify,
+  }
+}
+
+export function SignTypedData() {
+  const { signature, handleReset, handleSign } = useTypedDataSigner()
+  const { valid, handleVerify } = useTypedDataVerifier(signature)
+
   return (
     <View style={styles.section}>
       <Text style={styles.sectionHeader}>eth_signTypedData_v4</Text>
       <View style={styles.row}>
-        <Button onPress={resetState} text="Reset" variant="secondary" />
+        <Button onPress={handleReset} text="Reset" variant="secondary" />
       </View>
-      <Button
-        onPress={async () => {
-          const [account] = await porto.provider.request({
-            method: 'eth_accounts',
-          })
-          const result = await porto.provider.request({
-            method: 'eth_signTypedData_v4',
-            params: [account, TypedData.serialize(typedData)],
-          })
-          setSignature(result)
-        }}
-        text="Sign"
-      />
+      <Button onPress={handleSign} text="Sign" />
       {signature && (
         <>
           <Text style={styles.codeBlock}>{signature}</Text>

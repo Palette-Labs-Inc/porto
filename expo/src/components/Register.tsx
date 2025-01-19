@@ -3,26 +3,32 @@ import { Platform, StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
 
-export function Register() {
+function useRegistration() {
   const porto = usePorto()
   const [result, setResult] = useState<string | null>(null)
 
   const handleRegister = async () => {
-    console.info('[PlaygroundScreen:Register] Starting registration')
     try {
+      console.info('[Register] Starting registration')
       const response = await porto.provider.request({
         method: 'experimental_createAccount',
       })
-      console.info(
-        '[PlaygroundScreen:Register] Registration successful:',
-        response,
-      )
+      console.info('[Register] Registration successful:', response)
       setResult(response)
     } catch (error) {
-      console.error('[PlaygroundScreen:Register] Registration failed:', error)
+      console.error('[Register] Registration failed:', error)
       throw error
     }
   }
+
+  return {
+    result,
+    handleRegister,
+  }
+}
+
+export function Register() {
+  const { result, handleRegister } = useRegistration()
 
   return (
     <View style={styles.section}>

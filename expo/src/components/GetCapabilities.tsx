@@ -3,23 +3,43 @@ import { Platform, StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
 
-export function GetCapabilities() {
+type Capabilities = Record<string, unknown>
+
+function useCapabilities() {
   const porto = usePorto()
-  const [result, setResult] = useState<Record<string, unknown> | null>(null)
+  const [capabilities, setCapabilities] = useState<Capabilities | null>(null)
+
+  const fetchCapabilities = async () => {
+    try {
+      console.info('[GetCapabilities] Fetching capabilities')
+      const capabilities = await porto.provider.request({
+        method: 'wallet_getCapabilities',
+      })
+      console.info('[GetCapabilities] Capabilities received:', capabilities)
+      setCapabilities(capabilities)
+    } catch (error) {
+      console.error('[GetCapabilities] Failed to fetch capabilities:', error)
+      throw error
+    }
+  }
+
+  return {
+    capabilities,
+    fetchCapabilities,
+  }
+}
+
+export function GetCapabilities() {
+  const { capabilities, fetchCapabilities } = useCapabilities()
 
   return (
     <View style={styles.section}>
       <Text style={styles.sectionHeader}>wallet_getCapabilities</Text>
-      <Button
-        onPress={() =>
-          porto.provider
-            .request({ method: 'wallet_getCapabilities' })
-            .then(setResult)
-        }
-        text="Get Capabilities"
-      />
-      {result && (
-        <Text style={styles.codeBlock}>{JSON.stringify(result, null, 2)}</Text>
+      <Button onPress={fetchCapabilities} text="Get Capabilities" />
+      {capabilities && (
+        <Text style={styles.codeBlock}>
+          {JSON.stringify(capabilities, null, 2)}
+        </Text>
       )}
     </View>
   )

@@ -1,27 +1,39 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Platform, StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
 
-export function Accounts() {
+function useAccounts() {
   const porto = usePorto()
-  const [result, setResult] = useState<readonly string[] | null>(null)
+  const [accounts, setAccounts] = useState<readonly string[] | null>(null)
 
-  useEffect(() => {
-    console.info('[PlaygroundScreen:Accounts] result', result)
-  }, [result])
+  const fetchAccounts = async () => {
+    try {
+      console.info('[Accounts] Fetching accounts')
+      const accounts = await porto.provider.request({ method: 'eth_accounts' })
+      console.info('[Accounts] Accounts received:', accounts)
+      setAccounts(accounts)
+    } catch (error) {
+      console.error('[Accounts] Failed to fetch accounts:', error)
+      throw error
+    }
+  }
+
+  return {
+    accounts,
+    fetchAccounts,
+  }
+}
+
+export function Accounts() {
+  const { accounts, fetchAccounts } = useAccounts()
 
   return (
     <View style={styles.section}>
       <Text style={styles.sectionHeader}>eth_accounts</Text>
-      <Button
-        onPress={() =>
-          porto.provider.request({ method: 'eth_accounts' }).then(setResult)
-        }
-        text="Get Accounts"
-      />
-      {result && (
-        <Text style={styles.codeBlock}>{JSON.stringify(result, null, 2)}</Text>
+      <Button onPress={fetchAccounts} text="Get Accounts" />
+      {accounts && (
+        <Text style={styles.codeBlock}>{JSON.stringify(accounts, null, 2)}</Text>
       )}
     </View>
   )

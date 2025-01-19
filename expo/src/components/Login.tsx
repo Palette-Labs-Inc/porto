@@ -3,28 +3,39 @@ import { Platform, StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
 
-export function Login() {
+function useLogin() {
   const porto = usePorto()
-  const [result, setResult] = useState<readonly string[] | null>(null)
+  const [accounts, setAccounts] = useState<readonly string[] | null>(null)
 
   const handleLogin = async () => {
     try {
+      console.info('[Login] Requesting accounts')
       const accounts = await porto.provider.request({
         method: 'eth_requestAccounts',
       })
-      setResult(accounts)
+      console.info('[Login] Accounts received:', accounts)
+      setAccounts(accounts)
     } catch (error) {
-      console.error('[PlaygroundScreen:Login] Login failed:', error)
+      console.error('[Login] Login failed:', error)
       throw error
     }
   }
+
+  return {
+    accounts,
+    handleLogin,
+  }
+}
+
+export function Login() {
+  const { accounts, handleLogin } = useLogin()
 
   return (
     <View style={styles.section}>
       <Text style={styles.sectionHeader}>eth_requestAccounts</Text>
       <Button onPress={handleLogin} text="Login" />
-      {result && (
-        <Text style={styles.codeBlock}>{JSON.stringify(result, null, 2)}</Text>
+      {accounts && (
+        <Text style={styles.codeBlock}>{JSON.stringify(accounts, null, 2)}</Text>
       )}
     </View>
   )

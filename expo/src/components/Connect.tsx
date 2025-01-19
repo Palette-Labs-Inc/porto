@@ -3,39 +3,67 @@ import { Platform, StyleSheet, Switch, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
 
+interface ConnectResponse {
+  address: string
+  chainId: number
+}
+
+interface ConnectOptions {
+  capabilities: {
+    grantSession?: boolean
+    createAccount?: boolean
+  }
+}
+
 function useConnect() {
   const porto = usePorto()
   const [grantSession, setGrantSession] = useState<boolean>(true)
-  const [result, setResult] = useState<unknown | null>(null)
+  const [connectResponse, setConnectResponse] = useState<ConnectResponse | null>(null)
 
-  const handleLogin = async () => {
-    const result = await porto.provider.request({
-      method: 'experimental_connect',
-      params: [{ capabilities: { grantSession } }],
-    })
-    setResult(result)
+  const handleConnect = async (shouldCreateAccount: boolean) => {
+    try {
+      console.info('[Connect] Initiating connection')
+      const options: ConnectOptions = {
+        capabilities: {
+          grantSession,
+          ...(shouldCreateAccount && { createAccount: true }),
+        },
+      }
+
+      console.info('[Connect] Requesting connection with options:', options)
+      const response = await porto.provider.request({
+        method: 'experimental_connect',
+        params: [options],
+      }) as ConnectResponse
+
+      console.info('[Connect] Connection successful:', response)
+      setConnectResponse(response)
+    } catch (error) {
+      console.error('[Connect] Connection failed:', error)
+      throw error
+    }
   }
 
-  const handleRegister = async () => {
-    const result = await porto.provider.request({
-      method: 'experimental_connect',
-      params: [{ capabilities: { createAccount: true, grantSession } }],
-    })
-    setResult(result)
-  }
+  const handleLogin = () => handleConnect(false)
+  const handleRegister = () => handleConnect(true)
 
   return {
     grantSession,
     setGrantSession,
-    result,
+    connectResponse,
     handleLogin,
     handleRegister,
   }
 }
 
 export function Connect() {
-  const { grantSession, setGrantSession, result, handleLogin, handleRegister } =
-    useConnect()
+  const {
+    grantSession,
+    setGrantSession,
+    connectResponse,
+    handleLogin,
+    handleRegister,
+  } = useConnect()
 
   return (
     <View style={styles.section}>
@@ -48,10 +76,12 @@ export function Connect() {
         <Button onPress={handleLogin} text="Login" />
         <Button onPress={handleRegister} text="Register" />
       </View>
-      {result ? (
-        <Text style={styles.codeBlock}>{JSON.stringify(result, null, 2)}</Text>
+      {connectResponse ? (
+        <Text style={styles.codeBlock}>
+          {JSON.stringify(connectResponse, null, 2)}
+        </Text>
       ) : (
-        <Text>No result</Text>
+        <Text>No connection</Text>
       )}
     </View>
   )

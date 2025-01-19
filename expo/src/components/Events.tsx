@@ -2,36 +2,50 @@ import { useEffect, useState } from 'react'
 import { Platform, StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 
+type EventName = 'accountsChanged' | 'chainChanged' | 'connect' | 'disconnect' | 'message'
+
+interface EventResponses {
+  accountsChanged?: string[]
+  chainChanged?: number
+  connect?: { chainId: number }
+  disconnect?: { code: number; message: string }
+  message?: unknown
+}
+
 function useEvents() {
   const porto = usePorto()
-  const [responses, setResponses] = useState<Record<string, unknown>>({})
+  const [responses, setResponses] = useState<EventResponses>({})
 
   useEffect(() => {
-    const handleResponse = (event: string) => (response: unknown) => {
-      setResponses((responses) => ({
-        ...responses,
-        [event]: response,
+    console.info('[Events] Setting up event listeners')
+
+    const createEventHandler = (eventName: EventName) => (response: unknown) => {
+      console.info(`[Events] Received ${eventName} event:`, response)
+      setResponses(prev => ({
+        ...prev,
+        [eventName]: response,
       }))
     }
 
-    const handleAccountsChanged = handleResponse('accountsChanged')
-    const handleChainChanged = handleResponse('chainChanged')
-    const handleConnect = handleResponse('connect')
-    const handleDisconnect = handleResponse('disconnect')
-    const handleMessage = handleResponse('message')
+    const eventHandlers = {
+      accountsChanged: createEventHandler('accountsChanged'),
+      chainChanged: createEventHandler('chainChanged'),
+      connect: createEventHandler('connect'),
+      disconnect: createEventHandler('disconnect'),
+      message: createEventHandler('message'),
+    }
 
-    porto.provider.on('accountsChanged', handleAccountsChanged)
-    porto.provider.on('chainChanged', handleChainChanged)
-    porto.provider.on('connect', handleConnect)
-    porto.provider.on('disconnect', handleDisconnect)
-    porto.provider.on('message', handleMessage)
+    // Set up event listeners
+    for (const [event, handler] of Object.entries(eventHandlers)) {
+      porto.provider.on(event as EventName, handler)
+    }
 
+    // Cleanup function
     return () => {
-      porto.provider.removeListener('accountsChanged', handleAccountsChanged)
-      porto.provider.removeListener('chainChanged', handleChainChanged)
-      porto.provider.removeListener('connect', handleConnect)
-      porto.provider.removeListener('disconnect', handleDisconnect)
-      porto.provider.removeListener('message', handleMessage)
+      console.info('[Events] Cleaning up event listeners')
+      for (const [event, handler] of Object.entries(eventHandlers)) {
+        porto.provider.removeListener(event as EventName, handler)
+      }
     }
   }, [porto])
 

@@ -3,9 +3,29 @@ import { useSyncExternalStore } from 'react'
 import { Platform, StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 
-export function State() {
+type AccountKey = {
+  expiry: number
+  publicKey: { prefix: number; x: bigint; y?: bigint }
+  status: string
+  type: string
+}
+
+type Account = {
+  address: string
+  keys: AccountKey[]
+}
+
+type State = {
+  accounts: Account[]
+  chain: {
+    id: number
+  }
+}
+
+function usePortoState() {
   const porto = usePorto()
-  const state = useSyncExternalStore(
+
+  const state = useSyncExternalStore<State>(
     (callback) => {
       const unsubscribe = porto._internal.store.subscribe(() => {
         callback()
@@ -14,45 +34,44 @@ export function State() {
         unsubscribe()
       }
     },
-    () => {
-      const state = porto._internal.store.getState()
-      return state
-    },
+    () => porto._internal.store.getState(),
     () => porto._internal.store.getState(),
   )
+
+  const formatKeys = (account: Account) => {
+    return account.keys
+      .filter((key) => key.status === 'unlocked')
+      .map((key) => ({
+        expiry: key.expiry,
+        publicKey: PublicKey.toHex(key.publicKey),
+        status: key.status,
+        type: key.type,
+      }))
+  }
+
+  return {
+    isConnected: state.accounts.length > 0,
+    address: state.accounts[0]?.address,
+    chainId: state.chain.id,
+    formattedKeys: state.accounts[0] ? formatKeys(state.accounts[0]) : [],
+  }
+}
+
+export function State() {
+  const { isConnected, address, chainId, formattedKeys } = usePortoState()
 
   return (
     <View style={styles.section}>
       <Text style={styles.sectionHeader}>State</Text>
-      {state.accounts.length === 0 ? (
+      {!isConnected ? (
         <Text>Disconnected</Text>
       ) : (
         <View>
-          <Text>Address: {state.accounts[0].address}</Text>
-          <Text>Chain ID: {state.chain.id}</Text>
+          <Text>Address: {address}</Text>
+          <Text>Chain ID: {chainId}</Text>
           <Text>Keys:</Text>
           <Text style={styles.codeBlock}>
-            {Json.stringify(
-              state.accounts?.[0]?.keys
-                .filter((x: { status: string }) => x.status === 'unlocked')
-                .map(
-                  (x: {
-                    expiry: any
-                    publicKey:
-                      | { prefix: number; x: bigint; y: bigint }
-                      | { prefix: number; x: bigint; y?: undefined }
-                    status: any
-                    type: any
-                  }) => ({
-                    expiry: x.expiry,
-                    publicKey: PublicKey.toHex(x.publicKey),
-                    status: x.status,
-                    type: x.type,
-                  }),
-                ),
-              null,
-              2,
-            )}
+            {Json.stringify(formattedKeys, null, 2)}
           </Text>
         </View>
       )}

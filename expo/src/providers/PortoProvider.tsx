@@ -1,5 +1,11 @@
 import { Porto } from 'porto'
-import { createContext, useContext, useEffect, useRef, type ReactNode } from 'react'
+import {
+  type ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+} from 'react'
 import { Platform } from 'react-native'
 
 type PortoContextType = {
@@ -43,4 +49,4 @@ export function usePorto() {
     throw new Error('usePorto must be used within a PortoProvider')
   }
   return context
-} 
+}

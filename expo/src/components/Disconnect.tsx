@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
 
@@ -29,4 +29,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 12,
   },
-}) 
+})

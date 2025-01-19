@@ -1,9 +1,20 @@
-import { View, Text, StyleSheet, Platform, Switch, TextInput } from 'react-native'
+import type { Hex } from 'ox'
 import { useState } from 'react'
+import {
+  Platform,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  View,
+} from 'react-native'
+import {
+  generatePrivateKey,
+  privateKeyToAccount,
+  privateKeyToAddress,
+} from 'viem/accounts'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
-import { generatePrivateKey, privateKeyToAccount, privateKeyToAddress } from 'viem/accounts'
-import type { Hex } from 'ox'
 
 export function ImportAccount() {
   const porto = usePorto()
@@ -104,4 +115,4 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 4,
   },
-}) 
+})

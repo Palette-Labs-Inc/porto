@@ -1,10 +1,10 @@
-import { View, Text, StyleSheet, Platform } from 'react-native'
+import { TypedData } from 'ox'
 import { useState } from 'react'
-import { porto } from '../porto'
-import { Button } from './Button'
+import { Platform, StyleSheet, Text, View } from 'react-native'
 import { createClient, custom } from 'viem'
 import { verifyTypedData } from 'viem/actions'
-import { TypedData } from 'ox'
+import { porto } from '../porto'
+import { Button } from './Button'
 
 const client = createClient({
   transport: custom(porto.provider),
@@ -158,4 +158,4 @@ const styles = StyleSheet.create({
     color: '#F44336',
     fontWeight: 'bold',
   },
-}) 
+})

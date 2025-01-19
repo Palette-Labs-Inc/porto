@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, Platform } from 'react-native'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { Platform, StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
 

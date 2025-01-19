@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, Platform } from 'react-native'
 import { useState } from 'react'
+import { Platform, StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
 
@@ -56,4 +56,4 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 4,
   },
-}) 
+})

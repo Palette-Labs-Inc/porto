@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet, Platform, TextInput } from 'react-native'
+import type { Hex } from 'ox'
 import { useState } from 'react'
+import { Platform, StyleSheet, Text, TextInput, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
-import type { Hex } from 'ox'
 
 export function GrantSession() {
   const porto = usePorto()
@@ -67,4 +67,4 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 4,
   },
-}) 
+})

@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, Platform } from 'react-native'
 import { Json, PublicKey } from 'ox'
 import { useSyncExternalStore } from 'react'
+import { Platform, StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 
 export function State() {
@@ -78,4 +78,4 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 4,
   },
-}) 
+})

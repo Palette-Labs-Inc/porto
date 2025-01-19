@@ -55,4 +55,4 @@ const styles = StyleSheet.create({
   buttonTextSecondary: {
     color: '#2196F3',
   },
-}) 
+})

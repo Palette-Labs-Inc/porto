@@ -570,7 +570,9 @@ function SendCalls() {
             onPress={() => setSelectedAction(option.id)}
           >
             <View style={styles.checkbox}>
-              {selectedAction === option.id && <View style={styles.checkboxInner} />}
+              {selectedAction === option.id && (
+                <View style={styles.checkboxInner} />
+              )}
             </View>
             <Text style={styles.checkboxLabel}>{option.label}</Text>
           </Pressable>
@@ -636,7 +638,9 @@ function SendTransaction() {
             onPress={() => setSelectedAction(option.id)}
           >
             <View style={styles.checkbox}>
-              {selectedAction === option.id && <View style={styles.checkboxInner} />}
+              {selectedAction === option.id && (
+                <View style={styles.checkboxInner} />
+              )}
             </View>
             <Text style={styles.checkboxLabel}>{option.label}</Text>
           </Pressable>

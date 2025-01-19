@@ -8,10 +8,13 @@ import type { createKeyPair, getKeyPair, sign } from '../P256'
  * Converts a native key pair response to the WebCryptoP256-compatible format.
  * @internal
  */
-function convertNativeKeyPairToWebCrypto(privateKeyStorageKey: string, nativeKeyPair: {
-  privateKey: string
-  publicKey: string
-}): createKeyPair.ReturnType {
+function convertNativeKeyPairToWebCrypto(
+  privateKeyStorageKey: string,
+  nativeKeyPair: {
+    privateKey: string
+    publicKey: string
+  },
+): createKeyPair.ReturnType {
   if (!nativeKeyPair.privateKey || !nativeKeyPair.publicKey) {
     throw new InvalidKeyPairError()
   }
@@ -93,7 +96,7 @@ export function generateStorageKey(prefix: string = P256_KEY_PREFIX): string {
   ensureValidKey(prefix)
   const timestamp = Date.now().toString(36)
   const random = Math.random().toString(36).slice(2, 6)
-  
+
   return `${prefix}-${timestamp}${random}`
 }
 

@@ -1,81 +1,28 @@
-import { Json, PublicKey } from 'ox'
-import { useSyncExternalStore } from 'react'
+import { Json } from 'ox'
 import { Platform, StyleSheet, Text, View } from 'react-native'
+import { useSyncExternalStore } from 'react'
 import { usePorto } from '../providers/PortoProvider'
 
-type AccountKey = {
-  expiry: number
-  publicKey: { prefix: number; x: bigint; y?: bigint }
-  status: string
-  type: string
-}
-
-type Account = {
-  address: string
-  keys: AccountKey[]
-}
-
-type State = {
-  accounts: readonly Account[]
-  chain: {
-    id: number
-  }
-}
-
-function usePortoState() {
-  const porto = usePorto()
-
-  const state = useSyncExternalStore<State>(
-    (callback) => {
-      const unsubscribe = porto.provider.on('stateChanged', callback)
-      return () => {
-        unsubscribe()
-      }
-    },
-    () => ({
-      accounts: porto.provider.accounts,
-      chain: { id: porto.provider.chainId },
-    }),
-    () => ({
-      accounts: porto.provider.accounts,
-      chain: { id: porto.provider.chainId },
-    }),
-  )
-
-  const formatKeys = (account: Account) => {
-    return account.keys
-      .filter((key) => key.status === 'unlocked')
-      .map((key) => ({
-        expiry: key.expiry,
-        publicKey: PublicKey.toHex(key.publicKey),
-        status: key.status,
-        type: key.type,
-      }))
-  }
-
-  return {
-    isConnected: state.accounts.length > 0,
-    address: state.accounts[0]?.address,
-    chainId: state.chain.id,
-    formattedKeys: state.accounts[0] ? formatKeys(state.accounts[0]) : [],
-  }
-}
-
 export function State() {
-  const { isConnected, address, chainId, formattedKeys } = usePortoState()
+  const porto = usePorto()
+  const state = useSyncExternalStore(
+    porto._internal.store.subscribe,
+    () => porto._internal.store.getState(),
+    () => porto._internal.store.getState(),
+  )
 
   return (
     <View style={styles.section}>
       <Text style={styles.sectionHeader}>State</Text>
-      {!isConnected ? (
+      {state.accounts.length === 0 ? (
         <Text>Disconnected</Text>
       ) : (
         <View>
-          <Text>Address: {address}</Text>
-          <Text>Chain ID: {chainId}</Text>
+          <Text>Address: {state.accounts[0].address}</Text>
+          <Text>Chain ID: {state.chain.id}</Text>
           <Text>Keys:</Text>
           <Text style={styles.codeBlock}>
-            {Json.stringify(formattedKeys, null, 2)}
+            {Json.stringify(state.accounts[0].keys, null, 2)}
           </Text>
         </View>
       )}

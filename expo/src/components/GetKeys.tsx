@@ -3,72 +3,26 @@ import { Platform, StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
 
-type CallScope = {
-  signature?: string
-  to?: `0x${string}`
-}
-
-interface Session {
-  callScopes?: readonly CallScope[]
-  expiry: number
-  publicKey: `0x${string}`
-  role: 'admin' | 'session'
-  type: 'p256' | 'secp256k1' | 'webauthn-p256'
-}
-
-function useKeyFetcher() {
-  const porto = usePorto()
-  const [sessions, setSessions] = useState<Session[]>([])
-
-  const fetchKeys = async () => {
-    try {
-      console.info('[GetKeys] Fetching keys')
-      const result = await porto.provider.request({
-        method: 'experimental_keys',
-      })
-      console.info('[GetKeys] Keys fetched:', result)
-      setSessions([...result])
-    } catch (error) {
-      console.error('[GetKeys] Failed to fetch keys:', error)
-      throw error
-    }
-  }
-
-  return {
-    sessions,
-    fetchKeys,
-  }
-}
-
 export function GetKeys() {
-  const { sessions, fetchKeys } = useKeyFetcher()
+  const porto = usePorto()
+  const [result, setResult] = useState<unknown>(null)
 
   return (
     <View style={styles.section}>
       <Text style={styles.sectionHeader}>experimental_keys</Text>
-      <Button onPress={fetchKeys} text="Get Keys" />
-      {sessions.length > 0 && (
-        <View style={styles.codeBlock}>
-          {sessions.map((session, index) => (
-            <Text key={session.publicKey} style={styles.sessionText}>
-              {index + 1}. publicKey: {session.publicKey}
-              {'\n'}
-              role: {session.role}
-              {'\n'}
-              type: {session.type}
-              {'\n'}
-              expiry: {session.expiry}
-              {session.callScopes && session.callScopes.length > 0 && (
-                <>
-                  {'\n'}
-                  callScopes: {JSON.stringify(session.callScopes)}
-                </>
-              )}
-              {'\n'}
-            </Text>
-          ))}
-        </View>
-      )}
+      <Button
+        onPress={() =>
+          porto.provider
+            .request({ method: 'experimental_keys' })
+            .then(setResult)
+        }
+        text="Get Keys"
+      />
+      {result ? (
+        <Text style={styles.codeBlock}>
+          {JSON.stringify(result, null, 2)}
+        </Text>
+      ) : null}
     </View>
   )
 }
@@ -90,8 +44,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#e0e0e0',
     padding: 8,
     borderRadius: 4,
-  },
-  sessionText: {
-    marginBottom: 8,
   },
 })

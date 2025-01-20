@@ -8,11 +8,13 @@ import * as P256 from 'ox/P256'
 import * as PublicKey from 'ox/PublicKey'
 import * as Secp256k1 from 'ox/Secp256k1'
 import * as Signature from 'ox/Signature'
-// platform specific modules.
 import type * as WebAuthnP256 from 'ox/WebAuthnP256'
-import * as P256Module from './p256'
 import type { OneOf, Undefined } from './types.js'
+
+// platform specific modules.
 import * as WebAuthNModule from './webauthn'
+import * as P256Module from './p256'
+
 
 type PrivateKeyFn = () => Hex.Hex
 
@@ -51,7 +53,6 @@ export type Key = OneOf<
 export type P256Key = BaseKey<'p256', { privateKey: PrivateKeyFn }>
 export type Secp256k1Key = BaseKey<'secp256k1', { privateKey: PrivateKeyFn }>
 
-// A Native CryptoKey.
 export type NativeCryptoKey = BaseKey<
   'p256',
   {
@@ -644,8 +645,7 @@ export async function sign(
             key,
           }),
         )
-        // Web implementation with privateKey returns true for prehash, native returns false
-        return [signature, Boolean(key.privateKey)]
+        return [signature, true]
       }
       case 'secp256k1': {
         const { privateKey } = key

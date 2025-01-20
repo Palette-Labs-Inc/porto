@@ -1,6 +1,6 @@
-import { Base64, type Bytes, Errors, Hex, PublicKey, Signature } from 'ox'
+import { Base64, type Bytes, Errors, Hex, PublicKey, Signature } from "ox";
 
-import type { createKeyPair, getKeyPair, sign } from '../P256'
+import type { createKeyPair, getKeyPair, sign } from "../P256";
 
 // ============= Type Adapters =============
 
@@ -11,20 +11,20 @@ import type { createKeyPair, getKeyPair, sign } from '../P256'
 function convertNativeKeyPairToWebCrypto(
   privateKeyStorageKey: string,
   nativeKeyPair: {
-    privateKey: string
-    publicKey: string
+    privateKey: string;
+    publicKey: string;
   },
 ): createKeyPair.ReturnType {
   if (!nativeKeyPair.privateKey || !nativeKeyPair.publicKey) {
-    throw new InvalidKeyPairError()
+    throw new InvalidKeyPairError();
   }
 
   return {
-    privateKeyStorageKey: privateKeyStorageKey,
+    privateKeyStorageKey,
     publicKey: PublicKey.from(
       Base64.toBytes(nativeKeyPair.publicKey),
     ) as PublicKey.PublicKey,
-  }
+  };
 }
 
 /**
@@ -35,7 +35,7 @@ export function adaptCreateP256KeyPairReturnType(
   privateKeyStorageKey: string,
   nativeResponse: createKeyPair.NativeResponse,
 ): createKeyPair.ReturnType {
-  return convertNativeKeyPairToWebCrypto(privateKeyStorageKey, nativeResponse)
+  return convertNativeKeyPairToWebCrypto(privateKeyStorageKey, nativeResponse);
 }
 
 /**
@@ -46,8 +46,8 @@ export function adaptGetP256KeyPairReturnType(
   privateKeyStorageKey: string,
   nativeResponse: getKeyPair.NativeResponse,
 ): getKeyPair.ReturnType {
-  if (!nativeResponse) return null
-  return convertNativeKeyPairToWebCrypto(privateKeyStorageKey, nativeResponse)
+  if (!nativeResponse) return null;
+  return convertNativeKeyPairToWebCrypto(privateKeyStorageKey, nativeResponse);
 }
 
 /**
@@ -58,14 +58,14 @@ export function adaptSignWithP256KeyPairReturnType(
   nativeResponse: sign.NativeResponse,
 ): sign.ReturnType {
   if (!nativeResponse?.signature) {
-    throw new InvalidSignatureError()
+    throw new InvalidSignatureError();
   }
 
-  const signatureBytes = Base64.toBytes(nativeResponse.signature)
-  const signatureHex = Hex.fromBytes(signatureBytes)
+  const signatureBytes = Base64.toBytes(nativeResponse.signature);
+  const signatureHex = Hex.fromBytes(signatureBytes);
 
-  const { r, s } = Signature.fromDerHex(signatureHex)
-  return { r, s }
+  const { r, s } = Signature.fromDerHex(signatureHex);
+  return { r, s };
 }
 
 // ============= Payload Conversion =============
@@ -76,9 +76,9 @@ export function adaptSignWithP256KeyPairReturnType(
  */
 export function convertPayloadToBase64(payload: Hex.Hex | Bytes.Bytes): string {
   if (payload instanceof Uint8Array) {
-    return Base64.fromBytes(payload)
+    return Base64.fromBytes(payload);
   }
-  return Base64.fromHex(payload)
+  return Base64.fromHex(payload);
 }
 
 // ============= Key Management =============
@@ -86,18 +86,18 @@ export function convertPayloadToBase64(payload: Hex.Hex | Bytes.Bytes): string {
 /**
  * Storage key prefix for P256 keys
  */
-export const P256_KEY_PREFIX = 'p256'
+export const P256_KEY_PREFIX = "p256";
 
 /**
  * Generates a shorter unique storage key for a P256 key pair.
  * Combines timestamp base36 with random values for uniqueness.
  */
 export function generateStorageKey(prefix: string = P256_KEY_PREFIX): string {
-  ensureValidKey(prefix)
-  const timestamp = Date.now().toString(36)
-  const random = Math.random().toString(36).slice(2, 6)
+  ensureValidKey(prefix);
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).slice(2, 6);
 
-  return `${prefix}-${timestamp}${random}`
+  return `${prefix}-${timestamp}${random}`;
 }
 
 /**
@@ -106,7 +106,7 @@ export function generateStorageKey(prefix: string = P256_KEY_PREFIX): string {
  */
 export function ensureValidKey(key: string) {
   if (!isValidKey(key)) {
-    throw new InvalidKeyFormatError(key)
+    throw new InvalidKeyFormatError(key);
   }
 }
 
@@ -115,7 +115,7 @@ export function ensureValidKey(key: string) {
  * @internal
  */
 function isValidKey(key: string) {
-  return typeof key === 'string' && /^[\w.-]+$/.test(key)
+  return typeof key === "string" && /^[\w.-]+$/.test(key);
 }
 
 // ============= Error Types =============
@@ -124,9 +124,9 @@ function isValidKey(key: string) {
  * Thrown when a key pair is invalid or missing required components.
  */
 export class InvalidKeyPairError extends Errors.BaseError {
-  override name = 'InvalidKeyPairError'
+  override name = "InvalidKeyPairError";
   constructor() {
-    super('Invalid key pair: missing private key or public key')
+    super("Invalid key pair: missing private key or public key");
   }
 }
 
@@ -134,9 +134,9 @@ export class InvalidKeyPairError extends Errors.BaseError {
  * Thrown when a signature is invalid or missing.
  */
 export class InvalidSignatureError extends Errors.BaseError {
-  override name = 'InvalidSignatureError'
+  override name = "InvalidSignatureError";
   constructor() {
-    super('Invalid signature: signature data is missing or malformed')
+    super("Invalid signature: signature data is missing or malformed");
   }
 }
 
@@ -144,10 +144,10 @@ export class InvalidSignatureError extends Errors.BaseError {
  * Thrown when a key format is invalid.
  */
 export class InvalidKeyFormatError extends Errors.BaseError {
-  override name = 'InvalidKeyFormatError'
+  override name = "InvalidKeyFormatError";
   constructor(key: string) {
     super(
       `Invalid key format: "${key}". Keys must not be empty and contain only alphanumeric characters, ".", "-", and "_".`,
-    )
+    );
   }
 }

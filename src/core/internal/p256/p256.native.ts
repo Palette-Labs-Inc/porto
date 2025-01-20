@@ -1,35 +1,27 @@
 import * as ExpoP256 from '@porto/expo-p256'
-import type { IP256 } from './types.js'
+import type { IP256, P256KeyPair } from './types.js'
 
 export const P256: IP256 = {
-  async createKeyPair() {
-    const result = await ExpoP256.createKeyPair({
+  async createKeyPair(options?: ExpoP256.createKeyPair.Options): Promise<P256KeyPair> {
+    return ExpoP256.createKeyPair({
       requireAuthentication: false, // otherwise key requires user authentication, not really a delegated signer.
       keychainService: ExpoP256.KEY_PREFIX,
+      ...options,
     })
-
-    return {
-      publicKey: result.publicKey,
-      privateKey: result.privateKey,
-    }
   },
 
   async sign(options) {
-    if (options.keyData.platform !== 'native') {
+    if (!options.privateKeyStorageKey) {
       throw new Error(
         'Invalid key type for native platform, the package is not properly resolving native vs. web file paths.',
       )
     }
 
-    console.info('[P256-PORTO.sign]:options', options)
-
-    const signOptions = {
-      privateKeyStorageKey: options.privateKey,
-      payload: options.payload,
+    return ExpoP256.sign({
       requireAuthentication: false,
+      payload: options.payload,
+      privateKeyStorageKey: options.privateKeyStorageKey,
       keychainService: ExpoP256.KEY_PREFIX,
-    }
-
-    return ExpoP256.sign(signOptions)
+    })
   },
 }

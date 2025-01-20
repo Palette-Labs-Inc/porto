@@ -8,9 +8,13 @@ import * as P256 from 'ox/P256'
 import * as PublicKey from 'ox/PublicKey'
 import * as Secp256k1 from 'ox/Secp256k1'
 import * as Signature from 'ox/Signature'
-import * as WebAuthnP256 from 'ox/WebAuthnP256'
 import * as WebCryptoP256 from 'ox/WebCryptoP256'
 import type { OneOf, Undefined } from './types.js'
+import type * as WebAuthnP256 from 'ox/WebAuthnP256'
+// platform specific modules.
+import { P256 as P256Module} from './p256'
+import { WebAuthN as WebAuthNModule} from './webauthn'
+import type * as ExpoP256 from '@porto/expo-p256'
 
 type PrivateKeyFn = () => Hex.Hex
 
@@ -43,17 +47,25 @@ export type CallScope = OneOf<
     }
 >
 export type CallScopes = readonly [CallScope, ...CallScope[]]
-
-export type Key = OneOf<P256Key | Secp256k1Key | WebCryptoKey | WebAuthnKey>
-
+export type Key = OneOf<P256Key | Secp256k1Key | WebCryptoKey | NativeCryptoKey | WebAuthnKey>
 export type P256Key = BaseKey<'p256', { privateKey: PrivateKeyFn }>
 export type Secp256k1Key = BaseKey<'secp256k1', { privateKey: PrivateKeyFn }>
+
+// A Native CryptoKey. 
+export type NativeCryptoKey = BaseKey<
+  'p256',
+  {
+    privateKeyStorageKey: string
+  }
+>
+
 export type WebCryptoKey = BaseKey<
   'p256',
   {
     privateKey: CryptoKey
   }
 >
+
 export type WebAuthnKey = BaseKey<
   'webauthn-p256',
   {
@@ -202,7 +214,7 @@ export async function createWebAuthnP256<const role extends Key['role']>(
 ) {
   const { createFn, label, rpId, userId } = parameters
 
-  const credential = await WebAuthnP256.createCredential({
+  const credential = await WebAuthNModule.createCredential({
     authenticatorSelection: {
       requireResidentKey: false,
       residentKey: 'preferred',
@@ -280,8 +292,16 @@ export declare namespace createWebAuthnP256 {
 export async function createWebCryptoP256<const role extends Key['role']>(
   parameters: createWebCryptoP256.Parameters<role>,
 ) {
-  const keyPair = await WebCryptoP256.createKeyPair()
-  return fromWebCryptoP256({
+  const keyPair = await P256Module.createKeyPair()
+
+  if (keyPair.privateKey) {
+    return fromWebCryptoP256({
+      ...parameters,
+      keyPair,
+    })
+  }
+
+  return fromNativeCryptoP256({
     ...parameters,
     keyPair,
   })
@@ -595,6 +615,7 @@ export function fromWebCryptoP256<const role extends Key['role']>(
   })
 }
 
+// TODO-EXPO: need to add native support (no CryptoKey available) for native keyPair (which has a privateKeyStorageKey instead of a privateKey)
 export declare namespace fromWebCryptoP256 {
   type Parameters<role extends Key['role']> = {
     /** Call scopes. */
@@ -602,11 +623,70 @@ export declare namespace fromWebCryptoP256 {
     /** Expiry. */
     expiry?: Key['expiry'] | undefined
     /** P256 private key. */
-    keyPair: Awaited<ReturnType<typeof WebCryptoP256.createKeyPair>>
+    keyPair: Awaited<ReturnType<typeof WebCryptoP256.createKeyPair>> 
     /** Role. */
     role: role | Key['role']
   }
 }
+
+
+/**
+ * Instantiates a native P256 key from its parameters.
+ *
+ * @example
+ * ```ts
+ * import * as Key from './key.js'
+ * 
+ * const keyPair = await P256.createKeyPair()
+ * 
+ * // Admin Key
+ * const key = Key.fromNativeCryptoP256({
+ *   keyPair,
+ *   role: 'admin',
+ * })
+ * 
+ * // Session Key
+ * const key = Key.fromNativeCryptoP256({
+ *   expiry: 1714857600,
+ *   keyPair,
+ *   role: 'session',
+ * })
+ * ```
+ *
+ * @param parameters - Key parameters.
+ * @returns P256 key.
+ */
+export function fromNativeCryptoP256<const role extends Key['role']>(
+  parameters: fromNativeCryptoP256.Parameters<role>,
+) {
+  const { keyPair } = parameters
+  const publicKey = PublicKey.toHex(keyPair.publicKey, {
+    includePrefix: false,
+  })
+  return from({
+    callScopes: parameters.callScopes,
+    expiry: parameters.expiry ?? 0,
+    publicKey,
+    role: parameters.role as Key['role'],
+    canSign: true,
+    privateKeyStorageKey: keyPair.privateKeyStorageKey,
+    type: 'p256',
+  })
+}
+
+export declare namespace fromNativeCryptoP256 {
+  type Parameters<role extends Key['role'] = Key['role']> = {
+    /** Call scopes. */
+    callScopes?: CallScopes | undefined
+    /** Expiry. */
+    expiry?: Key['expiry'] | undefined
+    /** P256 key pair. */
+    keyPair: ExpoP256.createKeyPair.ReturnType
+    /** Role. */
+    role: role | Key['role']
+  }
+}
+
 
 /**
  * Hashes a key.
@@ -702,7 +782,7 @@ export async function sign(
         signature: { r, s },
         raw,
         metadata,
-      } = await WebAuthnP256.sign({
+      } = await WebAuthNModule.sign({
         challenge: payload,
         credentialId: credential.id,
         rpId,

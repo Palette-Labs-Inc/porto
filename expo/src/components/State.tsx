@@ -1,6 +1,6 @@
 import { Json } from 'ox'
-import { Platform, StyleSheet, Text, View } from 'react-native'
 import { useSyncExternalStore } from 'react'
+import { Platform, StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 
 export function State() {

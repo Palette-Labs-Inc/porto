@@ -11,10 +11,9 @@ import * as Signature from 'ox/Signature'
 import type * as WebAuthnP256 from 'ox/WebAuthnP256'
 import type { OneOf, Undefined } from './types.js'
 
+import * as P256Module from './p256'
 // platform specific modules.
 import * as WebAuthNModule from './webauthn'
-import * as P256Module from './p256'
-
 
 type PrivateKeyFn = () => Hex.Hex
 

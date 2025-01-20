@@ -19,9 +19,7 @@ export function GetKeys() {
         text="Get Keys"
       />
       {result ? (
-        <Text style={styles.codeBlock}>
-          {JSON.stringify(result, null, 2)}
-        </Text>
+        <Text style={styles.codeBlock}>{JSON.stringify(result, null, 2)}</Text>
       ) : null}
     </View>
   )

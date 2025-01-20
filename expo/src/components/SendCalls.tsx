@@ -6,13 +6,14 @@ import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
 
 type Call = {
-  to: string
-  data: string
+  to: Hex.Hex
+  data?: Hex.Hex
+  value?: Hex.Hex
 }
 
 function useSendCalls() {
   const porto = usePorto()
-  const [result, setResult] = useState<string | null>(null)
+  const [hash, setHash] = useState<Hex.Hex | null>(null)
   const [selectedAction, setSelectedAction] = useState<string>('mint')
 
   const callOptions = [
@@ -22,7 +23,7 @@ function useSendCalls() {
   ] as const
 
   const createMintCall = (account: Hex.Hex): Call => ({
-    to: ExperimentERC20.address,
+    to: ExperimentERC20.address as Hex.Hex,
     data: AbiFunction.encodeData(
       AbiFunction.fromAbi(ExperimentERC20.abi, 'mint'),
       [account, Value.fromEther('100')],
@@ -30,7 +31,7 @@ function useSendCalls() {
   })
 
   const createApproveCall = (account: Hex.Hex): Call => ({
-    to: ExperimentERC20.address,
+    to: ExperimentERC20.address as Hex.Hex,
     data: AbiFunction.encodeData(
       AbiFunction.fromAbi(ExperimentERC20.abi, 'approve'),
       [account, Value.fromEther('50')],
@@ -38,7 +39,7 @@ function useSendCalls() {
   })
 
   const createTransferFromCall = (account: Hex.Hex): Call => ({
-    to: ExperimentERC20.address,
+    to: ExperimentERC20.address as Hex.Hex,
     data: AbiFunction.encodeData(
       AbiFunction.fromAbi(ExperimentERC20.abi, 'transferFrom'),
       [
@@ -51,12 +52,12 @@ function useSendCalls() {
 
   const createNoopCalls = (): Call[] => [
     {
-      data: '0xdeadbeef',
-      to: '0x0000000000000000000000000000000000000000',
+      to: '0x0000000000000000000000000000000000000000' as Hex.Hex,
+      value: '0x0' as Hex.Hex,
     },
     {
-      data: '0xcafebabe',
-      to: '0x0000000000000000000000000000000000000000',
+      to: '0x0000000000000000000000000000000000000000' as Hex.Hex,
+      value: '0x0' as Hex.Hex,
     },
   ]
 
@@ -74,26 +75,32 @@ function useSendCalls() {
   }
 
   const handleSendCalls = async () => {
-    const [account] = await porto.provider.request({
-      method: 'eth_accounts',
-    })
+    try {
+      const [account] = await porto.provider.request({
+        method: 'eth_accounts',
+      })
 
-    const calls = getCallsForAction(account as Hex.Hex, selectedAction)
+      const calls = getCallsForAction(account as Hex.Hex, selectedAction)
 
-    const result = await porto.provider.request({
-      method: 'eth_sendCalls',
-      params: [
-        {
-          from: account,
-          calls,
-        },
-      ],
-    })
-    setResult(result)
+      const hash = await porto.provider.request({
+        method: 'wallet_sendCalls',
+        params: [
+          {
+            calls,
+            from: account,
+            version: '1',
+          },
+        ],
+      }) as Hex.Hex
+
+      setHash(hash)
+    } catch (error) {
+      console.error('[SendCalls] Failed:', error)
+    }
   }
 
   return {
-    result,
+    hash,
     selectedAction,
     setSelectedAction,
     callOptions,
@@ -103,7 +110,7 @@ function useSendCalls() {
 
 export function SendCalls() {
   const {
-    result,
+    hash,
     selectedAction,
     setSelectedAction,
     callOptions,
@@ -112,7 +119,7 @@ export function SendCalls() {
 
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionHeader}>eth_sendCalls</Text>
+      <Text style={styles.sectionHeader}>wallet_sendCalls</Text>
       <View style={styles.optionsContainer}>
         {callOptions.map((option) => (
           <Pressable
@@ -129,8 +136,15 @@ export function SendCalls() {
           </Pressable>
         ))}
       </View>
-      <Button onPress={handleSendCalls} text="Send Calls" />
-      {result && <Text style={styles.codeBlock}>{result}</Text>}
+      <Button onPress={handleSendCalls} text="Send" />
+      {hash && (
+        <View>
+          <Text style={styles.codeBlock}>{hash}</Text>
+          <Text style={styles.link}>
+            View on Explorer: https://odyssey-explorer.ithaca.xyz/tx/{hash}
+          </Text>
+        </View>
+      )}
     </View>
   )
 }
@@ -179,5 +193,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#e0e0e0',
     padding: 8,
     borderRadius: 4,
+  },
+  link: {
+    color: '#2196F3',
+    marginTop: 8,
   },
 })

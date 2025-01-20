@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Platform, StyleSheet, Text, TextInput, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
+import * as Hex from 'ox/Hex'
 
 function useMessageSigner() {
   const porto = usePorto()
@@ -19,7 +20,7 @@ function useMessageSigner() {
     })
     const signature = await porto.provider.request({
       method: 'personal_sign',
-      params: [message, account],
+      params: [Hex.fromString(message), account],
     })
     setSignature(signature)
   }
@@ -44,8 +45,8 @@ function useMessageVerifier(message: string, signature: string | null) {
     })
     const result = await porto.provider.request({
       method: 'personal_ecRecover',
-      params: [message, signature],
-    })
+      params: [Hex.fromString(message), signature],
+    }) as `0x${string}`
     setIsValid(result.toLowerCase() === account.toLowerCase())
   }
 

@@ -17,7 +17,6 @@ catalog:
   wagmi: "^2.12.30"
   # expo deps
   expo: "^52.0.0"
-  react-native: "0.76.5"
   expo-module-scripts: "^4.0.3"
   expo-modules-core: "^2.1.3"
   #add ox to catalog, used in expo-webauthn and expo-p256

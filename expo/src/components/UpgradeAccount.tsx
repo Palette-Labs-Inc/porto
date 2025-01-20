@@ -1,4 +1,4 @@
-import type { Hex } from 'ox'
+import type * as Hex from 'ox/Hex'
 import { useState } from 'react'
 import {
   Platform,
@@ -15,16 +15,19 @@ import {
 } from 'viem/accounts'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
+import { ExperimentERC20 } from '../contracts'
 
 type AccountData = {
   address: string
   privateKey: string
 }
 
-type ImportContext = {
-  context: unknown
-  signPayloads: Hex.Hex[]
-}
+const callScopes = [
+  {
+    signature: 'mint(address,uint256)',
+    to: ExperimentERC20.address,
+  },
+] as const
 
 // Account Generation Hook
 function useAccountGenerator() {
@@ -48,79 +51,67 @@ function useAccountGenerator() {
   }
 }
 
-// Session Management Hook
-function useSessionManager() {
-  const [grantSession, setGrantSession] = useState<boolean>(true)
+// Key Authorization Hook
+function useKeyAuthorization() {
+  const [authorizeKey, setAuthorizeKey] = useState<boolean>(true)
 
   return {
-    grantSession,
-    setGrantSession,
+    authorizeKey,
+    setAuthorizeKey,
   }
 }
 
-// Account Import Hook
-function useAccountImporter(privateKey: string, grantSession: boolean) {
+// Account Upgrade Hook
+function useAccountUpgrade(privateKey: string, authorizeKey: boolean) {
   const porto = usePorto()
   const [result, setResult] = useState<unknown | null>(null)
 
-  const prepareImport = async (
-    account: ReturnType<typeof privateKeyToAccount>,
-  ) => {
-    const { context, signPayloads } = (await porto.provider.request({
-      method: 'experimental_prepareCreateAccount',
-      params: [
-        {
-          address: account.address,
-          capabilities: { authorizeKey: grantSession },
-        },
-      ],
-    })) as ImportContext
-
-    return { context, signPayloads }
-  }
-
-  const signPayloads = async (
-    account: ReturnType<typeof privateKeyToAccount>,
-    payloads: `0x${string}`[],
-  ) => {
-    return Promise.all(payloads.map((hash) => account.sign({ hash })))
-  }
-
-  const finalizeImport = async (context: unknown, signatures: string[]) => {
-    const address = await porto.provider.request({
-      method: 'experimental_createAccount',
-      params: [{ context, signatures }],
-    })
-    setResult(address)
-  }
-
-  const handleImport = async () => {
+  const handleUpgrade = async () => {
     try {
       const account = privateKeyToAccount(privateKey as Hex.Hex)
-      const { context, signPayloads: payloads } = await prepareImport(account)
-      const signatures = await signPayloads(account, payloads)
-      await finalizeImport(context, signatures)
+
+      const { context, signPayloads } = await porto.provider.request({
+        method: 'experimental_prepareCreateAccount',
+        params: [
+          {
+            address: account.address,
+            capabilities: {
+              authorizeKey: authorizeKey ? { callScopes } : undefined,
+            },
+          },
+        ],
+      })
+
+      const signatures = await Promise.all(
+        signPayloads.map((hash: Hex.Hex) => account.sign({ hash }))
+      )
+
+      const address = await porto.provider.request({
+        method: 'experimental_createAccount',
+        params: [{ context, signatures }],
+      })
+      setResult(address)
     } catch (error) {
-      console.error('Failed to import account:', error)
+      console.error('Failed to upgrade account:', error)
     }
   }
 
   return {
     result,
-    handleImport,
+    handleUpgrade,
   }
 }
 
-export function ImportAccount() {
+export function UpgradeAccount() {
   const { accountData, privateKey, setPrivateKey, generateAccount } =
     useAccountGenerator()
-  const { grantSession, setGrantSession } = useSessionManager()
-  const { result, handleImport } = useAccountImporter(privateKey, grantSession)
+  const { authorizeKey, setAuthorizeKey } = useKeyAuthorization()
+  const { result, handleUpgrade } = useAccountUpgrade(privateKey, authorizeKey)
 
   return (
     <View style={styles.section}>
       <Text style={styles.sectionHeader}>experimental_createAccount</Text>
-      <Button onPress={generateAccount} text="Create Account" />
+      <Button onPress={generateAccount} text="Create EOA" />
       {accountData && (
         <Text style={styles.codeBlock}>
           {JSON.stringify(accountData, null, 2)}
@@ -133,15 +124,15 @@ export function ImportAccount() {
         placeholder="Private Key"
       />
       <View style={styles.row}>
-        <Text>Grant Session</Text>
-        <Switch value={grantSession} onValueChange={setGrantSession} />
+        <Text>Authorize Key</Text>
+        <Switch value={authorizeKey} onValueChange={setAuthorizeKey} />
       </View>
-      <Button onPress={handleImport} text="Import Account" />
+      <Button onPress={handleUpgrade} text="Upgrade EOA to Porto Account" />
       {result ? (
-        <Text style={styles.codeBlock}>{JSON.stringify(result, null, 2)}</Text>
-      ) : (
-        <Text>No result</Text>
-      )}
+        <Text style={styles.codeBlock}>
+          Upgraded account. {JSON.stringify(result, null, 2)}
+        </Text>
+      ) : null}
     </View>
   )
 }

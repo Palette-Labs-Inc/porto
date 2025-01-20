@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Platform, StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
+import type { RpcSchema } from 'ox'
+import type { Schema } from 'porto/core/internal/rpcSchema'
 
 type EventName =
   | 'accountsChanged'
@@ -9,12 +11,18 @@ type EventName =
   | 'disconnect'
   | 'message'
 
+type AccountsChangedEvent = readonly `0x${string}`[]
+type ChainChangedEvent = string
+type ConnectEvent = { chainId: string }
+type DisconnectEvent = { code: number; message: string }
+type MessageEvent = { type: string; data: unknown }
+
 interface EventResponses {
-  accountsChanged?: string[]
-  chainChanged?: number
-  connect?: { chainId: number }
-  disconnect?: { code: number; message: string }
-  message?: unknown
+  accountsChanged?: AccountsChangedEvent
+  chainChanged?: ChainChangedEvent
+  connect?: ConnectEvent
+  disconnect?: DisconnectEvent
+  message?: MessageEvent
 }
 
 function useEvents() {
@@ -24,34 +32,46 @@ function useEvents() {
   useEffect(() => {
     console.info('[Events] Setting up event listeners')
 
-    const createEventHandler =
-      (eventName: EventName) => (response: unknown) => {
-        console.info(`[Events] Received ${eventName} event:`, response)
-        setResponses((prev) => ({
-          ...prev,
-          [eventName]: response,
-        }))
-      }
+    const handleAccountsChanged = (accounts: AccountsChangedEvent) => {
+      console.info('[Events] Received accountsChanged event:', accounts)
+      setResponses((prev) => ({ ...prev, accountsChanged: accounts }))
+    }
 
-    const eventHandlers = {
-      accountsChanged: createEventHandler('accountsChanged'),
-      chainChanged: createEventHandler('chainChanged'),
-      connect: createEventHandler('connect'),
-      disconnect: createEventHandler('disconnect'),
-      message: createEventHandler('message'),
+    const handleChainChanged = (chainId: ChainChangedEvent) => {
+      console.info('[Events] Received chainChanged event:', chainId)
+      setResponses((prev) => ({ ...prev, chainChanged: chainId }))
+    }
+
+    const handleConnect = (connectInfo: ConnectEvent) => {
+      console.info('[Events] Received connect event:', connectInfo)
+      setResponses((prev) => ({ ...prev, connect: connectInfo }))
+    }
+
+    const handleDisconnect = (error: DisconnectEvent) => {
+      console.info('[Events] Received disconnect event:', error)
+      setResponses((prev) => ({ ...prev, disconnect: error }))
+    }
+
+    const handleMessage = (message: MessageEvent) => {
+      console.info('[Events] Received message event:', message)
+      setResponses((prev) => ({ ...prev, message: message }))
     }
 
     // Set up event listeners
-    for (const [event, handler] of Object.entries(eventHandlers)) {
-      porto.provider.on(event as EventName, handler)
-    }
+    porto.provider.on('accountsChanged', handleAccountsChanged)
+    porto.provider.on('chainChanged', handleChainChanged)
+    porto.provider.on('connect', handleConnect)
+    porto.provider.on('disconnect', handleDisconnect)
+    porto.provider.on('message', handleMessage)
 
     // Cleanup function
     return () => {
       console.info('[Events] Cleaning up event listeners')
-      for (const [event, handler] of Object.entries(eventHandlers)) {
-        porto.provider.removeListener(event as EventName, handler)
-      }
+      porto.provider.removeListener('accountsChanged', handleAccountsChanged)
+      porto.provider.removeListener('chainChanged', handleChainChanged)
+      porto.provider.removeListener('connect', handleConnect)
+      porto.provider.removeListener('disconnect', handleDisconnect)
+      porto.provider.removeListener('message', handleMessage)
     }
   }, [porto])
 

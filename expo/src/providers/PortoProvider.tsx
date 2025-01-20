@@ -1,4 +1,4 @@
-import { Porto } from 'porto'
+import { Implementation, Porto } from 'porto'
 import {
   type ReactNode,
   createContext,
@@ -7,19 +7,12 @@ import {
   useRef,
 } from 'react'
 
-type PortoContextType = {
-  provider: any
-  _internal: any
-  destroy?: () => void
-}
-
-const PortoContext = createContext<PortoContextType | null>(null)
+type PortoInstance = ReturnType<typeof Porto.create>
+const PortoContext = createContext<PortoInstance | null>(null)
 
 export function PortoProvider({ children }: { children: ReactNode }) {
-  const portoRef = useRef(
-    Porto.create({
-      keystoreHost: 'mperhats.github.io', // TODO, add to env and use here and in app.config.ts
-    }),
+  const portoRef = useRef<PortoInstance>(
+    Porto.create({ implementation: Implementation.local({keystoreHost: 'mperhats.github.io'}) }),
   )
 
   useEffect(() => {
@@ -43,3 +36,6 @@ export function usePorto() {
   }
   return context
 }
+
+// Export the Porto type for convenience
+export type { Porto }

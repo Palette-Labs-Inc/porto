@@ -3,10 +3,17 @@ import { Platform, StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
 
+type CallScope = {
+  signature?: string
+  to?: `0x${string}`
+}
+
 interface Session {
-  id: string
-  address: string
+  callScopes?: readonly CallScope[]
   expiry: number
+  publicKey: `0x${string}`
+  role: 'admin' | 'session'
+  type: 'p256' | 'secp256k1' | 'webauthn-p256'
 }
 
 function useKeyFetcher() {
@@ -20,7 +27,7 @@ function useKeyFetcher() {
         method: 'experimental_keys',
       })
       console.info('[GetKeys] Keys fetched:', result)
-      setSessions(result)
+      setSessions([...result])
     } catch (error) {
       console.error('[GetKeys] Failed to fetch keys:', error)
       throw error
@@ -43,12 +50,20 @@ export function GetKeys() {
       {sessions.length > 0 && (
         <View style={styles.codeBlock}>
           {sessions.map((session, index) => (
-            <Text key={session.id} style={styles.sessionText}>
-              {index + 1}. id: {session.id}
+            <Text key={session.publicKey} style={styles.sessionText}>
+              {index + 1}. publicKey: {session.publicKey}
               {'\n'}
-              address: {session.address}
+              role: {session.role}
+              {'\n'}
+              type: {session.type}
               {'\n'}
               expiry: {session.expiry}
+              {session.callScopes && session.callScopes.length > 0 && (
+                <>
+                  {'\n'}
+                  callScopes: {JSON.stringify(session.callScopes)}
+                </>
+              )}
               {'\n'}
             </Text>
           ))}

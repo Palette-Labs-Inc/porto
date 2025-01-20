@@ -3,13 +3,21 @@ import { useState } from 'react'
 import { Platform, StyleSheet, Text, TextInput, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
+import { ExperimentERC20 } from '../contracts'
 
-function useSessionGrant() {
+const callScopes = [
+  {
+    signature: 'mint(address,uint256)',
+    to: ExperimentERC20.address,
+  },
+] as const
+
+function useAuthorizeKey() {
   const porto = usePorto()
-  const [sessionId, setSessionId] = useState<Hex.Hex | null>(null)
+  const [result, setResult] = useState<any | null>(null)
   const [expiry, setExpiry] = useState<string>('')
 
-  const grantSession = async () => {
+  const handleAuthorizeKey = async () => {
     try {
       console.info('[AuthorizeKey] Fetching account')
       const [account] = await porto.provider.request({
@@ -17,19 +25,20 @@ function useSessionGrant() {
       })
 
       console.info('[AuthorizeKey] Authorizing key')
-      const result = await porto.provider.request({
+      const response = await porto.provider.request({
         method: 'experimental_authorizeKey',
         params: [
           {
             address: account,
             key: {
+              callScopes,
               expiry: Math.floor(Date.now() / 1000) + Number(expiry),
             },
           },
         ],
       })
-      console.info('[AuthorizeKey] Key authorized:', result)
-      setSessionId(result)
+      console.info('[AuthorizeKey] Key authorized:', response)
+      setResult(response)
     } catch (error) {
       console.error('[AuthorizeKey] Failed to authorize key:', error)
       throw error
@@ -37,15 +46,15 @@ function useSessionGrant() {
   }
 
   return {
-    sessionId,
+    result,
     expiry,
     setExpiry,
-    grantSession,
+    handleAuthorizeKey,
   }
 }
 
-export function GrantSession() {
-  const { sessionId, expiry, setExpiry, grantSession } = useSessionGrant()
+export function AuthorizeKey() {
+  const { result, expiry, setExpiry, handleAuthorizeKey } = useAuthorizeKey()
 
   return (
     <View style={styles.section}>
@@ -57,8 +66,12 @@ export function GrantSession() {
         onChangeText={setExpiry}
         keyboardType="numeric"
       />
-      <Button onPress={grantSession} text="Authorize Key" />
-      {sessionId && <Text style={styles.codeBlock}>key: {sessionId}</Text>}
+      <Button onPress={handleAuthorizeKey} text="Authorize Key" />
+      {result && (
+        <Text style={styles.codeBlock}>
+          {JSON.stringify(result, null, 2)}
+        </Text>
+      )}
     </View>
   )
 }

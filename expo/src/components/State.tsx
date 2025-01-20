@@ -16,7 +16,7 @@ type Account = {
 }
 
 type State = {
-  accounts: Account[]
+  accounts: readonly Account[]
   chain: {
     id: number
   }
@@ -27,15 +27,19 @@ function usePortoState() {
 
   const state = useSyncExternalStore<State>(
     (callback) => {
-      const unsubscribe = porto._internal.store.subscribe(() => {
-        callback()
-      })
+      const unsubscribe = porto.provider.on('stateChanged', callback)
       return () => {
         unsubscribe()
       }
     },
-    () => porto._internal.store.getState(),
-    () => porto._internal.store.getState(),
+    () => ({
+      accounts: porto.provider.accounts,
+      chain: { id: porto.provider.chainId },
+    }),
+    () => ({
+      accounts: porto.provider.accounts,
+      chain: { id: porto.provider.chainId },
+    })
   )
 
   const formatKeys = (account: Account) => {

@@ -1,7 +1,9 @@
 import * as WebAuthnP256 from 'ox/WebAuthnP256'
-import type { IWebAuthn } from './types'
 
-export const WebAuthN: IWebAuthn = {
-  createCredential: WebAuthnP256.createCredential,
-  sign: WebAuthnP256.sign,
+export const createCredential = async (options: WebAuthnP256.createCredential.Options) => {
+  return WebAuthnP256.createCredential(options)
+}
+
+export const sign = async (options: WebAuthnP256.sign.Options) => {
+  return WebAuthnP256.sign(options)
 }

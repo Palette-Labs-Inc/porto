@@ -33,13 +33,9 @@
     "ox": "catalog:"
   },
   "devDependencies": {
-    "expo-module-scripts": "catalog:",
-    "expo-modules-core": "catalog:",
-    "expo": "catalog:"
+    "expo-module-scripts": "catalog:"
   },
   "peerDependencies": {
-    "expo": "catalog:",
-    "react-native": "catalog:",
-    "expo-modules-core": "catalog:"
+    "expo": "catalog:"
   }
 }

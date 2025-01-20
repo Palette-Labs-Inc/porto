@@ -4,8 +4,8 @@ import { Disconnect } from '@/src/components/Disconnect'
 import { Events } from '@/src/components/Events'
 import { GetCapabilities } from '@/src/components/GetCapabilities'
 import { GetKeys } from '@/src/components/GetKeys'
-import { GrantSession } from '@/src/components/GrantSession'
-import { ImportAccount } from '@/src/components/ImportAccount'
+import { AuthorizeKey } from '@/src/components/AuthorizeKey'
+import { UpgradeAccount } from '@/src/components/UpgradeAccount'
 import { Login } from '@/src/components/Login'
 import { Register } from '@/src/components/Register'
 import { SendCalls } from '@/src/components/SendCalls'
@@ -27,12 +27,12 @@ export default function PlaygroundScreen() {
         <Events />
         <Connect />
         <Register />
-        <ImportAccount />
+        <UpgradeAccount />
         <Login />
         <Disconnect />
         <Accounts />
         <GetCapabilities />
-        <GrantSession />
+        <AuthorizeKey />
         <GetKeys />
         <SendCalls />
         <SendTransaction />

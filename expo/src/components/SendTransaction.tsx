@@ -7,13 +7,14 @@ import { Button } from './Button'
 
 type Transaction = {
   from: Hex.Hex
-  to: string
-  data: string
+  to: Hex.Hex
+  data?: Hex.Hex
+  value?: Hex.Hex
 }
 
 function useSendTransaction() {
   const porto = usePorto()
-  const [result, setResult] = useState<string | null>(null)
+  const [hash, setHash] = useState<Hex.Hex | null>(null)
   const [selectedAction, setSelectedAction] = useState<string>('mint')
 
   const transactionOptions = [
@@ -23,7 +24,7 @@ function useSendTransaction() {
 
   const createMintTransaction = (account: Hex.Hex): Transaction => ({
     from: account,
-    to: ExperimentERC20.address,
+    to: ExperimentERC20.address as Hex.Hex,
     data: AbiFunction.encodeData(
       AbiFunction.fromAbi(ExperimentERC20.abi, 'mint'),
       [account, Value.fromEther('100')],
@@ -32,8 +33,8 @@ function useSendTransaction() {
 
   const createNoopTransaction = (account: Hex.Hex): Transaction => ({
     from: account,
-    to: '0x0000000000000000000000000000000000000000',
-    data: '0xdeadbeef',
+    to: '0x0000000000000000000000000000000000000000' as Hex.Hex,
+    value: '0x0' as Hex.Hex,
   })
 
   const getTransactionForAction = (
@@ -51,24 +52,29 @@ function useSendTransaction() {
   }
 
   const handleSendTransaction = async () => {
-    const [account] = await porto.provider.request({
-      method: 'eth_accounts',
-    })
+    try {
+      const [account] = await porto.provider.request({
+        method: 'eth_accounts',
+      })
 
-    const transaction = getTransactionForAction(
-      account as Hex.Hex,
-      selectedAction,
-    )
+      const transaction = getTransactionForAction(
+        account as Hex.Hex,
+        selectedAction,
+      )
 
-    const result = await porto.provider.request({
-      method: 'eth_sendTransaction',
-      params: [transaction],
-    })
-    setResult(result)
+      const hash = await porto.provider.request({
+        method: 'eth_sendTransaction',
+        params: [transaction],
+      }) as Hex.Hex
+
+      setHash(hash)
+    } catch (error) {
+      console.error('[SendTransaction] Failed:', error)
+    }
   }
 
   return {
-    result,
+    hash,
     selectedAction,
     setSelectedAction,
     transactionOptions,
@@ -78,7 +84,7 @@ function useSendTransaction() {
 
 export function SendTransaction() {
   const {
-    result,
+    hash,
     selectedAction,
     setSelectedAction,
     transactionOptions,
@@ -104,8 +110,15 @@ export function SendTransaction() {
           </Pressable>
         ))}
       </View>
-      <Button onPress={handleSendTransaction} text="Send Transaction" />
-      {result && <Text style={styles.codeBlock}>{result}</Text>}
+      <Button onPress={handleSendTransaction} text="Send" />
+      {hash && (
+        <View>
+          <Text style={styles.codeBlock}>{hash}</Text>
+          <Text style={styles.link}>
+            View on Explorer: https://odyssey-explorer.ithaca.xyz/tx/{hash}
+          </Text>
+        </View>
+      )}
     </View>
   )
 }
@@ -154,5 +167,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#e0e0e0',
     padding: 8,
     borderRadius: 4,
+  },
+  link: {
+    color: '#2196F3',
+    marginTop: 8,
   },
 })

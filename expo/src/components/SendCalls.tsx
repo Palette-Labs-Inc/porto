@@ -82,7 +82,7 @@ function useSendCalls() {
 
       const calls = getCallsForAction(account as Hex.Hex, selectedAction)
 
-      const hash = await porto.provider.request({
+      const hash = (await porto.provider.request({
         method: 'wallet_sendCalls',
         params: [
           {
@@ -91,7 +91,7 @@ function useSendCalls() {
             version: '1',
           },
         ],
-      }) as Hex.Hex
+      })) as Hex.Hex
 
       setHash(hash)
     } catch (error) {

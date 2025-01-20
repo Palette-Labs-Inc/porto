@@ -9,11 +9,10 @@ import * as PublicKey from 'ox/PublicKey'
 import * as Secp256k1 from 'ox/Secp256k1'
 import * as Signature from 'ox/Signature'
 // platform specific modules.
-import * as WebAuthnP256 from 'ox/WebAuthnP256'
+import type * as WebAuthnP256 from 'ox/WebAuthnP256'
+import * as P256Module from './p256'
 import type { OneOf, Undefined } from './types.js'
 import * as WebAuthNModule from './webauthn'
-import * as P256Module from './p256'
-
 
 type PrivateKeyFn = () => Hex.Hex
 
@@ -559,7 +558,6 @@ export declare namespace fromWebAuthnP256 {
   }
 }
 
-
 /**
  * Hashes a key.
  *
@@ -639,7 +637,7 @@ export async function sign(
             false,
           ]
         }
-  
+
         const signature = Signature.toHex(
           await P256Module.sign({
             payload,

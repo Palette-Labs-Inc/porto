@@ -13,9 +13,9 @@ import {
   privateKeyToAccount,
   privateKeyToAddress,
 } from 'viem/accounts'
+import { ExperimentERC20 } from '../contracts'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
-import { ExperimentERC20 } from '../contracts'
 
 type AccountData = {
   address: string
@@ -83,7 +83,7 @@ function useAccountUpgrade(privateKey: string, authorizeKey: boolean) {
       })
 
       const signatures = await Promise.all(
-        signPayloads.map((hash: Hex.Hex) => account.sign({ hash }))
+        signPayloads.map((hash: Hex.Hex) => account.sign({ hash })),
       )
 
       const address = await porto.provider.request({

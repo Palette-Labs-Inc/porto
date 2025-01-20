@@ -1,8 +1,8 @@
+import * as Hex from 'ox/Hex'
 import { useState } from 'react'
 import { Platform, StyleSheet, Text, TextInput, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
-import * as Hex from 'ox/Hex'
 
 function useMessageSigner() {
   const porto = usePorto()
@@ -43,10 +43,10 @@ function useMessageVerifier(message: string, signature: string | null) {
     const [account] = await porto.provider.request({
       method: 'eth_accounts',
     })
-    const result = await porto.provider.request({
+    const result = (await porto.provider.request({
       method: 'personal_ecRecover',
       params: [Hex.fromString(message), signature],
-    }) as `0x${string}`
+    })) as `0x${string}`
     setIsValid(result.toLowerCase() === account.toLowerCase())
   }
 

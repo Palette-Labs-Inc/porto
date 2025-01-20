@@ -12,7 +12,11 @@ const PortoContext = createContext<PortoInstance | null>(null)
 
 export function PortoProvider({ children }: { children: ReactNode }) {
   const portoRef = useRef<PortoInstance>(
-    Porto.create({ implementation: Implementation.local({keystoreHost: 'mperhats.github.io'}) }),
+    Porto.create({
+      implementation: Implementation.local({
+        keystoreHost: 'mperhats.github.io',
+      }),
+    }),
   )
 
   useEffect(() => {

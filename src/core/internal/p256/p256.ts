@@ -1,33 +1,34 @@
-import * as WebCryptoP256 from 'ox/WebCryptoP256'
 import { PublicKey } from 'ox'
-import type { createWebCryptoP256, CallScopes, Key } from '../key.js'
-import { from } from '../key.js'
 import type * as Hex from 'ox/Hex'
+import * as WebCryptoP256 from 'ox/WebCryptoP256'
+import type { CallScopes, Key, createWebCryptoP256 } from '../key.js'
+import { from } from '../key.js'
 
 export const createKeyPair = async <const role extends Key['role']>(
-    parameters: createWebCryptoP256.Parameters<role>,
-  ): Promise<Key> => {
-    const keyPair = await WebCryptoP256.createKeyPair()
-    return fromWebCryptoP256({
-     ...parameters,
-      keyPair,
-    })
+  parameters: createWebCryptoP256.Parameters<role>,
+): Promise<Key> => {
+  const keyPair = await WebCryptoP256.createKeyPair()
+  return fromWebCryptoP256({
+    ...parameters,
+    keyPair,
+  })
 }
 
-
 export const sign = async (options: {
-    key: Key,
-    payload: Hex.Hex
+  key: Key
+  payload: Hex.Hex
 }) => {
-    const { privateKey } = options.key
-    if (privateKey instanceof CryptoKey) {
-        return WebCryptoP256.sign({
-            payload: options.payload,
-            privateKey: privateKey,
-        })
-    }
+  const { privateKey } = options.key
+  if (privateKey instanceof CryptoKey) {
+    return WebCryptoP256.sign({
+      payload: options.payload,
+      privateKey: privateKey,
+    })
+  }
 
-    throw new Error('Private key is not a CryptoKey, this package is not properly resolving native vs. web file paths.')
+  throw new Error(
+    'Private key is not a CryptoKey, this package is not properly resolving native vs. web file paths.',
+  )
 }
 
 /**

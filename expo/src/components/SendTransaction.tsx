@@ -62,10 +62,10 @@ function useSendTransaction() {
         selectedAction,
       )
 
-      const hash = await porto.provider.request({
+      const hash = (await porto.provider.request({
         method: 'eth_sendTransaction',
         params: [transaction],
-      }) as Hex.Hex
+      })) as Hex.Hex
 
       setHash(hash)
     } catch (error) {

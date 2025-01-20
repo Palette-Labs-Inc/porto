@@ -1,8 +1,8 @@
+import type { RpcSchema } from 'ox'
+import type { Schema } from 'porto/core/internal/rpcSchema'
 import { useEffect, useState } from 'react'
 import { Platform, StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
-import type { RpcSchema } from 'ox'
-import type { Schema } from 'porto/core/internal/rpcSchema'
 
 type EventName =
   | 'accountsChanged'

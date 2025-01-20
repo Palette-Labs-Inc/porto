@@ -1,10 +1,10 @@
+import type { RpcSchema } from 'ox'
+import type { ConnectParameters, Schema } from 'porto/core/internal/rpcSchema'
 import { useState } from 'react'
 import { Platform, StyleSheet, Switch, Text, View } from 'react-native'
+import { ExperimentERC20 } from '../contracts'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
-import type { Schema, ConnectParameters } from 'porto/core/internal/rpcSchema'
-import type { RpcSchema } from 'ox'
-import { ExperimentERC20 } from '../contracts'
 
 type ConnectReturnType = RpcSchema.ExtractReturnType<Schema, 'wallet_connect'>
 type ConnectOptions = ConnectParameters
@@ -33,10 +33,10 @@ function useConnect() {
       }
 
       console.info('[Connect] Requesting connection with options:', options)
-      const response = await porto.provider.request({
+      const response = (await porto.provider.request({
         method: 'wallet_connect',
         params: [options],
-      }) as ConnectReturnType
+      })) as ConnectReturnType
 
       console.info('[Connect] Connection successful:', response)
       setConnectResponse(response)

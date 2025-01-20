@@ -1,8 +1,8 @@
 import * as ExpoP256 from '@porto/expo-p256'
-import type { CallScopes, createWebCryptoP256, Key } from '../key.js'
-import { from } from '../key.js'
-import type * as Hex from 'ox/Hex'
 import { PublicKey } from 'ox'
+import type * as Hex from 'ox/Hex'
+import type { CallScopes, Key, createWebCryptoP256 } from '../key.js'
+import { from } from '../key.js'
 
 export const createKeyPair = async <const role extends Key['role']>(
   parameters: createWebCryptoP256.Parameters<role>,
@@ -18,8 +18,8 @@ export const createKeyPair = async <const role extends Key['role']>(
 }
 
 export const sign = async (options: {
-    key: Key,
-    payload: Hex.Hex
+  key: Key
+  payload: Hex.Hex
 }) => {
   const { privateKeyStorageKey } = options.key
   if (privateKeyStorageKey) {
@@ -91,4 +91,3 @@ export declare namespace fromNativeCryptoP256 {
     role: role | Key['role']
   }
 }
-  

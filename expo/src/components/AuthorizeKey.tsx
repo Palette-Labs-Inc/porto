@@ -1,9 +1,9 @@
 import type { Hex } from 'ox'
 import { useState } from 'react'
 import { Platform, StyleSheet, Text, TextInput, View } from 'react-native'
+import { ExperimentERC20 } from '../contracts'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
-import { ExperimentERC20 } from '../contracts'
 
 const callScopes = [
   {
@@ -68,9 +68,7 @@ export function AuthorizeKey() {
       />
       <Button onPress={handleAuthorizeKey} text="Authorize Key" />
       {result && (
-        <Text style={styles.codeBlock}>
-          {JSON.stringify(result, null, 2)}
-        </Text>
+        <Text style={styles.codeBlock}>{JSON.stringify(result, null, 2)}</Text>
       )}
     </View>
   )

@@ -39,7 +39,7 @@ function usePortoState() {
     () => ({
       accounts: porto.provider.accounts,
       chain: { id: porto.provider.chainId },
-    })
+    }),
   )
 
   const formatKeys = (account: Account) => {

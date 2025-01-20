@@ -1,3 +1,4 @@
+import type * as ExpoP256 from '@porto/expo-p256'
 import * as AbiParameters from 'ox/AbiParameters'
 import * as Address from 'ox/Address'
 import * as Bytes from 'ox/Bytes'
@@ -8,13 +9,12 @@ import * as P256 from 'ox/P256'
 import * as PublicKey from 'ox/PublicKey'
 import * as Secp256k1 from 'ox/Secp256k1'
 import * as Signature from 'ox/Signature'
-import * as WebCryptoP256 from 'ox/WebCryptoP256'
-import type { OneOf, Undefined } from './types.js'
 import type * as WebAuthnP256 from 'ox/WebAuthnP256'
+import * as WebCryptoP256 from 'ox/WebCryptoP256'
 // platform specific modules.
-import { P256 as P256Module} from './p256'
-import { WebAuthN as WebAuthNModule} from './webauthn'
-import type * as ExpoP256 from '@porto/expo-p256'
+import { P256 as P256Module } from './p256'
+import type { OneOf, Undefined } from './types.js'
+import { WebAuthN as WebAuthNModule } from './webauthn'
 
 type PrivateKeyFn = () => Hex.Hex
 
@@ -47,11 +47,13 @@ export type CallScope = OneOf<
     }
 >
 export type CallScopes = readonly [CallScope, ...CallScope[]]
-export type Key = OneOf<P256Key | Secp256k1Key | WebCryptoKey | NativeCryptoKey | WebAuthnKey>
+export type Key = OneOf<
+  P256Key | Secp256k1Key | WebCryptoKey | NativeCryptoKey | WebAuthnKey
+>
 export type P256Key = BaseKey<'p256', { privateKey: PrivateKeyFn }>
 export type Secp256k1Key = BaseKey<'secp256k1', { privateKey: PrivateKeyFn }>
 
-// A Native CryptoKey. 
+// A Native CryptoKey.
 export type NativeCryptoKey = BaseKey<
   'p256',
   {
@@ -623,12 +625,11 @@ export declare namespace fromWebCryptoP256 {
     /** Expiry. */
     expiry?: Key['expiry'] | undefined
     /** P256 private key. */
-    keyPair: Awaited<ReturnType<typeof WebCryptoP256.createKeyPair>> 
+    keyPair: Awaited<ReturnType<typeof WebCryptoP256.createKeyPair>>
     /** Role. */
     role: role | Key['role']
   }
 }
-
 
 /**
  * Instantiates a native P256 key from its parameters.
@@ -636,15 +637,15 @@ export declare namespace fromWebCryptoP256 {
  * @example
  * ```ts
  * import * as Key from './key.js'
- * 
+ *
  * const keyPair = await P256.createKeyPair()
- * 
+ *
  * // Admin Key
  * const key = Key.fromNativeCryptoP256({
  *   keyPair,
  *   role: 'admin',
  * })
- * 
+ *
  * // Session Key
  * const key = Key.fromNativeCryptoP256({
  *   expiry: 1714857600,
@@ -686,7 +687,6 @@ export declare namespace fromNativeCryptoP256 {
     role: role | Key['role']
   }
 }
-
 
 /**
  * Hashes a key.

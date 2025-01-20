@@ -2,7 +2,9 @@ import * as ExpoP256 from '@porto/expo-p256'
 import type { IP256, P256KeyPair } from './types.js'
 
 export const P256: IP256 = {
-  async createKeyPair(options?: ExpoP256.createKeyPair.Options): Promise<P256KeyPair> {
+  async createKeyPair(
+    options?: ExpoP256.createKeyPair.Options,
+  ): Promise<P256KeyPair> {
     return ExpoP256.createKeyPair({
       requireAuthentication: false, // otherwise key requires user authentication, not really a delegated signer.
       keychainService: ExpoP256.KEY_PREFIX,

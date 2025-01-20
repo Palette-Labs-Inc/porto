@@ -2,7 +2,9 @@ import * as WebCryptoP256 from 'ox/WebCryptoP256'
 import type { IP256, P256KeyPair } from './types.js'
 
 export const P256: IP256 = {
-  async createKeyPair(options?: WebCryptoP256.createKeyPair.Options): Promise<P256KeyPair> {
+  async createKeyPair(
+    options?: WebCryptoP256.createKeyPair.Options,
+  ): Promise<P256KeyPair> {
     return WebCryptoP256.createKeyPair(options)
   },
 

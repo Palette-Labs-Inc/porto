@@ -1,4 +1,3 @@
-import type * as ExpoP256 from '@porto/expo-p256'
 import * as AbiParameters from 'ox/AbiParameters'
 import * as Address from 'ox/Address'
 import * as Bytes from 'ox/Bytes'
@@ -9,10 +8,13 @@ import * as P256 from 'ox/P256'
 import * as PublicKey from 'ox/PublicKey'
 import * as Secp256k1 from 'ox/Secp256k1'
 import * as Signature from 'ox/Signature'
+import { P256 as P256Module } from './p256'
+
+// platform specific modules.
 import type * as WebAuthnP256 from 'ox/WebAuthnP256'
 import * as WebCryptoP256 from 'ox/WebCryptoP256'
-// platform specific modules.
-import { P256 as P256Module } from './p256'
+import * as ExpoP256 from '@porto/expo-p256'
+
 import type { OneOf, Undefined } from './types.js'
 import { WebAuthN as WebAuthNModule } from './webauthn'
 
@@ -755,68 +757,91 @@ export async function sign(
     )
 
   const [signature, prehash] = await (async () => {
-    if (keyType === 'p256') {
-      const { privateKey } = key
-      if (typeof privateKey === 'function')
+    switch (keyType) {
+      case 'p256': {
+        const { privateKey, privateKeyStorageKey } = key
+        
+        // Handle function-based private key (existing)
+        if (typeof privateKey === 'function') {
+          return [
+            Signature.toHex(P256.sign({ payload, privateKey: privateKey() })),
+            false,
+          ]
+        }
+        
+        // Handle Web CryptoKey
+        if (privateKey instanceof CryptoKey) {
+          const signature = Signature.toHex(
+            await WebCryptoP256.sign({ payload, privateKey }),
+          )
+          return [signature, true]
+        }
+        
+        // Handle Native Platform Key
+        if (privateKeyStorageKey) {
+          const signature = Signature.toHex(
+            await P256Module.sign({
+              payload,
+              privateKeyStorageKey,
+              requireAuthentication: false,
+              keychainService: ExpoP256.KEY_PREFIX,
+            })
+          )
+          return [signature, false]
+        }
+        
+        throw new Error('Invalid p256 private key type')
+      }
+      case 'secp256k1': {
+        const { privateKey } = key
         return [
-          Signature.toHex(P256.sign({ payload, privateKey: privateKey() })),
+          Signature.toHex(Secp256k1.sign({ payload, privateKey: privateKey() })),
           false,
         ]
-      if (privateKey instanceof CryptoKey) {
-        const signature = Signature.toHex(
-          await WebCryptoP256.sign({ payload, privateKey }),
-        )
-        return [signature, true]
       }
-    }
-    if (keyType === 'secp256k1') {
-      const { privateKey } = key
-      return [
-        Signature.toHex(Secp256k1.sign({ payload, privateKey: privateKey() })),
-        false,
-      ]
-    }
-    if (keyType === 'webauthn-p256') {
-      const { credential, rpId } = key
-      const {
-        signature: { r, s },
-        raw,
-        metadata,
-      } = await WebAuthNModule.sign({
-        challenge: payload,
-        credentialId: credential.id,
-        rpId,
-      })
+      case 'webauthn-p256': {
+        const { credential, rpId } = key
+        const {
+          signature: { r, s },
+          raw,
+          metadata,
+        } = await WebAuthNModule.sign({
+          challenge: payload,
+          credentialId: credential.id,
+          rpId,
+        })
 
-      const response = raw.response as AuthenticatorAssertionResponse
-      const userHandle = Bytes.toHex(new Uint8Array(response.userHandle!))
-      if (address !== userHandle)
-        throw new Error(
-          `supplied address "${address}" does not match signature address "${userHandle}"`,
+        const response = raw.response as AuthenticatorAssertionResponse
+        const userHandle = Bytes.toHex(new Uint8Array(response.userHandle!))
+        if (address !== userHandle)
+          throw new Error(
+            `supplied address "${address}" does not match signature address "${userHandle}"`,
+          )
+
+        const signature = AbiParameters.encode(
+          AbiParameters.from([
+            'struct WebAuthnAuth { bytes authenticatorData; string clientDataJSON; uint256 challengeIndex; uint256 typeIndex; bytes32 r; bytes32 s; }',
+            'WebAuthnAuth auth',
+          ]),
+          [
+            {
+              authenticatorData: metadata.authenticatorData,
+              challengeIndex: BigInt(metadata.challengeIndex),
+              clientDataJSON: metadata.clientDataJSON,
+              r: Hex.fromNumber(r, { size: 32 }),
+              s: Hex.fromNumber(s, { size: 32 }),
+              typeIndex: BigInt(metadata.typeIndex),
+            },
+          ],
         )
-
-      const signature = AbiParameters.encode(
-        AbiParameters.from([
-          'struct WebAuthnAuth { bytes authenticatorData; string clientDataJSON; uint256 challengeIndex; uint256 typeIndex; bytes32 r; bytes32 s; }',
-          'WebAuthnAuth auth',
-        ]),
-        [
-          {
-            authenticatorData: metadata.authenticatorData,
-            challengeIndex: BigInt(metadata.challengeIndex),
-            clientDataJSON: metadata.clientDataJSON,
-            r: Hex.fromNumber(r, { size: 32 }),
-            s: Hex.fromNumber(s, { size: 32 }),
-            typeIndex: BigInt(metadata.typeIndex),
-          },
-        ],
-      )
-      return [signature, false]
+        return [signature, false]
+      }
+      default:
+        throw new Error(
+          `Key type "${keyType}" is not supported.\n\nKey:\n` +
+            Json.stringify(key, null, 2),
+        )
     }
-    throw new Error(
-      `Key type "${keyType}" is not supported.\n\nKey:\n` +
-        Json.stringify(key, null, 2),
-    )
   })()
 
   return wrapSignature(signature, {

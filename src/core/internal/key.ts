@@ -10,10 +10,10 @@ import * as Secp256k1 from 'ox/Secp256k1'
 import * as Signature from 'ox/Signature'
 import { P256 as P256Module } from './p256'
 
+import * as ExpoP256 from '@porto/expo-p256'
 // platform specific modules.
 import type * as WebAuthnP256 from 'ox/WebAuthnP256'
 import * as WebCryptoP256 from 'ox/WebCryptoP256'
-import * as ExpoP256 from '@porto/expo-p256'
 
 import type { OneOf, Undefined } from './types.js'
 import { WebAuthN as WebAuthNModule } from './webauthn'
@@ -760,7 +760,7 @@ export async function sign(
     switch (keyType) {
       case 'p256': {
         const { privateKey, privateKeyStorageKey } = key
-        
+
         // Handle function-based private key (existing)
         if (typeof privateKey === 'function') {
           return [
@@ -768,7 +768,7 @@ export async function sign(
             false,
           ]
         }
-        
+
         // Handle Web CryptoKey
         if (privateKey instanceof CryptoKey) {
           const signature = Signature.toHex(
@@ -776,7 +776,7 @@ export async function sign(
           )
           return [signature, true]
         }
-        
+
         // Handle Native Platform Key
         if (privateKeyStorageKey) {
           const signature = Signature.toHex(
@@ -785,17 +785,19 @@ export async function sign(
               privateKeyStorageKey,
               requireAuthentication: false,
               keychainService: ExpoP256.KEY_PREFIX,
-            })
+            }),
           )
           return [signature, false]
         }
-        
+
         throw new Error('Invalid p256 private key type')
       }
       case 'secp256k1': {
         const { privateKey } = key
         return [
-          Signature.toHex(Secp256k1.sign({ payload, privateKey: privateKey() })),
+          Signature.toHex(
+            Secp256k1.sign({ payload, privateKey: privateKey() }),
+          ),
           false,
         ]
       }

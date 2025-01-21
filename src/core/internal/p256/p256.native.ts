@@ -26,7 +26,7 @@ export const sign = async (options: {
       requireAuthentication: false,
       payload: options.payload,
       keychainService: ExpoP256.KEY_PREFIX,
-      privateKeyStorageKey
+      privateKeyStorageKey,
     })
   }
   throw new Error(

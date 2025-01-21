@@ -5,7 +5,6 @@ import * as assertion from './internal/assertion'
 import * as credential from './internal/credential'
 import type * as internal from './internal/webauthn'
 
-
 // ============= Functions =============
 
 /**

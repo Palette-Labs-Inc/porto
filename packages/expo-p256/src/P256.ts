@@ -33,7 +33,7 @@ export type P256Options = {
    * - Android: Equivalent of the public/private key pair `Alias`.
    * - iOS: The item's service namespace, equivalent to [`kSecAttrService`].
    * @see Apple's documentation on [kSecAttrService](https://developer.apple.com/documentation/security/ksecattrservice/).
-  */
+   */
   keychainService?: string
   /**
    * Option for enabling user authentication methods while signing.

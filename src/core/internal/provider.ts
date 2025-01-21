@@ -424,7 +424,6 @@ export function from<
             })
           })()
 
-
           store.setState((x) => ({ ...x, accounts }))
 
           emitter.emit('connect', {

@@ -1,83 +1,5 @@
-import { Base64, type Bytes, Errors, Hex, PublicKey, Signature } from 'ox'
-
-import type { createKeyPair, getKeyPair, sign } from '../P256'
-
-// ============= Type Adapters =============
-
-/**
- * Converts a native key pair response to the WebCryptoP256-compatible format.
- * @internal
- */
-function convertNativeKeyPairToWebCrypto(
-  privateKeyStorageKey: string,
-  nativeKeyPair: {
-    privateKey: string
-    publicKey: string
-  },
-): createKeyPair.ReturnType {
-  if (!nativeKeyPair.privateKey || !nativeKeyPair.publicKey) {
-    throw new InvalidKeyPairError()
-  }
-
-  return {
-    privateKeyStorageKey,
-    publicKey: PublicKey.from(
-      Base64.toBytes(nativeKeyPair.publicKey),
-    ) as PublicKey.PublicKey,
-  }
-}
-
-/**
- * Adapts the native response from createKeyPair to the WebCryptoP256-compatible format.
- * Converts the base64 encoded public key to the ox PublicKey format.
- */
-export function adaptCreateP256KeyPairReturnType(
-  privateKeyStorageKey: string,
-  nativeResponse: createKeyPair.NativeResponse,
-): createKeyPair.ReturnType {
-  return convertNativeKeyPairToWebCrypto(privateKeyStorageKey, nativeResponse)
-}
-
-/**
- * Adapts the native response from getKeyPair to the WebCryptoP256-compatible format.
- * Returns null if no key pair exists, otherwise converts to the WebCryptoP256 format.
- */
-export function adaptGetP256KeyPairReturnType(
-  privateKeyStorageKey: string,
-  nativeResponse: getKeyPair.NativeResponse,
-): getKeyPair.ReturnType {
-  if (!nativeResponse) return null
-  return convertNativeKeyPairToWebCrypto(privateKeyStorageKey, nativeResponse)
-}
-
-/**
- * Adapts the native signature response to the WebCryptoP256-compatible format.
- * Extracts r and s values from the ASN.1 DER encoded signature.
- */
-export function adaptSignWithP256KeyPairReturnType(
-  nativeResponse: sign.NativeResponse,
-): sign.ReturnType {
-  if (!nativeResponse?.signature) {
-    throw new InvalidSignatureError()
-  }
-  const signatureBytes = Base64.toBytes(nativeResponse.signature)
-  const signatureHex = Hex.fromBytes(signatureBytes)
-  const { r, s } = Signature.fromDerHex(signatureHex)
-  return { r, s }
-}
-
-// ============= Payload Conversion =============
-
-/**
- * Converts a payload (Hex or Bytes) to a base64 string for native module consumption.
- * Handles both Uint8Array and hex string inputs.
- */
-export function convertPayloadToBase64(payload: Hex.Hex | Bytes.Bytes): string {
-  if (payload instanceof Uint8Array) {
-    return Base64.fromBytes(payload)
-  }
-  return Base64.fromHex(payload)
-}
+// internal/utils.ts
+import { Base64, type Bytes, Errors, type Hex } from 'ox'
 
 // ============= Key Management =============
 
@@ -94,7 +16,6 @@ export function generateStorageKey(prefix: string = P256_KEY_PREFIX): string {
   ensureValidKey(prefix)
   const timestamp = Date.now().toString(36)
   const random = Math.random().toString(36).slice(2, 6)
-
   return `${prefix}-${timestamp}${random}`
 }
 
@@ -109,11 +30,23 @@ export function ensureValidKey(key: string) {
 }
 
 /**
- * Tests if a key string matches a format compatible with the native key store.
- * @internal
+ * A regex test to check if a key string matches a format compatible with the native key store.
  */
-function isValidKey(key: string) {
+function isValidKey(key: string): boolean {
   return typeof key === 'string' && /^[\w.-]+$/.test(key)
+}
+
+// ============= Payload Conversion =============
+
+/**
+ * Converts a payload (Hex or Bytes) to a base64 string for native module consumption.
+ * Handles both Uint8Array and hex string inputs.
+ */
+export function convertPayloadToBase64(payload: Hex.Hex | Bytes.Bytes): string {
+  if (payload instanceof Uint8Array) {
+    return Base64.fromBytes(payload)
+  }
+  return Base64.fromHex(payload)
 }
 
 // ============= Error Types =============
@@ -145,7 +78,7 @@ export class InvalidKeyFormatError extends Errors.BaseError {
   override name = 'InvalidKeyFormatError'
   constructor(key: string) {
     super(
-      `Invalid key format: "${key}". Keys must not be empty and contain only alphanumeric characters, ".", "-", and "_".`,
+      `Invalid key format: "${key}". Keys must contain only alphanumeric characters, ".", "-", and "_".`,
     )
   }
 }

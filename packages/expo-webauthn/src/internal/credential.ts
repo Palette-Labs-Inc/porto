@@ -96,7 +96,6 @@ class PublicKeyExtractionError extends CredentialError {
  *
  * @param attestationObject - Base64URL encoded attestation object
  * @returns ArrayBuffer containing the public key in SPKI format
- * @throws {PublicKeyExtractionError} If SPKI parsing fails
  */
 export function parseSPKIFromAttestation(
   attestationObject: parseSPKIFromAttestation.Input,
@@ -244,7 +243,6 @@ function mapAuthenticatorTransport(
 
 /**
  * Creates credential parameters in iOS format
- * @throws {InvalidOptionsError} When algorithm is not ES256 (-7)
  * @internal
  */
 function createParameters(params: PublicKeyCredentialParameters): {
@@ -278,7 +276,6 @@ function createDescriptor(descriptor: PublicKeyCredentialDescriptor): {
 
 /**
  * Creates credential options in iOS format
- * @throws {InvalidOptionsError} When required fields are missing
  * @internal
  */
 export function create(options: create.Options): create.ReturnType {
@@ -324,7 +321,6 @@ export declare namespace create {
  *
  * @param response - Native iOS credential response
  * @returns WebAuthn formatted credential
- * @throws {ParseError} If credential cannot be parsed
  */
 export function parse(response: parse.Input): parse.ReturnType {
   try {

@@ -19,30 +19,6 @@ public final class P256Module: Module {
       "WHEN_UNLOCKED_THIS_DEVICE_ONLY": P256Accessible.whenUnlockedThisDeviceOnly.rawValue
     ])
 
-    AsyncFunction("getValueWithKeyAsync") { (key: String, options: P256Options) -> String? in
-      return try get(with: key, options: options)
-    }
-
-    Function("getValueWithKeySync") { (key: String, options: P256Options) -> String? in
-      return try get(with: key, options: options)
-    }
-
-    AsyncFunction("setValueWithKeyAsync") { (value: String, key: String, options: P256Options) -> Bool in
-      guard let key = validate(for: key) else {
-        throw InvalidKeyException()
-      }
-
-      return try set(value: value, with: key, options: options)
-    }
-
-    Function("setValueWithKeySync") {(value: String, key: String, options: P256Options) -> Bool in
-      guard let key = validate(for: key) else {
-        throw InvalidKeyException()
-      }
-
-      return try set(value: value, with: key, options: options)
-    }
-
     AsyncFunction("deleteValueWithKeyAsync") { (key: String, options: P256Options) in
       let noAuthSearchDictionary = query(with: key, options: options, requireAuthentication: false)
       let authSearchDictionary = query(with: key, options: options, requireAuthentication: true)
@@ -93,7 +69,7 @@ public final class P256Module: Module {
         accessControl: accessControl
       )
       
-      // Store private key bytes WITHOUT authentication requirement.
+      // Store private key bytes WITHOUT authentication requirement. If true, we would require double signing which is poor UX.
       let noAuthOptions: P256Options = options
       noAuthOptions.requireAuthentication = false
       

@@ -42,28 +42,6 @@ open class P256Module : Module() {
   override fun definition() = ModuleDefinition {
     Name("ExpoP256")
 
-    AsyncFunction("setValueWithKeyAsync") Coroutine { value: String?, key: String?, options: P256Options ->
-      key ?: throw NullKeyException()
-      return@Coroutine setItemImpl(key, value, options, false)
-    }
-
-    AsyncFunction("getValueWithKeyAsync") Coroutine { key: String, options: P256Options ->
-      return@Coroutine getItemImpl(key, options)
-    }
-
-    Function("setValueWithKeySync") { value: String?, key: String?, options: P256Options ->
-      key ?: throw NullKeyException()
-      return@Function runBlocking {
-        setItemImpl(key, value, options, keyIsInvalidated = false)
-      }
-    }
-
-    Function("getValueWithKeySync") { key: String, options: P256Options ->
-      return@Function runBlocking {
-        getItemImpl(key, options)
-      }
-    }
-
     AsyncFunction("deleteValueWithKeyAsync") { key: String, options: P256Options ->
       try {
         deleteItemImpl(key, options)
@@ -549,7 +527,7 @@ open class P256Module : Module() {
   companion object {
     private const val SHARED_PREFERENCES_NAME = "P256"
     const val USES_KEYSTORE_SUFFIX_PROPERTY = "usesKeystoreSuffix"
-    const val DEFAULT_KEYSTORE_ALIAS = "key_v1"
+    const val DEFAULT_KEYSTORE_ALIAS = "porto"
     const val TAG = "PortoP256"
     const val KEYSTORE_PROVIDER = "AndroidKeyStore"
     const val AUTHENTICATED_KEYSTORE_SUFFIX = "keystoreAuthenticated"

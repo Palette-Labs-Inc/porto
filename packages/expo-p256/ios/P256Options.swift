@@ -11,5 +11,5 @@ internal struct P256Options: Record {
   var keychainService: String?
 
   @Field
-  var requireAuthentication: Bool
+  var requireAuthentication: Bool = false
 }

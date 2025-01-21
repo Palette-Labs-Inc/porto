@@ -19,10 +19,10 @@ import * as Call from './internal/call.js'
 import * as Delegation from './internal/delegation.js'
 import { delegationAbi } from './internal/generated.js'
 import * as Key from './internal/key.js'
+import { keystoreResolver } from './internal/keystore'
 import type * as Porto from './internal/porto.js'
 import type * as RpcSchema_porto from './internal/rpcSchema.js'
 import type { Compute, PartialBy } from './internal/types.js'
-import { keystoreResolver } from './internal/keystore'
 
 // Platform specific modules and import changes.
 import * as WebAuthNModule from './internal/webauthn'
@@ -172,7 +172,9 @@ export declare namespace from {
  * @returns Implementation.
  */
 export function local(parameters: local.Parameters = {}) {
-  const keystoreHost = keystoreResolver.resolveKeystoreHost(parameters.keystoreHost)
+  const keystoreHost = keystoreResolver.resolveKeystoreHost(
+    parameters.keystoreHost,
+  )
 
   return from({
     actions: {

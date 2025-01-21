@@ -12,8 +12,8 @@ import type { OneOf, Undefined } from './types.js'
 
 // Platform specific modules and import changes.
 import type { WebAuthnP256 } from 'ox'
-import * as WebAuthNModule from './webauthn'
 import * as P256Module from './p256'
+import * as WebAuthNModule from './webauthn'
 
 type PrivateKeyFn = () => Hex.Hex
 
@@ -47,7 +47,9 @@ export type CallScope = OneOf<
 >
 export type CallScopes = readonly [CallScope, ...CallScope[]]
 
-export type Key = OneOf<P256Key | Secp256k1Key | WebCryptoKey | WebAuthnKey | NativeCryptoKey>
+export type Key = OneOf<
+  P256Key | Secp256k1Key | WebCryptoKey | WebAuthnKey | NativeCryptoKey
+>
 
 export type P256Key = BaseKey<'p256', { privateKey: PrivateKeyFn }>
 export type Secp256k1Key = BaseKey<'secp256k1', { privateKey: PrivateKeyFn }>

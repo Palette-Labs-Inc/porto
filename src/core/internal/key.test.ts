@@ -14,7 +14,7 @@ import { client, delegation } from '../../../test/src/porto.js'
 import * as Call from './call.js'
 import * as Delegation from './delegation.js'
 import * as Key from './key.js'
-import {fromWebCryptoP256} from './p256/p256.js'
+import { fromWebCryptoP256 } from './p256/p256.js'
 import { fromNativeCryptoP256 } from './p256/p256.native.js'
 
 describe('createP256', () => {
@@ -53,7 +53,7 @@ describe('createP256', () => {
         }),
       ],
       delegation,
-      chain: undefined
+      chain: undefined,
     })
 
     const payload = Hex.random(32)
@@ -107,7 +107,7 @@ describe('createSecp256k1', () => {
         }),
       ],
       delegation,
-      chain: undefined
+      chain: undefined,
     })
 
     const payload = Hex.random(32)
@@ -226,7 +226,7 @@ describe('createWebCryptoP256', () => {
         }),
       ],
       delegation,
-      chain: undefined
+      chain: undefined,
     })
 
     const payload = Hex.random(32)

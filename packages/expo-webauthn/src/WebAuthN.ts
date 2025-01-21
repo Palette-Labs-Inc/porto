@@ -115,7 +115,6 @@ export declare namespace createCredential {
 export async function getCredential(
   options: getCredential.Parameters,
 ): Promise<getCredential.ReturnType> {
-
   if (!options) {
     throw new MissingOptionsError('Credential request')
   }

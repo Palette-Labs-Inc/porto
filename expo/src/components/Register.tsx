@@ -3,7 +3,6 @@ import { Platform, StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
 
-
 function useRegistration() {
   const porto = usePorto()
   const [result, setResult] = useState<unknown | null>(null)
@@ -35,7 +34,9 @@ export function Register() {
     <View style={styles.section}>
       <Text style={styles.sectionHeader}>experimental_createAccount</Text>
       <Button onPress={handleRegister} text="Register" />
-      {result ? <Text style={styles.codeBlock}>{JSON.stringify(result, null, 2)}</Text> : null}
+      {result ? (
+        <Text style={styles.codeBlock}>{JSON.stringify(result, null, 2)}</Text>
+      ) : null}
     </View>
   )
 }

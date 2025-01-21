@@ -6,10 +6,10 @@ import * as RpcResponse from 'ox/RpcResponse'
 
 import type * as Chains from '../Chains.js'
 import * as Porto from '../Porto.js'
+import { announcer } from './announce'
 import type * as Call from './call.js'
 import * as Key from './key.js'
 import type * as Schema from './rpcSchema.js'
-import { announcer } from './announce'
 
 export type Provider = ox_Provider.Provider<{
   includeEvents: true

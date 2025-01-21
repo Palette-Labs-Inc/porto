@@ -60,7 +60,7 @@ describe('eth_requestAccounts', () => {
 describe('eth_sendTransaction', () => {
   test('default', async () => {
     const porto = createPorto()
-    const client = Porto.getClients(porto).default.extend(() => ({
+    const client = Porto.getClient(porto).extend(() => ({
       mode: 'anvil',
     }))
 
@@ -93,7 +93,7 @@ describe('eth_sendTransaction', () => {
 describe('eth_signTypedData_v4', () => {
   test('default', async () => {
     const porto = createPorto()
-    const client = Porto.getClients(porto).default
+    const client = Porto.getClient(porto)
     const { address } = await porto.provider.request({
       method: 'experimental_createAccount',
     })
@@ -247,7 +247,7 @@ describe('experimental_authorizeKey', () => {
         ],
       }),
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      '[Error: session key must have at least one call scope (`callScope`).]',
+      '[RpcResponse.InternalError: session key must have at least one call scope (`callScope`).]',
     )
   })
 })
@@ -410,7 +410,7 @@ describe('experimental_revokeKey', () => {
         params: [{ publicKey }],
       }),
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      '[Error: cannot revoke key. account must have at least one admin key.]',
+      '[RpcResponse.InternalError: cannot revoke key. account must have at least one admin key.]',
     )
   })
 })
@@ -418,7 +418,7 @@ describe('experimental_revokeKey', () => {
 describe('personal_sign', () => {
   test('default', async () => {
     const porto = createPorto()
-    const client = Porto.getClients(porto).default
+    const client = Porto.getClient(porto)
     const { address } = await porto.provider.request({
       method: 'experimental_createAccount',
     })
@@ -659,7 +659,7 @@ describe('wallet_disconnect', () => {
 describe('wallet_sendCalls', () => {
   test('default', async () => {
     const porto = createPorto()
-    const client = Porto.getClients(porto).default.extend(() => ({
+    const client = Porto.getClient(porto).extend(() => ({
       mode: 'anvil',
     }))
 
@@ -695,7 +695,7 @@ describe('wallet_sendCalls', () => {
 
   test('behavior: `key` capability', async () => {
     const porto = createPorto()
-    const client = Porto.getClients(porto).default.extend(() => ({
+    const client = Porto.getClient(porto).extend(() => ({
       mode: 'anvil',
     }))
 
@@ -744,7 +744,7 @@ describe('wallet_sendCalls', () => {
 
   test('behavior: `key.callScopes` mismatch', async () => {
     const porto = createPorto()
-    const client = Porto.getClients(porto).default.extend(() => ({
+    const client = Porto.getClient(porto).extend(() => ({
       mode: 'anvil',
     }))
 
@@ -792,7 +792,7 @@ describe('wallet_sendCalls', () => {
 
   test('behavior: revoked key', async () => {
     const porto = createPorto()
-    const client = Porto.getClients(porto).default.extend(() => ({
+    const client = Porto.getClient(porto).extend(() => ({
       mode: 'anvil',
     }))
 
@@ -804,7 +804,7 @@ describe('wallet_sendCalls', () => {
       value: Value.fromEther('10000'),
     })
 
-    const alice = '0x0000000000000000000000000000000000069422'
+    const alice = '0x0000000000000000000000000000000000069423'
 
     const key = await porto.provider.request({
       method: 'experimental_authorizeKey',
@@ -866,7 +866,7 @@ describe('wallet_sendCalls', () => {
 
   test('behavior: not provider-managed key', async () => {
     const porto = createPorto()
-    const client = Porto.getClients(porto).default.extend(() => ({
+    const client = Porto.getClient(porto).extend(() => ({
       mode: 'anvil',
     }))
 
@@ -914,13 +914,13 @@ describe('wallet_sendCalls', () => {
         ],
       }),
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      '[Error: key (publicKey: 0x86a0d77beccf47a0a78cccfc19fdfe7317816740c9f9e6d7f696a02b0c66e0e21744d93c5699e9ce658a64ce60df2f32a17954cd577c713922bf62a1153cf68e) does not exist or is not a provider-managed key.]',
+      '[RpcResponse.InternalError: key (publicKey: 0x86a0d77beccf47a0a78cccfc19fdfe7317816740c9f9e6d7f696a02b0c66e0e21744d93c5699e9ce658a64ce60df2f32a17954cd577c713922bf62a1153cf68e) does not exist or is not a provider-managed key.]',
     )
   })
 
   test('behavior: key does not exist', async () => {
     const porto = createPorto()
-    const client = Porto.getClients(porto).default.extend(() => ({
+    const client = Porto.getClient(porto).extend(() => ({
       mode: 'anvil',
     }))
 
@@ -957,7 +957,7 @@ describe('wallet_sendCalls', () => {
         ],
       }),
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      '[Error: key (publicKey: 0x86a0d77beccf47a0a78cccfc19fdfe7317816740c9f9e6d7f696a02b0c66e0e21744d93c5699e9ce658a64ce60df2f32a17954cd577c713922bf62a1153cf68e) does not exist or is not a provider-managed key.]',
+      '[RpcResponse.InternalError: key (publicKey: 0x86a0d77beccf47a0a78cccfc19fdfe7317816740c9f9e6d7f696a02b0c66e0e21744d93c5699e9ce658a64ce60df2f32a17954cd577c713922bf62a1153cf68e) does not exist or is not a provider-managed key.]',
     )
   })
 })

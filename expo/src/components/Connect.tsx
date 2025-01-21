@@ -1,5 +1,5 @@
 import type { RpcSchema } from 'ox'
-import type { ConnectParameters, Schema } from 'porto/core/internal/rpcSchema'
+import type { Schema } from 'porto/core/internal/rpcSchema'
 import { useState } from 'react'
 import { Platform, StyleSheet, Switch, Text, View } from 'react-native'
 import { ExperimentERC20 } from '../contracts'
@@ -7,7 +7,6 @@ import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
 
 type ConnectReturnType = RpcSchema.ExtractReturnType<Schema, 'wallet_connect'>
-type ConnectOptions = ConnectParameters
 
 const callScopes = [
   {

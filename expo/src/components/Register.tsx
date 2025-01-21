@@ -3,9 +3,10 @@ import { Platform, StyleSheet, Text, View } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
 
+
 function useRegistration() {
   const porto = usePorto()
-  const [result, setResult] = useState<string | null>(null)
+  const [result, setResult] = useState<unknown | null>(null)
 
   const handleRegister = async () => {
     try {
@@ -34,7 +35,7 @@ export function Register() {
     <View style={styles.section}>
       <Text style={styles.sectionHeader}>experimental_createAccount</Text>
       <Button onPress={handleRegister} text="Register" />
-      {result && <Text style={styles.codeBlock}>{result}</Text>}
+      {result ? <Text style={styles.codeBlock}>{JSON.stringify(result, null, 2)}</Text> : null}
     </View>
   )
 }

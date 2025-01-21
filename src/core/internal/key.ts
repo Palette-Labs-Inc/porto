@@ -8,12 +8,12 @@ import * as P256 from 'ox/P256'
 import * as PublicKey from 'ox/PublicKey'
 import * as Secp256k1 from 'ox/Secp256k1'
 import * as Signature from 'ox/Signature'
-import type * as WebAuthnP256 from 'ox/WebAuthnP256'
 import type { OneOf, Undefined } from './types.js'
 
-import * as P256Module from './p256'
-// platform specific modules.
+// Platform specific modules and import changes.
+import type { WebAuthnP256 } from 'ox'
 import * as WebAuthNModule from './webauthn'
+import * as P256Module from './p256'
 
 type PrivateKeyFn = () => Hex.Hex
 
@@ -46,26 +46,26 @@ export type CallScope = OneOf<
     }
 >
 export type CallScopes = readonly [CallScope, ...CallScope[]]
-export type Key = OneOf<
-  P256Key | Secp256k1Key | WebCryptoKey | NativeCryptoKey | WebAuthnKey
->
+
+export type Key = OneOf<P256Key | Secp256k1Key | WebCryptoKey | WebAuthnKey | NativeCryptoKey>
+
 export type P256Key = BaseKey<'p256', { privateKey: PrivateKeyFn }>
 export type Secp256k1Key = BaseKey<'secp256k1', { privateKey: PrivateKeyFn }>
-
+export type WebCryptoKey = BaseKey<
+  'p256',
+  {
+    credential?:
+      | Pick<WebAuthnP256.P256Credential, 'id' | 'publicKey'>
+      | undefined
+    privateKey: CryptoKey
+  }
+>
 export type NativeCryptoKey = BaseKey<
   'p256',
   {
     privateKeyStorageKey: string
   }
 >
-
-export type WebCryptoKey = BaseKey<
-  'p256',
-  {
-    privateKey: CryptoKey
-  }
->
-
 export type WebAuthnKey = BaseKey<
   'webauthn-p256',
   {
@@ -73,6 +73,14 @@ export type WebAuthnKey = BaseKey<
     rpId: string | undefined
   }
 >
+
+export type Rpc = {
+  callScopes?: CallScopes | undefined
+  expiry: number
+  publicKey: Hex.Hex
+  role: 'admin' | 'session'
+  type: 'p256' | 'secp256k1' | 'webauthn-p256'
+}
 
 /** Serialized (contract-compatible) format of a key. */
 export type Serialized = {
@@ -292,8 +300,7 @@ export declare namespace createWebAuthnP256 {
 export async function createWebCryptoP256<const role extends Key['role']>(
   parameters: createWebCryptoP256.Parameters<role>,
 ) {
-  const key = await P256Module.createKeyPair(parameters)
-  return key
+  return await P256Module.createKeyPair(parameters)
 }
 
 export declare namespace createWebCryptoP256 {
@@ -426,6 +433,23 @@ export declare namespace fromP256 {
 }
 
 /**
+ * Instantiates a key from its RPC format.
+ *
+ * @param rpc - RPC key.
+ * @returns Key.
+ */
+export function fromRpc(rpc: Rpc): Key {
+  return {
+    canSign: false,
+    callScopes: rpc.callScopes,
+    expiry: rpc.expiry,
+    publicKey: rpc.publicKey,
+    role: rpc.role,
+    type: rpc.type,
+  }
+}
+
+/**
  * Instantiates a Secp256k1 key from its parameters.
  *
  * @example
@@ -531,7 +555,6 @@ export function fromWebAuthnP256<const role extends Key['role']>(
   const publicKey = PublicKey.toHex(credential.publicKey, {
     includePrefix: false,
   })
-
   return from({
     callScopes: parameters.callScopes,
     credential,
@@ -627,13 +650,18 @@ export async function sign(
 
   const [signature, prehash] = await (async () => {
     if (keyType === 'p256') {
-      const signature = Signature.toHex(
-        await P256Module.sign({
-          payload,
-          key,
-        }),
-      )
-      return [signature, true]
+      const { privateKey } = key
+      if (typeof privateKey === 'function')
+        return [
+          Signature.toHex(P256.sign({ payload, privateKey: privateKey() })),
+          false,
+        ]
+      if (privateKey instanceof CryptoKey) {
+        const signature = Signature.toHex(
+          await P256Module.sign({ payload, key }),
+        )
+        return [signature, true]
+      }
     }
     if (keyType === 'secp256k1') {
       const { privateKey } = key
@@ -644,7 +672,6 @@ export async function sign(
     }
     if (keyType === 'webauthn-p256') {
       const { credential, rpId } = key
-
       const {
         signature: { r, s },
         raw,
@@ -654,8 +681,6 @@ export async function sign(
         credentialId: credential.id,
         rpId,
       })
-
-      console.info(`[Key] signer collected payload ${payload}`)
 
       const response = raw.response as AuthenticatorAssertionResponse
       const userHandle = Bytes.toHex(new Uint8Array(response.userHandle!))
@@ -693,6 +718,22 @@ export async function sign(
     publicKey,
     prehash,
   })
+}
+
+/**
+ * Converts a key into RPC format.
+ *
+ * @param key - Key.
+ * @returns RPC key.
+ */
+export function toRpc(key: Key): Rpc {
+  return {
+    callScopes: key.callScopes,
+    expiry: key.expiry,
+    publicKey: key.publicKey,
+    role: key.role,
+    type: key.type,
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////

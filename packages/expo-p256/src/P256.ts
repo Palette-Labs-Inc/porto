@@ -20,7 +20,6 @@ import {
  * - Android: Key pair is stored in Android Keystore System
  */
 export type P256Key = {
-  type: 'p256'
   publicKey: PublicKey.PublicKey
   privateKeyStorageKey: string
 }
@@ -217,7 +216,6 @@ export function fromNativeKeyPair(
   }
 
   return {
-    type: 'p256',
     publicKey: PublicKey.from(Base64.toBytes(publicKey)) as PublicKey.PublicKey,
     privateKeyStorageKey: storageKey,
   }

@@ -1,32 +1,10 @@
 import { Errors } from 'ox'
-import { Platform } from 'react-native'
 import ExpoWebAuthN from './ExpoWebAuthN'
 import * as assertion from './internal/assertion'
 import * as credential from './internal/credential'
 import type * as internal from './internal/webauthn'
 
 // ============= Functions =============
-
-/**
- * Checks if WebAuthn is supported on the current device.
- *
- * Platform requirements:
- * - iOS: iOS 15 or later (uses ASAuthorizationPlatformPublicKeyCredentialProvider)
- * - Android: API Level 28 or later
- *
- * @returns boolean indicating whether WebAuthn is supported
- */
-export function isSupported(): boolean {
-  if (Platform.OS === 'android') {
-    return Platform.Version >= 28
-  }
-
-  if (Platform.OS === 'ios') {
-    return Number.parseInt(Platform.Version, 10) >= 15
-  }
-
-  return false
-}
 
 /**
  * Creates a new WebAuthn credential for the specified options.
@@ -74,10 +52,6 @@ export async function createCredential(
     throw new MissingOptionsError('Credential creation')
   }
 
-  if (!isSupported()) {
-    throw new UnsupportedError()
-  }
-
   const nativeOptions = credential.createNativeCredential(options)
   const nativeResponse = await ExpoWebAuthN.createCredential(nativeOptions)
   return credential.fromNativeAttestation(nativeResponse)
@@ -90,7 +64,6 @@ export declare namespace createCredential {
   }
   type ErrorType =
     | MissingOptionsError
-    | UnsupportedError
     | credential.InvalidOptionsError
     | credential.MissingFieldError
     | credential.ParseError
@@ -142,9 +115,6 @@ export declare namespace createCredential {
 export async function getCredential(
   options: getCredential.Parameters,
 ): Promise<getCredential.ReturnType> {
-  if (!isSupported()) {
-    throw new UnsupportedError()
-  }
 
   if (!options) {
     throw new MissingOptionsError('Credential request')
@@ -162,21 +132,12 @@ export declare namespace getCredential {
   }
   type ErrorType =
     | MissingOptionsError
-    | UnsupportedError
     | assertion.InvalidOptionsError
     | assertion.MissingFieldError
     | assertion.ParseError
 }
 
 // ============= Errors =============
-
-/** Thrown when WebAuthn is not supported on the device */
-export class UnsupportedError extends Errors.BaseError<Error | undefined> {
-  override readonly name = 'WebAuthN.UnsupportedError' as const
-  constructor() {
-    super('WebAuthn is not supported on this device')
-  }
-}
 
 /** Thrown when required options are missing */
 export class MissingOptionsError extends Errors.BaseError<Error | undefined> {

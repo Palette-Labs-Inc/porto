@@ -53,7 +53,10 @@
     "vitest": "^2.1.8",
     "wagmi": "catalog:",
     "@porto/expo-webauthn": "workspace:*",
-    "@porto/expo-p256": "workspace:*"
+    "@porto/expo-p256": "workspace:*",
+    "expo-modules-core": "catalog:",
+    "expo-module-scripts": "catalog:",
+    "expo": "catalog:"
   },
   "packageManager": "pnpm@9.15.0",
   "engines": {

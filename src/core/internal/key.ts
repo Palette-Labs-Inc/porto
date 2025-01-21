@@ -658,10 +658,8 @@ export async function sign(
           Signature.toHex(P256.sign({ payload, privateKey: privateKey() })),
           false,
         ]
-        const signature = Signature.toHex(
-          await P256Module.sign({ payload, key }),
-        )
-        return [signature, true]
+      const signature = Signature.toHex(await P256Module.sign({ payload, key }))
+      return [signature, true]
     }
     if (keyType === 'secp256k1') {
       const { privateKey } = key

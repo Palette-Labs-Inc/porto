@@ -25,7 +25,7 @@
     "prepare": "pnpm simple-git-hooks",
     "test": "vitest -c ./test/vitest.config.ts",
     "test:ci": "CI=true vitest -c ./test/vitest.config.ts --retry=3 --bail=1",
-    "ios:debug": "EXPO_USE_METRO_WORKSPACE_ROOT=1 pnpm --filter porto-expo ios:debug"
+    "ios:debug": "USE_PORTO_SOURCE=true EXPO_USE_METRO_WORKSPACE_ROOT=1 pnpm --filter porto-expo ios:debug"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.17.1",

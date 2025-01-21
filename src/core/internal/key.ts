@@ -644,7 +644,6 @@ export async function sign(
     }
     if (keyType === 'webauthn-p256') {
       const { credential, rpId } = key
-      console.info(`[Key] Signing payloads with webauthn-p256 ${rpId}`)
 
       const {
         signature: { r, s },

@@ -3,13 +3,8 @@ import { Platform } from 'react-native'
 import ExpoWebAuthN from './ExpoWebAuthN'
 import * as assertion from './internal/assertion'
 import * as credential from './internal/credential'
-import type {
-  AuthenticatorAssertionResponse,
-  AuthenticatorAttestationResponse,
-  PublicKeyCredential,
-  CredentialCreationOptions as WebAuthnCredentialCreationOptions,
-  CredentialRequestOptions as WebAuthnCredentialRequestOptions,
-} from './internal/webauthn'
+import type * as internal from './internal/webauthn'
+
 
 // ============= Functions =============
 
@@ -90,9 +85,9 @@ export async function createCredential(
 }
 
 export declare namespace createCredential {
-  type Parameters = WebAuthnCredentialCreationOptions
-  type ReturnType = PublicKeyCredential & {
-    response: AuthenticatorAttestationResponse
+  type Parameters = internal.CredentialCreationOptions | undefined
+  type ReturnType = internal.PublicKeyCredential & {
+    response: internal.AuthenticatorAttestationResponse
   }
   type ErrorType =
     | MissingOptionsError
@@ -162,9 +157,9 @@ export async function getCredential(
 }
 
 export declare namespace getCredential {
-  type Parameters = WebAuthnCredentialRequestOptions
-  type ReturnType = PublicKeyCredential & {
-    response: AuthenticatorAssertionResponse
+  type Parameters = internal.CredentialRequestOptions | undefined
+  type ReturnType = internal.PublicKeyCredential & {
+    response: internal.AuthenticatorAssertionResponse
   }
   type ErrorType =
     | MissingOptionsError

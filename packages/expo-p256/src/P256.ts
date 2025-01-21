@@ -33,7 +33,7 @@ export type P256Options = {
    * - Android: Equivalent of the public/private key pair `Alias`.
    * - iOS: The item's service namespace, equivalent to [`kSecAttrService`].
    * @see Apple's documentation on [kSecAttrService](https://developer.apple.com/documentation/security/ksecattrservice/).
-   */
+  */
   keychainService?: string
   /**
    * Option for enabling user authentication methods while signing.
@@ -301,11 +301,11 @@ export async function sign(options: sign.Options): Promise<sign.ReturnType> {
     throw new UnsupportedPlatformError()
   }
 
-  const { key, payload, ...p256Options } = options
+  const { privateKeyStorageKey, payload, ...p256Options } = options
 
   const base64Payload = convertPayloadToBase64(payload)
   const nativeResponse = await ExpoP256.signWithP256KeyPair(
-    key.privateKeyStorageKey,
+    privateKeyStorageKey,
     base64Payload,
     p256Options,
   )
@@ -317,7 +317,7 @@ export async function sign(options: sign.Options): Promise<sign.ReturnType> {
 
 export declare namespace sign {
   type Options = P256Options & {
-    key: P256Key
+    privateKeyStorageKey: string
     payload: Hex.Hex | Bytes.Bytes
   }
   type ReturnType = Signature.Signature<false>

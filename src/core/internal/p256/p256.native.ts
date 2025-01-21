@@ -8,7 +8,6 @@ export const createKeyPair = async <const role extends Key['role']>(
   parameters: createWebCryptoP256.Parameters<role>,
 ): Promise<Key> => {
   const keyPair = await ExpoP256.createKeyPair({
-    requireAuthentication: false, // otherwise key requires user authentication, not really a delegated signer.
     keychainService: ExpoP256.KEY_PREFIX,
   })
   return fromNativeCryptoP256({
@@ -26,8 +25,8 @@ export const sign = async (options: {
     return ExpoP256.sign({
       requireAuthentication: false,
       payload: options.payload,
-      privateKeyStorageKey,
       keychainService: ExpoP256.KEY_PREFIX,
+      privateKeyStorageKey
     })
   }
   throw new Error(

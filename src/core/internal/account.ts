@@ -152,13 +152,14 @@ export async function sign<
   if (!sign) throw new Error('cannot find key to sign with.')
 
   // Sign the payload(s).
-  const signature1 = await sign({ payload })
-  const signature2 =
+  const signatures = await Promise.all([
+    sign({ payload }),
     authorizationPayload && account.sign
       ? account.sign({ payload: authorizationPayload })
-      : undefined
+      : undefined,
+  ])
 
-  return [signature1, signature2] as never
+  return signatures as never
 }
 
 export declare namespace sign {

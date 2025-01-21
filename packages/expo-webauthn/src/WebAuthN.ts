@@ -1,3 +1,4 @@
+import { Errors } from 'ox'
 import { Platform } from 'react-native'
 import ExpoWebAuthN from './ExpoWebAuthN'
 import * as assertion from './internal/assertion'
@@ -9,7 +10,6 @@ import type {
   CredentialCreationOptions as WebAuthnCredentialCreationOptions,
   CredentialRequestOptions as WebAuthnCredentialRequestOptions,
 } from './internal/webauthn'
-import { Errors } from 'ox'
 
 // ============= Functions =============
 
@@ -36,11 +36,11 @@ export function isSupported(): boolean {
 
 /**
  * Creates a new WebAuthn credential for the specified options.
- * 
+ *
  * On iOS, this uses ASAuthorizationPlatformPublicKeyCredentialProvider for credential creation.
  * The private key is stored securely in the device's keychain, and a reference is maintained
  * for future operations.
- * 
+ *
  * Note: While this function accepts WebAuthn credential creation options, it is specifically
  * designed to work with the native module implementation. The options are converted into
  * the appropriate format for each platform:
@@ -57,11 +57,11 @@ export function isSupported(): boolean {
  *   }
  * })
  * ```
- * 
+ *
  * This function can also be used as a custom createFn with WebAuthnP256:
  * ```ts
  * import { WebAuthnP256 } from 'ox'
- * 
+ *
  * const credential = await WebAuthnP256.createCredential({
  *   name: 'Example',
  *   createFn: Platform.OS !== 'web'
@@ -69,7 +69,7 @@ export function isSupported(): boolean {
  *     : undefined
  * })
  * ```
- * 
+ *
  * @param options - The credential creation options
  * @returns A Promise that resolves with the created credential
  */
@@ -105,17 +105,17 @@ export declare namespace createCredential {
 
 /**
  * Gets an existing WebAuthn credential using the specified options.
- * 
+ *
  * On iOS, this uses ASAuthorizationPlatformPublicKeyCredentialProvider for credential assertion.
  * It will access the previously stored credential in the device's keychain using the provided
  * parameters.
- * 
+ *
  * Note: While this function accepts WebAuthn credential request options, it is specifically
  * designed to work with the native module implementation. The options are converted into
  * the appropriate format for each platform:
  * - iOS: Uses ASAuthorizationPlatformPublicKeyCredentialProvider
  * - Android: Uses the FIDO2 API (API Level 28+)
- * 
+ *
  * @example
  * ```ts
  * const assertion = await WebAuthN.getCredential({
@@ -129,11 +129,11 @@ export declare namespace createCredential {
  *   }
  * })
  * ```
- * 
+ *
  * This function can also be used as a custom getFn with WebAuthnP256:
  * ```ts
  * import { WebAuthnP256 } from 'ox'
- * 
+ *
  * const { metadata, signature } = await WebAuthnP256.sign({
  *   challenge: '0xdeadbeef',
  *   getFn: Platform.OS !== 'web'
@@ -141,7 +141,7 @@ export declare namespace createCredential {
  *     : undefined
  * })
  * ```
- * 
+ *
  * @param options - The credential request options
  * @returns A Promise that resolves with the credential assertion
  */
@@ -173,7 +173,6 @@ export declare namespace getCredential {
     | assertion.MissingFieldError
     | assertion.ParseError
 }
-
 
 // ============= Errors =============
 

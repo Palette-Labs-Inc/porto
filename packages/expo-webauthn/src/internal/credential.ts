@@ -1,6 +1,6 @@
-import type * as internal from './webauthn'
-import { base64URLToArrayBuffer, bufferSourceToBase64 } from './utils'
 import { Errors } from 'ox'
+import { base64URLToArrayBuffer, bufferSourceToBase64 } from './utils'
+import type * as internal from './webauthn'
 
 // ============= Functions =============
 
@@ -196,7 +196,7 @@ function createDescriptor(descriptor: internal.PublicKeyCredentialDescriptor): {
 
 /**
  * Creates native module credential creation options from WebAuthn options.
- * 
+ *
  * @example
  * ```ts
  * const nativeOptions = createNativeCredential({
@@ -207,12 +207,12 @@ function createDescriptor(descriptor: internal.PublicKeyCredentialDescriptor): {
  *   }
  * })
  * ```
- * 
+ *
  * @param options - WebAuthn credential creation options
  * @returns Native module credential creation options
  */
 export function createNativeCredential(
-  options: createNativeCredential.Parameters
+  options: createNativeCredential.Parameters,
 ): createNativeCredential.ReturnType {
   try {
     const publicKey = options.publicKey
@@ -241,10 +241,15 @@ export function createNativeCredential(
       attestation: publicKey.attestation,
     }
   } catch (error) {
-    if (error instanceof InvalidOptionsError || error instanceof MissingFieldError) {
+    if (
+      error instanceof InvalidOptionsError ||
+      error instanceof MissingFieldError
+    ) {
       throw error
     }
-    throw new InvalidOptionsError('Failed to create credential options', { cause: error as Error })
+    throw new InvalidOptionsError('Failed to create credential options', {
+      cause: error as Error,
+    })
   }
 }
 
@@ -293,7 +298,7 @@ export declare namespace createNativeCredential {
  * @returns WebAuthn formatted credential
  */
 export function fromNativeAttestation(
-  response: fromNativeAttestation.Parameters
+  response: fromNativeAttestation.Parameters,
 ): fromNativeAttestation.ReturnType {
   try {
     const publicKeyBuffer = parseSPKIFromAttestation(
@@ -383,7 +388,9 @@ export class MissingFieldError extends Errors.BaseError<Error | undefined> {
 }
 
 /** Thrown when public key extraction fails */
-export class PublicKeyExtractionError extends Errors.BaseError<Error | undefined> {
+export class PublicKeyExtractionError extends Errors.BaseError<
+  Error | undefined
+> {
   override readonly name = 'WebAuthN.PublicKeyExtractionError' as const
   constructor(options: { cause?: Error } = {}) {
     super('Failed to extract public key from attestation.', options)

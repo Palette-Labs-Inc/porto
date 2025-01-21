@@ -1,7 +1,6 @@
-import type * as internal from './webauthn'
-import { base64URLToArrayBuffer, bufferSourceToBase64 } from './utils'
 import { Errors } from 'ox'
-
+import { base64URLToArrayBuffer, bufferSourceToBase64 } from './utils'
+import type * as internal from './webauthn'
 
 // ============= Validation Functions =============
 
@@ -80,7 +79,7 @@ function createDescriptor(descriptor: internal.PublicKeyCredentialDescriptor): {
  * @returns Native module assertion options
  */
 export function createNativeAssertion(
-  options: createNativeAssertion.Parameters
+  options: createNativeAssertion.Parameters,
 ): createNativeAssertion.ReturnType {
   try {
     const publicKey = options.publicKey
@@ -101,10 +100,15 @@ export function createNativeAssertion(
       timeout: publicKey.timeout,
     }
   } catch (error) {
-    if (error instanceof InvalidOptionsError || error instanceof MissingFieldError) {
+    if (
+      error instanceof InvalidOptionsError ||
+      error instanceof MissingFieldError
+    ) {
       throw error
     }
-    throw new InvalidOptionsError('Failed to create assertion options', { cause: error as Error })
+    throw new InvalidOptionsError('Failed to create assertion options', {
+      cause: error as Error,
+    })
   }
 }
 
@@ -144,7 +148,7 @@ export declare namespace createNativeAssertion {
  * @returns WebAuthn formatted assertion
  */
 export function fromNativeAssertion(
-  response: fromNativeAssertion.Parameters
+  response: fromNativeAssertion.Parameters,
 ): fromNativeAssertion.ReturnType {
   try {
     return {

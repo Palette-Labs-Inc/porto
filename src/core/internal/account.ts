@@ -138,7 +138,6 @@ export async function sign<
     return undefined
   })()
 
-
   const sign = (() => {
     // If we have no key, use the root signing key.
     if (!key) return account.sign
@@ -154,9 +153,10 @@ export async function sign<
 
   // Sign the payload(s).
   const signature1 = await sign({ payload })
-  const signature2 = authorizationPayload && account.sign
-    ? account.sign({ payload: authorizationPayload })
-    : undefined
+  const signature2 =
+    authorizationPayload && account.sign
+      ? account.sign({ payload: authorizationPayload })
+      : undefined
 
   return [signature1, signature2] as never
 }

@@ -15,10 +15,10 @@ function useLogin() {
       }
 
       console.info('[Login] Requesting accounts')
-      const accounts = await porto.provider.request({
+      const accounts = (await porto.provider.request({
         method: 'eth_requestAccounts',
-      }) as readonly string[]
-      
+      })) as readonly string[]
+
       console.info('[Login] Accounts received:', accounts)
       setAccounts(accounts)
     } catch (error) {

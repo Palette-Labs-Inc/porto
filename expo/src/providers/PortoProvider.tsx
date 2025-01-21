@@ -52,7 +52,7 @@ export function PortoProvider({ children }: { children: ReactNode }) {
       implementation: Implementation.local({
         keystoreHost: 'mperhats.github.io',
       }),
-      storage: createMMKVStorage(mmkvStorage)
+      storage: createMMKVStorage(mmkvStorage),
     }),
   )
 

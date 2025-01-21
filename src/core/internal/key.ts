@@ -531,7 +531,7 @@ export function fromWebAuthnP256<const role extends Key['role']>(
   const publicKey = PublicKey.toHex(credential.publicKey, {
     includePrefix: false,
   })
-  
+
   return from({
     callScopes: parameters.callScopes,
     credential,
@@ -638,16 +638,14 @@ export async function sign(
     if (keyType === 'secp256k1') {
       const { privateKey } = key
       return [
-        Signature.toHex(
-          Secp256k1.sign({ payload, privateKey: privateKey() }),
-        ),
+        Signature.toHex(Secp256k1.sign({ payload, privateKey: privateKey() })),
         false,
       ]
     }
     if (keyType === 'webauthn-p256') {
       const { credential, rpId } = key
       console.info(`[Key] Signing payloads with webauthn-p256 ${rpId}`)
-      
+
       const {
         signature: { r, s },
         raw,
@@ -655,7 +653,7 @@ export async function sign(
       } = await WebAuthNModule.sign({
         challenge: payload,
         credentialId: credential.id,
-        rpId
+        rpId,
       })
 
       console.info(`[Key] signer collected payload ${payload}`)
@@ -666,7 +664,7 @@ export async function sign(
         throw new Error(
           `supplied address "${address}" does not match signature address "${userHandle}"`,
         )
-      
+
       const signature = AbiParameters.encode(
         AbiParameters.from([
           'struct WebAuthnAuth { bytes authenticatorData; string clientDataJSON; uint256 challengeIndex; uint256 typeIndex; bytes32 r; bytes32 s; }',

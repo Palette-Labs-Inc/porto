@@ -83,9 +83,8 @@ export function isSupported(): boolean {
 export async function createCredential(
   options: createCredential.Options,
 ): Promise<createCredential.ReturnType> {
-
   if (!options) {
-    // TODO: add better type assertion like this: 
+    // TODO: add better type assertion like this:
     // function requireParameter(
     //     param: unknown,
     //     details: string,
@@ -103,7 +102,9 @@ export async function createCredential(
   }
 
   const nativeOptions = credential.create(options)
-  const nativeResponse = (await ExpoWebAuthN.createCredential(nativeOptions)) as credential.parse.Input
+  const nativeResponse = (await ExpoWebAuthN.createCredential(
+    nativeOptions,
+  )) as credential.parse.Input
   // TODO: add zod validation or something here.
   return credential.parse(nativeResponse)
 }

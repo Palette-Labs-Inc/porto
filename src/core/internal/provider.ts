@@ -64,7 +64,7 @@ export function from<
 
         case 'eth_requestAccounts': {
           const clients = getClients()
-          
+
           const { accounts } = await implementation.actions.loadAccounts({
             clients,
             config,

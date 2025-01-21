@@ -138,6 +138,7 @@ export async function sign<
     return undefined
   })()
 
+
   const sign = (() => {
     // If we have no key, use the root signing key.
     if (!key) return account.sign
@@ -152,14 +153,12 @@ export async function sign<
   if (!sign) throw new Error('cannot find key to sign with.')
 
   // Sign the payload(s).
-  const signatures = await Promise.all([
-    sign({ payload }),
-    authorizationPayload && account.sign
-      ? account.sign({ payload: authorizationPayload })
-      : undefined,
-  ])
+  const signature1 = await sign({ payload })
+  const signature2 = authorizationPayload && account.sign
+    ? account.sign({ payload: authorizationPayload })
+    : undefined
 
-  return signatures as never
+  return [signature1, signature2] as never
 }
 
 export declare namespace sign {

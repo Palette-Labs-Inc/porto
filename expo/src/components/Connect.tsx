@@ -25,18 +25,15 @@ function useConnect() {
   const handleConnect = async (shouldCreateAccount: boolean) => {
     try {
       console.info('[Connect] Initiating connection')
-      const options: ConnectOptions = {
-        capabilities: {
-          authorizeKey: authorizeKey ? { callScopes } : undefined,
-          ...(shouldCreateAccount && { createAccount: true }),
-        },
-      }
-
-      console.info('[Connect] Requesting connection with options:', options)
-      const response = (await porto.provider.request({
+      const response = await porto.provider.request({
         method: 'wallet_connect',
-        params: [options],
-      })) as ConnectReturnType
+        params: [{
+          capabilities: {
+            authorizeKey: authorizeKey ? { callScopes } : undefined,
+            ...(shouldCreateAccount && { createAccount: true }),
+          },
+        }],
+      }) as ConnectReturnType
 
       console.info('[Connect] Connection successful:', response)
       setConnectResponse(response)

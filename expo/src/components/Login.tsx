@@ -5,19 +5,29 @@ import { Button } from './Button'
 
 function useLogin() {
   const porto = usePorto()
+  console.info('Porto instance:', porto)
   const [accounts, setAccounts] = useState<readonly string[] | null>(null)
 
   const handleLogin = async () => {
     try {
+      if (!porto?.provider) {
+        throw new Error('Porto provider is not initialized')
+      }
+
       console.info('[Login] Requesting accounts')
       const accounts = await porto.provider.request({
         method: 'eth_requestAccounts',
-      })
+      }) as readonly string[]
+      
       console.info('[Login] Accounts received:', accounts)
       setAccounts(accounts)
     } catch (error) {
       console.error('[Login] Login failed:', error)
-      throw error
+      // Handle the error appropriately instead of rethrowing
+      if (error instanceof Error) {
+        // You might want to show this error to the user
+        console.error(error.message)
+      }
     }
   }
 

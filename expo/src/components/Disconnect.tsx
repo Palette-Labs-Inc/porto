@@ -8,7 +8,7 @@ function useDisconnect() {
   const handleDisconnect = async () => {
     try {
       console.info('[Disconnect] Disconnecting')
-      await porto.provider.request({ method: 'experimental_disconnect' })
+      await porto.provider.request({ method: 'wallet_disconnect' })
       console.info('[Disconnect] Successfully disconnected')
     } catch (error) {
       console.error('[Disconnect] Failed to disconnect:', error)

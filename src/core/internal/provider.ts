@@ -64,7 +64,7 @@ export function from<
 
         case 'eth_requestAccounts': {
           const clients = getClients()
-
+          
           const { accounts } = await implementation.actions.loadAccounts({
             clients,
             config,
@@ -77,12 +77,14 @@ export function from<
             chainId: Hex.fromNumber(clients.default.chain.id),
           })
 
-          return accounts.map(
+          const response = accounts.map(
             (account) => account.address,
           ) satisfies RpcSchema.ExtractReturnType<
             Schema.Schema,
             'eth_requestAccounts'
           >
+          console.info('Returning response')
+          return response
         }
 
         case 'eth_sendTransaction': {

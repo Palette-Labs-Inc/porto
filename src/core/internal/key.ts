@@ -531,6 +531,7 @@ export function fromWebAuthnP256<const role extends Key['role']>(
   const publicKey = PublicKey.toHex(credential.publicKey, {
     includePrefix: false,
   })
+  
   return from({
     callScopes: parameters.callScopes,
     credential,
@@ -625,79 +626,69 @@ export async function sign(
     )
 
   const [signature, prehash] = await (async () => {
-    switch (keyType) {
-      case 'p256': {
-        const { privateKey } = key
-
-        // TODO: determine if this requires a native implementation or polyfill.
-        // Handle function-based private key (existing)
-        if (typeof privateKey === 'function') {
-          return [
-            Signature.toHex(P256.sign({ payload, privateKey: privateKey() })),
-            false,
-          ]
-        }
-
-        const signature = Signature.toHex(
-          await P256Module.sign({
-            payload,
-            key,
-          }),
-        )
-        return [signature, true]
-      }
-      case 'secp256k1': {
-        const { privateKey } = key
-        return [
-          Signature.toHex(
-            Secp256k1.sign({ payload, privateKey: privateKey() }),
-          ),
-          false,
-        ]
-      }
-      case 'webauthn-p256': {
-        const { credential, rpId } = key
-        const {
-          signature: { r, s },
-          raw,
-          metadata,
-        } = await WebAuthNModule.sign({
-          challenge: payload,
-          credentialId: credential.id,
-          rpId,
-        })
-
-        const response = raw.response as AuthenticatorAssertionResponse
-        const userHandle = Bytes.toHex(new Uint8Array(response.userHandle!))
-        if (address !== userHandle)
-          throw new Error(
-            `supplied address "${address}" does not match signature address "${userHandle}"`,
-          )
-
-        const signature = AbiParameters.encode(
-          AbiParameters.from([
-            'struct WebAuthnAuth { bytes authenticatorData; string clientDataJSON; uint256 challengeIndex; uint256 typeIndex; bytes32 r; bytes32 s; }',
-            'WebAuthnAuth auth',
-          ]),
-          [
-            {
-              authenticatorData: metadata.authenticatorData,
-              challengeIndex: BigInt(metadata.challengeIndex),
-              clientDataJSON: metadata.clientDataJSON,
-              r: Hex.fromNumber(r, { size: 32 }),
-              s: Hex.fromNumber(s, { size: 32 }),
-              typeIndex: BigInt(metadata.typeIndex),
-            },
-          ],
-        )
-        return [signature, false]
-      }
-      default:
-        throw new Error(
-          `Key type "${keyType}" is not supported.\n\nKey:\n` +
-            Json.stringify(key, null, 2),
-        )
+    if (keyType === 'p256') {
+      const signature = Signature.toHex(
+        await P256Module.sign({
+          payload,
+          key,
+        }),
+      )
+      return [signature, true]
     }
+    if (keyType === 'secp256k1') {
+      const { privateKey } = key
+      return [
+        Signature.toHex(
+          Secp256k1.sign({ payload, privateKey: privateKey() }),
+        ),
+        false,
+      ]
+    }
+    if (keyType === 'webauthn-p256') {
+      const { credential, rpId } = key
+      console.info(`[Key] Signing payloads with webauthn-p256 ${rpId}`)
+      
+      const {
+        signature: { r, s },
+        raw,
+        metadata,
+      } = await WebAuthNModule.sign({
+        challenge: payload,
+        credentialId: credential.id,
+        rpId
+      })
+
+      console.info(`[Key] signer collected payload ${payload}`)
+
+      const response = raw.response as AuthenticatorAssertionResponse
+      const userHandle = Bytes.toHex(new Uint8Array(response.userHandle!))
+      if (address !== userHandle)
+        throw new Error(
+          `supplied address "${address}" does not match signature address "${userHandle}"`,
+        )
+      
+      const signature = AbiParameters.encode(
+        AbiParameters.from([
+          'struct WebAuthnAuth { bytes authenticatorData; string clientDataJSON; uint256 challengeIndex; uint256 typeIndex; bytes32 r; bytes32 s; }',
+          'WebAuthnAuth auth',
+        ]),
+        [
+          {
+            authenticatorData: metadata.authenticatorData,
+            challengeIndex: BigInt(metadata.challengeIndex),
+            clientDataJSON: metadata.clientDataJSON,
+            r: Hex.fromNumber(r, { size: 32 }),
+            s: Hex.fromNumber(s, { size: 32 }),
+            typeIndex: BigInt(metadata.typeIndex),
+          },
+        ],
+      )
+      return [signature, false]
+    }
+    throw new Error(
+      `Key type "${keyType}" is not supported.\n\nKey:\n` +
+        Json.stringify(key, null, 2),
+    )
   })()
 
   return wrapSignature(signature, {

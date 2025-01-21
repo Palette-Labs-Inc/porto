@@ -8,7 +8,6 @@ import * as PersonalMessage from 'ox/PersonalMessage'
 import * as PublicKey from 'ox/PublicKey'
 import * as Secp256k1 from 'ox/Secp256k1'
 import * as TypedData from 'ox/TypedData'
-import * as WebAuthnP256 from 'ox/WebAuthnP256'
 import type { Hash } from 'viem'
 import { readContract } from 'viem/actions'
 
@@ -18,9 +17,11 @@ import * as Call from './internal/call.js'
 import * as Delegation from './internal/delegation.js'
 import { delegationAbi } from './internal/generated.js'
 import * as Key from './internal/key.js'
-import { keystoreResolver } from './internal/keystore/index.js'
 import type * as RpcSchema from './internal/rpcSchema.js'
 import type { Compute } from './internal/types.js'
+import { keystoreResolver } from './internal/keystore/index.js'
+
+import * as WebAuthnModule from './internal/webauthn'
 
 type Request = Pick<RpcRequest.RpcRequest, 'method' | 'params'>
 
@@ -183,9 +184,7 @@ export function from<const implementation extends Implementation>(
 export function local(parameters: local.Parameters = {}) {
   const defaultExpiry = Math.floor(Date.now() / 1000) + 60 * 60 // 1 hour
 
-  const keystoreHost = keystoreResolver.resolveKeystoreHost(
-    parameters.keystoreHost,
-  )
+  const keystoreHost = keystoreResolver.resolveKeystoreHost(parameters.keystoreHost)
 
   return from({
     actions: {
@@ -324,7 +323,7 @@ export function local(parameters: local.Parameters = {}) {
 
           // We will sign a random challenge. We need to do this to extract the
           // user id (ie. the address) to query for the Account's keys.
-          const credential = await WebAuthnP256.sign({
+          const credential = await WebAuthnModule.sign({
             challenge: '0x',
             rpId: keystoreHost,
           })

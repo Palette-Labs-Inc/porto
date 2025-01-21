@@ -2,9 +2,7 @@ import { Platform } from 'react-native'
 import ExpoWebAuthN from './ExpoWebAuthN'
 import * as assertion from './internal/assertion'
 import * as credential from './internal/credential'
-import { logger } from './internal/logger'
 import { WebAuthnError } from './internal/types'
-import { bufferSourceToBase64 } from './internal/utils'
 import type {
   AuthenticatorAssertionResponse,
   AuthenticatorAttestationResponse,
@@ -81,19 +79,22 @@ export function isSupported(): boolean {
  *
  * @param options - The credential creation options
  * @returns A Promise that resolves with the created credential
- * @throws {MissingOptionsError} When options is undefined
  */
 export async function createCredential(
   options: createCredential.Options,
 ): Promise<createCredential.ReturnType> {
-  logger.debug('[WebAuthN:createCredential] Starting credential creation:', {
-    hasOptions: !!options,
-    hasPublicKey: !!options?.publicKey,
-    rpId: options?.publicKey?.rp?.id,
-  })
 
   if (!options) {
-    logger.error('[WebAuthN:createCredential] No options provided')
+    // TODO: add better type assertion like this: 
+    // function requireParameter(
+    //     param: unknown,
+    //     details: string,
+    //   ): asserts param is NonNullable<typeof param> {
+    //   if (typeof param === 'undefined')
+    //     throw new RpcResponse.InvalidParamsError({
+    //       message: `Missing required parameter: ${details}`,
+    //     })
+    //   }
     throw new MissingOptionsError('Credential creation')
   }
 
@@ -101,32 +102,9 @@ export async function createCredential(
     throw new UnsupportedError()
   }
 
-  logger.debug('[WebAuthN:createCredential] Creating native options')
   const nativeOptions = credential.create(options)
-  logger.debug('[WebAuthN:createCredential] Native options created:', {
-    hasRp: !!(nativeOptions as WebAuthnCredentialCreationOptions).publicKey?.rp,
-    rpId: (nativeOptions as WebAuthnCredentialCreationOptions).publicKey?.rp
-      ?.id,
-    hasUser: !!(nativeOptions as WebAuthnCredentialCreationOptions).publicKey
-      ?.user,
-    authenticatorSelection: (nativeOptions as WebAuthnCredentialCreationOptions)
-      .publicKey?.authenticatorSelection,
-    timeout: (nativeOptions as WebAuthnCredentialCreationOptions).publicKey
-      ?.timeout,
-  })
-
-  logger.debug('[WebAuthN:createCredential] Calling native createCredential')
-  const nativeResponse = await ExpoWebAuthN.createCredential(nativeOptions)
-  logger.debug('[WebAuthN:nativeResponse] Native createCredential returned:', {
-    nativeResponse: JSON.stringify(nativeResponse, null, 2),
-  })
-
+  const nativeResponse = (await ExpoWebAuthN.createCredential(nativeOptions)) as credential.parse.Input
   // TODO: add zod validation or something here.
-  const nativeCredential = nativeResponse as credential.parse.Input
-  logger.debug('[WebAuthN:nativeCredential] Credential parsed:', {
-    nativeCredential: JSON.stringify(nativeCredential, null, 2),
-  })
-
   return credential.parse(nativeResponse)
 }
 
@@ -170,8 +148,6 @@ export declare namespace createCredential {
  *
  * @param options - The credential request options
  * @returns A Promise that resolves with the credential assertion
- * @throws {UnsupportedError} When WebAuthn is not supported on the device
- * @throws {MissingOptionsError} When options is undefined
  */
 export async function getCredential(
   options: getCredential.Options,
@@ -181,40 +157,14 @@ export async function getCredential(
   }
 
   if (!options) {
-    logger.error('[WebAuthN:getCredential] No options provided')
     throw new MissingOptionsError('Credential request')
   }
 
-  logger.debug('Getting credential with options:', {
-    options,
-    publicKey: options.publicKey,
-    challenge:
-      options.publicKey?.challenge &&
-      bufferSourceToBase64(options.publicKey.challenge),
-    rpId: options.publicKey?.rpId,
-    allowCredentials: options.publicKey?.allowCredentials?.map((cred) => ({
-      id: bufferSourceToBase64(cred.id),
-      type: cred.type,
-      transports: cred.transports,
-    })),
-    userVerification: options.publicKey?.userVerification,
-    timeout: options.publicKey?.timeout,
-  })
-
+  // TODO: add zod validation or something for the native response.
   const nativeOptions = assertion.create(options)
-  // TODO: add zod validation or something here.
   const nativeResponse = (await ExpoWebAuthN.getCredential(
     nativeOptions,
   )) as assertion.parse.Input
-
-  logger.debug('Received native response:', {
-    response: nativeResponse,
-    responseType: typeof nativeResponse,
-    hasAuthenticatorData: 'authenticatorData' in nativeResponse.response,
-    hasClientDataJSON: 'clientDataJSON' in nativeResponse.response,
-    hasSignature: 'signature' in nativeResponse.response,
-  })
-
   return assertion.parse(nativeResponse)
 }
 

@@ -60,10 +60,8 @@ export function adaptSignWithP256KeyPairReturnType(
   if (!nativeResponse?.signature) {
     throw new InvalidSignatureError()
   }
-
   const signatureBytes = Base64.toBytes(nativeResponse.signature)
   const signatureHex = Hex.fromBytes(signatureBytes)
-
   const { r, s } = Signature.fromDerHex(signatureHex)
   return { r, s }
 }

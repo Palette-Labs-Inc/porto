@@ -415,6 +415,7 @@ export function from<
               })
               return { accounts: [account] }
             }
+
             return await implementation.actions.loadAccounts({
               authorizeKeys,
               clients,
@@ -422,6 +423,7 @@ export function from<
               request,
             })
           })()
+
 
           store.setState((x) => ({ ...x, accounts }))
 

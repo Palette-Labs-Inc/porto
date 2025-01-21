@@ -585,7 +585,6 @@ async function prepareCreateAccount(parameters: {
       delegation,
     },
   )
-
   return { context: request, signPayloads }
 }
 

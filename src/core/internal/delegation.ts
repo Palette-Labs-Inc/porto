@@ -63,6 +63,8 @@ export async function execute<
       parameters,
     )
 
+
+
     return {
       request,
       signatures: await DelegatedAccount.sign(account, {
@@ -71,6 +73,12 @@ export async function execute<
       }),
     }
   })()
+
+  console.info(`[execute] Signatures ${JSON.stringify(signatures)}`)
+
+  for (const signature of (signatures as readonly Hex.Hex[])) {
+    console.info(`[execute] Signature ${Signature.from(signature)}`)
+  }
 
   const { account, authorization, executor, nonce, ...rest } = request
 

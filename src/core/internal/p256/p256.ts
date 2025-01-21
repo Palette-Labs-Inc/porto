@@ -59,33 +59,34 @@ export const sign = async (options: {
  * @returns WebCryptoP256 key.
  */
 export function fromWebCryptoP256<const role extends Key['role']>(
-  parameters: fromWebCryptoP256.Parameters<role>,
-) {
-  const { keyPair } = parameters
-  const { privateKey } = keyPair
-  const publicKey = PublicKey.toHex(keyPair.publicKey, {
-    includePrefix: false,
-  })
-  return from({
-    callScopes: parameters.callScopes,
-    expiry: parameters.expiry ?? 0,
-    publicKey,
-    role: parameters.role as Key['role'],
-    canSign: true,
-    privateKey,
-    type: 'p256',
-  })
-}
-
-export declare namespace fromWebCryptoP256 {
-  type Parameters<role extends Key['role']> = {
-    /** Call scopes. */
-    callScopes?: CallScopes | undefined
-    /** Expiry. */
-    expiry?: Key['expiry'] | undefined
-    /** P256 private key. */
-    keyPair: Awaited<ReturnType<typeof WebCryptoP256.createKeyPair>>
-    /** Role. */
-    role: role | Key['role']
+    parameters: fromWebCryptoP256.Parameters<role>,
+  ) {
+    const { keyPair } = parameters
+    const { privateKey } = keyPair
+    const publicKey = PublicKey.toHex(keyPair.publicKey, {
+      includePrefix: false,
+    })
+    
+    return from({
+      callScopes: parameters.callScopes,
+      expiry: parameters.expiry ?? 0,
+      publicKey,
+      role: parameters.role as Key['role'],
+      canSign: true,
+      privateKey,
+      type: 'p256',
+    })
   }
-}
+  
+  export declare namespace fromWebCryptoP256 {
+    type Parameters<role extends Key['role']> = {
+      /** Call scopes. */
+      callScopes?: CallScopes | undefined
+      /** Expiry. */
+      expiry?: Key['expiry'] | undefined
+      /** P256 private key. */
+      keyPair: Awaited<ReturnType<typeof WebCryptoP256.createKeyPair>>
+      /** Role. */
+      role: role | Key['role']
+    }
+  }

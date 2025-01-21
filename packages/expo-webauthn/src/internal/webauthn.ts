@@ -3,6 +3,15 @@
 // the DOM lib. These definitions match the Web Authentication API specification
 // and what ox/coreWebAuthnP256 expects in it's createFn and getFn.
 
+
+/**
+ * Supported authenticator transport types in iOS AuthenticationServices
+ * @see https://developer.apple.com/documentation/authenticationservices/asauthorizationsecuritykeypublickeycredentialdescriptor/transport
+ * @internal
+ */
+export type AuthenticatorTransportType = 'ble' | 'hybrid' | 'nfc' | 'usb'
+
+/** @internal */
 type COSEAlgorithmIdentifier = number
 
 /** @internal */

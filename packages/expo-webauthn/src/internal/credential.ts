@@ -1,87 +1,6 @@
-import {
-  type AuthenticatorTransportType,
-  type CredentialUserEntity,
-  WebAuthnError,
-} from './types'
+import type * as internal from './webauthn'
 import { base64URLToArrayBuffer, bufferSourceToBase64 } from './utils'
-import type {
-  AttestationConveyancePreference,
-  AuthenticatorAttestationResponse,
-  AuthenticatorSelectionCriteria,
-  AuthenticatorTransport,
-  PublicKeyCredential,
-  PublicKeyCredentialDescriptor,
-  PublicKeyCredentialParameters,
-  PublicKeyCredentialRpEntity,
-  CredentialCreationOptions as WebAuthnCredentialCreationOptions,
-} from './webauthn'
-
-// ============= Types =============
-
-/**
- * Options for creating a new credential
- * @internal
- */
-interface CredentialCreationOptions {
-  rp: PublicKeyCredentialRpEntity
-  user: CredentialUserEntity
-  challenge: string
-  pubKeyCredParams?: {
-    type: 'public-key'
-    alg: number
-  }[]
-  timeout?: number
-  excludeCredentials?: {
-    type?: 'public-key'
-    id: string
-    transports?: AuthenticatorTransportType[]
-  }[]
-  authenticatorSelection?: AuthenticatorSelectionCriteria
-  attestation?: AttestationConveyancePreference
-}
-
-/**
- * Response from a successful credential creation
- * @internal
- */
-interface CredentialAttestationResponse {
-  id: string
-  rawId: string
-  response: {
-    attestationObject: string
-    clientDataJSON: string
-  }
-  type: 'public-key'
-}
-
-// ============= Errors =============
-
-/** Base class for credential errors */
-class CredentialError extends WebAuthnError {}
-
-/** Thrown when creation options are invalid */
-class InvalidOptionsError extends CredentialError {}
-
-/** Thrown when a required field is missing */
-class MissingFieldError extends CredentialError {
-  constructor(field: string) {
-    super(`Missing required field: ${field}`)
-  }
-}
-
-/** Thrown when credential parsing fails */
-class ParseError extends CredentialError {
-  constructor({ cause }: { cause?: Error } = {}) {
-    super('Failed to parse credential response.', { cause })
-  }
-}
-
-/** Thrown when public key extraction fails */
-class PublicKeyExtractionError extends CredentialError {
-  constructor({ cause }: { cause?: Error } = {}) {
-    super('Failed to extract public key from attestation object.', { cause })
-  }
-}
+import { Errors } from 'ox'
 
 // ============= Functions =============
 
@@ -94,11 +13,11 @@ class PublicKeyExtractionError extends CredentialError {
  * const publicKeyBuffer = credential.parseSPKIFromAttestation(attestationObject)
  * ```
  *
- * @param attestationObject - Base64URL encoded attestation object
+ * @param attestationObject - Base64URL encoded native module attestation object
  * @returns ArrayBuffer containing the public key in SPKI format
  */
 export function parseSPKIFromAttestation(
-  attestationObject: parseSPKIFromAttestation.Input,
+  attestationObject: parseSPKIFromAttestation.Parameters,
 ): parseSPKIFromAttestation.ReturnType {
   try {
     // Decode attestation object
@@ -175,8 +94,12 @@ export function parseSPKIFromAttestation(
 }
 
 export declare namespace parseSPKIFromAttestation {
-  type Input = string
+  /** Base64URL encoded attestation object */
+  type Parameters = string
+
+  /** ArrayBuffer containing the public key in SPKI format */
   type ReturnType = ArrayBuffer
+
   type ErrorType = PublicKeyExtractionError
 }
 
@@ -184,12 +107,10 @@ export declare namespace parseSPKIFromAttestation {
 
 /**
  * Validates that the algorithm is supported
- * @throws {InvalidOptionsError} When algorithm is not ES256 (-7)
  * @internal
  */
 function validateAlgorithm(alg: number): void {
   if (alg !== -7) {
-    // ES256
     throw new InvalidOptionsError('Unsupported algorithm', {
       metaMessages: [
         'Only ES256 (-7) is supported by AuthenticationServices.',
@@ -201,13 +122,12 @@ function validateAlgorithm(alg: number): void {
 
 /**
  * Validates required fields in creation options
- * @throws {MissingFieldError} When a required field is missing
  * @internal
  */
 function validateOptions(options: {
-  rp: PublicKeyCredentialRpEntity | undefined
-  user: PublicKeyCredentialUserEntity | undefined
-  challenge: BufferSource | undefined
+  rp: internal.PublicKeyCredentialRpEntity | undefined
+  user: internal.PublicKeyCredentialUserEntity | undefined
+  challenge: internal.BufferSource | undefined
 }): void {
   if (!options.rp?.name) {
     throw new MissingFieldError('rp.name')
@@ -228,8 +148,8 @@ function validateOptions(options: {
  * @internal
  */
 function mapAuthenticatorTransport(
-  transport: AuthenticatorTransport,
-): AuthenticatorTransportType | undefined {
+  transport: internal.AuthenticatorTransport,
+): internal.AuthenticatorTransportType | undefined {
   switch (transport) {
     case 'usb':
     case 'nfc':
@@ -245,7 +165,7 @@ function mapAuthenticatorTransport(
  * Creates credential parameters in iOS format
  * @internal
  */
-function createParameters(params: PublicKeyCredentialParameters): {
+function createParameters(params: internal.PublicKeyCredentialParameters): {
   type: 'public-key'
   alg: number
 } {
@@ -260,73 +180,126 @@ function createParameters(params: PublicKeyCredentialParameters): {
  * Creates credential descriptor in iOS format
  * @internal
  */
-function createDescriptor(descriptor: PublicKeyCredentialDescriptor): {
+function createDescriptor(descriptor: internal.PublicKeyCredentialDescriptor): {
   type: 'public-key'
   id: string
-  transports?: AuthenticatorTransportType[]
+  transports?: internal.AuthenticatorTransportType[]
 } {
   return {
     type: 'public-key',
     id: bufferSourceToBase64(descriptor.id),
     transports: descriptor.transports
       ?.map(mapAuthenticatorTransport)
-      .filter((t): t is AuthenticatorTransportType => t !== undefined),
+      .filter((t): t is internal.AuthenticatorTransportType => t !== undefined),
   }
 }
 
 /**
- * Creates credential options in iOS format
- * @internal
+ * Creates native module credential creation options from WebAuthn options.
+ * 
+ * @example
+ * ```ts
+ * const nativeOptions = createNativeCredential({
+ *   publicKey: {
+ *     rp: { id: 'example.com', name: 'Example' },
+ *     user: { id: new Uint8Array([1,2,3]), name: 'user', displayName: 'User' },
+ *     challenge: new Uint8Array([1,2,3])
+ *   }
+ * })
+ * ```
+ * 
+ * @param options - WebAuthn credential creation options
+ * @returns Native module credential creation options
  */
-export function create(options: create.Options): create.ReturnType {
-  const publicKey = options.publicKey
-  if (!publicKey) throw new InvalidOptionsError('Missing publicKey')
+export function createNativeCredential(
+  options: createNativeCredential.Parameters
+): createNativeCredential.ReturnType {
+  try {
+    const publicKey = options.publicKey
+    if (!publicKey) {
+      throw new InvalidOptionsError('Missing publicKey')
+    }
 
-  validateOptions({
-    rp: publicKey.rp,
-    user: publicKey.user,
-    challenge: publicKey.challenge,
-  })
+    validateOptions({
+      rp: publicKey.rp,
+      user: publicKey.user,
+      challenge: publicKey.challenge,
+    })
 
-  return {
-    rp: publicKey.rp,
-    user: {
-      id: bufferSourceToBase64(publicKey.user.id),
-      name: publicKey.user.name,
-      displayName: publicKey.user.displayName,
-    },
-    challenge: bufferSourceToBase64(publicKey.challenge),
-    pubKeyCredParams: publicKey.pubKeyCredParams?.map(createParameters),
-    timeout: publicKey.timeout,
-    excludeCredentials: publicKey.excludeCredentials?.map(createDescriptor),
-    authenticatorSelection: publicKey.authenticatorSelection,
-    attestation: publicKey.attestation,
+    return {
+      rp: publicKey.rp,
+      user: {
+        id: bufferSourceToBase64(publicKey.user.id),
+        name: publicKey.user.name,
+        displayName: publicKey.user.displayName,
+      },
+      challenge: bufferSourceToBase64(publicKey.challenge),
+      pubKeyCredParams: publicKey.pubKeyCredParams?.map(createParameters),
+      timeout: publicKey.timeout,
+      excludeCredentials: publicKey.excludeCredentials?.map(createDescriptor),
+      authenticatorSelection: publicKey.authenticatorSelection,
+      attestation: publicKey.attestation,
+    }
+  } catch (error) {
+    if (error instanceof InvalidOptionsError || error instanceof MissingFieldError) {
+      throw error
+    }
+    throw new InvalidOptionsError('Failed to create credential options', { cause: error as Error })
   }
 }
 
-export declare namespace create {
-  type Options = WebAuthnCredentialCreationOptions
-  type ReturnType = CredentialCreationOptions
+export declare namespace createNativeCredential {
+  type Parameters = internal.CredentialCreationOptions
+
+  /**
+   * Native module credential creation format.
+   * This is the format expected by the native module for creating credentials.
+   */
+  type ReturnType = {
+    rp: internal.PublicKeyCredentialRpEntity
+    user: {
+      displayName: string
+      id: string
+      name: string
+    }
+    challenge: string
+    pubKeyCredParams?: {
+      type: 'public-key'
+      alg: number
+    }[]
+    timeout?: number
+    excludeCredentials?: {
+      type?: 'public-key'
+      id: string
+      transports?: internal.AuthenticatorTransportType[]
+    }[]
+    authenticatorSelection?: internal.AuthenticatorSelectionCriteria
+    attestation?: internal.AttestationConveyancePreference
+  }
+
   type ErrorType = InvalidOptionsError | MissingFieldError | Error
 }
 
 /**
- * Parses a native iOS credential response into WebAuthn format
+ * Parses a native module credential attestation response into WebAuthn format.
  *
  * @example
  * ```ts
- * const credential = credential.parse(nativeResponse)
+ * const credential = fromNativeAttestation(nativeResponse)
  * // Returns WebAuthn formatted credential
  * ```
  *
- * @param response - Native iOS credential response
+ * @param response - Native module credential attestation response
  * @returns WebAuthn formatted credential
  */
-export function parse(response: parse.Input): parse.ReturnType {
+export function fromNativeAttestation(
+  response: fromNativeAttestation.Parameters
+): fromNativeAttestation.ReturnType {
   try {
     const publicKeyBuffer = parseSPKIFromAttestation(
       response.response.attestationObject,
     )
+
     return {
       id: response.id,
       rawId: base64URLToArrayBuffer(response.rawId),
@@ -358,10 +331,61 @@ export function parse(response: parse.Input): parse.ReturnType {
   }
 }
 
-export declare namespace parse {
-  type Input = CredentialAttestationResponse
-  type ReturnType = PublicKeyCredential & {
-    response: AuthenticatorAttestationResponse
+export declare namespace fromNativeAttestation {
+  /**
+   * Native module credential attestation response format.
+   * This is the format returned by the native module after credential creation.
+   */
+  type Parameters = {
+    id: string
+    rawId: string
+    response: {
+      attestationObject: string
+      clientDataJSON: string
+    }
+    type: 'public-key'
   }
+
+  type ReturnType = internal.PublicKeyCredential & {
+    response: internal.AuthenticatorAttestationResponse
+  }
+
   type ErrorType = ParseError | parseSPKIFromAttestation.ErrorType
+}
+
+// ============= Errors =============
+
+/** Thrown when credential parsing fails */
+export class ParseError extends Errors.BaseError<Error | undefined> {
+  override readonly name = 'WebAuthN.ParseError' as const
+  constructor(options: { cause?: Error } = {}) {
+    super('Failed to parse credential.', options)
+  }
+}
+
+/** Thrown when required options are invalid */
+export class InvalidOptionsError extends Errors.BaseError<Error | undefined> {
+  override readonly name = 'WebAuthN.InvalidOptionsError' as const
+  constructor(
+    message: string,
+    options: { metaMessages?: string[]; cause?: Error } = {},
+  ) {
+    super(message, options)
+  }
+}
+
+/** Thrown when a required field is missing */
+export class MissingFieldError extends Errors.BaseError<Error | undefined> {
+  override readonly name = 'WebAuthN.MissingFieldError' as const
+  constructor(field: string) {
+    super(`Missing required field: ${field}`)
+  }
+}
+
+/** Thrown when public key extraction fails */
+export class PublicKeyExtractionError extends Errors.BaseError<Error | undefined> {
+  override readonly name = 'WebAuthN.PublicKeyExtractionError' as const
+  constructor(options: { cause?: Error } = {}) {
+    super('Failed to extract public key from attestation.', options)
+  }
 }

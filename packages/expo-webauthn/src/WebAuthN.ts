@@ -2,7 +2,6 @@ import { Platform } from 'react-native'
 import ExpoWebAuthN from './ExpoWebAuthN'
 import * as assertion from './internal/assertion'
 import * as credential from './internal/credential'
-import { WebAuthnError } from './internal/types'
 import type {
   AuthenticatorAssertionResponse,
   AuthenticatorAttestationResponse,
@@ -10,26 +9,9 @@ import type {
   CredentialCreationOptions as WebAuthnCredentialCreationOptions,
   CredentialRequestOptions as WebAuthnCredentialRequestOptions,
 } from './internal/webauthn'
+import { Errors } from 'ox'
 
-// ============= Errors =============
-
-class WebAuthNError extends WebAuthnError {}
-
-/** Thrown when WebAuthn is not supported on the device */
-class UnsupportedError extends WebAuthNError {
-  override readonly name = 'WebAuthN.UnsupportedError'
-  constructor() {
-    super('WebAuthn is not supported on this device')
-  }
-}
-
-/** Thrown when required options are missing */
-class MissingOptionsError extends WebAuthNError {
-  override readonly name = 'WebAuthN.MissingOptionsError'
-  constructor(operation: string) {
-    super(`${operation} options are required`)
-  }
-}
+// ============= Functions =============
 
 /**
  * Checks if WebAuthn is supported on the current device.
@@ -54,46 +36,47 @@ export function isSupported(): boolean {
 
 /**
  * Creates a new WebAuthn credential for the specified options.
- * This function is designed to be used with WebAuthnP256.createCredential as a custom createFn.
- *
+ * 
  * On iOS, this uses ASAuthorizationPlatformPublicKeyCredentialProvider for credential creation.
- *
- * Note: While this function accepts undefined options to match WebAuthnP256.ts's type signature,
- * passing undefined will result in an error. This is because the underlying WebAuthn API
- * requires valid credential creation options. The only reason undefined is accepted in the type
- * signature is to maintain compatibility with WebAuthnP256.ts's createFn type.
+ * The private key is stored securely in the device's keychain, and a reference is maintained
+ * for future operations.
+ * 
+ * Note: While this function accepts WebAuthn credential creation options, it is specifically
+ * designed to work with the native module implementation. The options are converted into
+ * the appropriate format for each platform:
+ * - iOS: Uses ASAuthorizationPlatformPublicKeyCredentialProvider
+ * - Android: Uses the FIDO2 API (API Level 28+)
  *
  * @example
  * ```ts
+ * const credential = await WebAuthN.createCredential({
+ *   publicKey: {
+ *     rp: { id: 'example.com', name: 'Example' },
+ *     user: { id: new Uint8Array([1,2,3]), name: 'user', displayName: 'User' },
+ *     challenge: new Uint8Array([1,2,3])
+ *   }
+ * })
+ * ```
+ * 
+ * This function can also be used as a custom createFn with WebAuthnP256:
+ * ```ts
  * import { WebAuthnP256 } from 'ox'
- * import * as ExpoWebAuthN from '@porto/expo-webauthn'
- *
- * // Use as custom createFn in WebAuthnP256
+ * 
  * const credential = await WebAuthnP256.createCredential({
  *   name: 'Example',
  *   createFn: Platform.OS !== 'web'
- *     ? (options) => ExpoWebAuthN.createCredential(options)
+ *     ? (options) => WebAuthN.createCredential(options)
  *     : undefined
  * })
  * ```
- *
+ * 
  * @param options - The credential creation options
  * @returns A Promise that resolves with the created credential
  */
 export async function createCredential(
-  options: createCredential.Options,
+  options: createCredential.Parameters,
 ): Promise<createCredential.ReturnType> {
   if (!options) {
-    // TODO: add better type assertion like this:
-    // function requireParameter(
-    //     param: unknown,
-    //     details: string,
-    //   ): asserts param is NonNullable<typeof param> {
-    //   if (typeof param === 'undefined')
-    //     throw new RpcResponse.InvalidParamsError({
-    //       message: `Missing required parameter: ${details}`,
-    //     })
-    //   }
     throw new MissingOptionsError('Credential creation')
   }
 
@@ -101,57 +84,69 @@ export async function createCredential(
     throw new UnsupportedError()
   }
 
-  const nativeOptions = credential.create(options)
-  const nativeResponse = (await ExpoWebAuthN.createCredential(
-    nativeOptions,
-  )) as credential.parse.Input
-  // TODO: add zod validation or something here.
-  return credential.parse(nativeResponse)
+  const nativeOptions = credential.createNativeCredential(options)
+  const nativeResponse = await ExpoWebAuthN.createCredential(nativeOptions)
+  return credential.fromNativeAttestation(nativeResponse)
 }
 
 export declare namespace createCredential {
-  type Options = WebAuthnCredentialCreationOptions | undefined
+  type Parameters = WebAuthnCredentialCreationOptions
   type ReturnType = PublicKeyCredential & {
     response: AuthenticatorAttestationResponse
   }
   type ErrorType =
     | MissingOptionsError
     | UnsupportedError
-    | credential.create.ErrorType
-    | credential.parse.ErrorType
-    | credential.parseSPKIFromAttestation.ErrorType
+    | credential.InvalidOptionsError
+    | credential.MissingFieldError
+    | credential.ParseError
+    | credential.PublicKeyExtractionError
 }
 
 /**
  * Gets an existing WebAuthn credential using the specified options.
- * This function is designed to be used with WebAuthnP256.sign as a custom getFn.
- *
+ * 
  * On iOS, this uses ASAuthorizationPlatformPublicKeyCredentialProvider for credential assertion.
- *
- * Note: While this function accepts undefined options to match WebAuthnP256.ts's type signature,
- * passing undefined will result in an error. This is because the underlying WebAuthn API
- * requires valid credential request options. The only reason undefined is accepted in the type
- * signature is to maintain compatibility with WebAuthnP256.ts's getFn type.
- *
+ * It will access the previously stored credential in the device's keychain using the provided
+ * parameters.
+ * 
+ * Note: While this function accepts WebAuthn credential request options, it is specifically
+ * designed to work with the native module implementation. The options are converted into
+ * the appropriate format for each platform:
+ * - iOS: Uses ASAuthorizationPlatformPublicKeyCredentialProvider
+ * - Android: Uses the FIDO2 API (API Level 28+)
+ * 
  * @example
  * ```ts
+ * const assertion = await WebAuthN.getCredential({
+ *   publicKey: {
+ *     challenge: new Uint8Array([1,2,3]),
+ *     rpId: 'example.com',
+ *     allowCredentials: [{
+ *       id: new Uint8Array([4,5,6]),
+ *       type: 'public-key'
+ *     }]
+ *   }
+ * })
+ * ```
+ * 
+ * This function can also be used as a custom getFn with WebAuthnP256:
+ * ```ts
  * import { WebAuthnP256 } from 'ox'
- * import * as ExpoWebAuthN from '@porto/expo-webauthn'
- *
- * // Use as custom getFn in WebAuthnP256
+ * 
  * const { metadata, signature } = await WebAuthnP256.sign({
  *   challenge: '0xdeadbeef',
  *   getFn: Platform.OS !== 'web'
- *     ? (options) => ExpoWebAuthN.getCredential(options)
+ *     ? (options) => WebAuthN.getCredential(options)
  *     : undefined
  * })
  * ```
- *
+ * 
  * @param options - The credential request options
  * @returns A Promise that resolves with the credential assertion
  */
 export async function getCredential(
-  options: getCredential.Options,
+  options: getCredential.Parameters,
 ): Promise<getCredential.ReturnType> {
   if (!isSupported()) {
     throw new UnsupportedError()
@@ -161,22 +156,39 @@ export async function getCredential(
     throw new MissingOptionsError('Credential request')
   }
 
-  // TODO: add zod validation or something for the native response.
-  const nativeOptions = assertion.create(options)
-  const nativeResponse = (await ExpoWebAuthN.getCredential(
-    nativeOptions,
-  )) as assertion.parse.Input
-  return assertion.parse(nativeResponse)
+  const nativeOptions = assertion.createNativeAssertion(options)
+  const nativeResponse = await ExpoWebAuthN.getCredential(nativeOptions)
+  return assertion.fromNativeAssertion(nativeResponse)
 }
 
 export declare namespace getCredential {
-  type Options = WebAuthnCredentialRequestOptions | undefined
+  type Parameters = WebAuthnCredentialRequestOptions
   type ReturnType = PublicKeyCredential & {
     response: AuthenticatorAssertionResponse
   }
   type ErrorType =
     | MissingOptionsError
     | UnsupportedError
-    | assertion.create.ErrorType
-    | assertion.parse.ErrorType
+    | assertion.InvalidOptionsError
+    | assertion.MissingFieldError
+    | assertion.ParseError
+}
+
+
+// ============= Errors =============
+
+/** Thrown when WebAuthn is not supported on the device */
+export class UnsupportedError extends Errors.BaseError<Error | undefined> {
+  override readonly name = 'WebAuthN.UnsupportedError' as const
+  constructor() {
+    super('WebAuthn is not supported on this device')
+  }
+}
+
+/** Thrown when required options are missing */
+export class MissingOptionsError extends Errors.BaseError<Error | undefined> {
+  override readonly name = 'WebAuthN.MissingOptionsError' as const
+  constructor(operation: string) {
+    super(`${operation} options are required`)
+  }
 }

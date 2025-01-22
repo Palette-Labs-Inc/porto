@@ -1,7 +1,7 @@
-package expo.modules.p256.encryptors
+package expo.porto.p256.encryptors
 
-import expo.modules.p256.AuthenticationHelper
-import expo.modules.p256.P256Options
+import expo.porto.p256.AuthenticationHelper
+import expo.porto.p256.P256Options
 import org.json.JSONException
 import org.json.JSONObject
 import java.security.GeneralSecurityException

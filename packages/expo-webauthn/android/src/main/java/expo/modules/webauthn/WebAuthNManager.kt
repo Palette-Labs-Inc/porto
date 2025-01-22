@@ -1,4 +1,4 @@
-package expo.modules.webauthn
+package expo.porto.webauthn
 
 import android.app.Activity
 import android.content.Context

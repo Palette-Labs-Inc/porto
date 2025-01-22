@@ -1,4 +1,4 @@
-package expo.modules.p256
+package expo.porto.p256
 
 import expo.modules.kotlin.records.Field
 import expo.modules.kotlin.records.Record
@@ -10,3 +10,4 @@ class P256Options(
   @Field var keychainService: String = P256Module.DEFAULT_KEYSTORE_ALIAS,
   @Field var requireAuthentication: Boolean = false,
 ) : Record, Serializable
+ 

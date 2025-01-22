@@ -1,4 +1,4 @@
-package expo.modules.p256
+package expo.porto.p256
 
 import android.annotation.SuppressLint
 import android.app.Activity

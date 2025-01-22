@@ -1,4 +1,4 @@
-package expo.modules.webauthn
+package expo.porto.webauthn
 
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition

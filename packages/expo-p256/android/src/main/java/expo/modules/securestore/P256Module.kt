@@ -1,4 +1,4 @@
-package expo.modules.p256
+package expo.porto.p256
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -12,9 +12,9 @@ import expo.modules.kotlin.exception.Exceptions
 import expo.modules.kotlin.functions.Coroutine
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import expo.modules.p256.encryptors.AESEncryptor
-import expo.modules.p256.encryptors.HybridAESEncryptor
-import expo.modules.p256.encryptors.KeyBasedEncryptor
+import expo.porto.p256.encryptors.AESEncryptor
+import expo.porto.p256.encryptors.HybridAESEncryptor
+import expo.porto.p256.encryptors.KeyBasedEncryptor
 import kotlinx.coroutines.runBlocking
 import org.json.JSONException
 import org.json.JSONObject

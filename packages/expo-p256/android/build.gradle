@@ -13,6 +13,9 @@ applyKotlinExpoModulesCorePlugin()
 useCoreDependencies()
 useExpoPublishing()
 
+plugins {
+    id 'kotlin-android'
+}
 // If you want to use the managed Android SDK versions from expo-modules-core, set this to true.
 // The Android SDK versions will be bumped from time to time in SDK releases and may introduce breaking changes in your module code.
 // Most of the time, you may like to manage the Android SDK versions yourself.
@@ -20,12 +23,6 @@ def useManagedAndroidSdkVersions = false
 if (useManagedAndroidSdkVersions) {
   useDefaultAndroidSdkVersions()
 } else {
-  buildscript {
-    // Simple helper that allows the root project to override versions declared by this library.
-    ext.safeExtGet = { prop, fallback ->
-      rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
-    }
-  }
   project.android {
     compileSdkVersion safeExtGet("compileSdkVersion", 34)
     defaultConfig {
@@ -36,7 +33,7 @@ if (useManagedAndroidSdkVersions) {
 }
 
 android {
-  namespace "expo.porto.webauthn"
+  namespace "expo.porto.p256"
   defaultConfig {
     versionCode 1
     versionName packageJson.version
@@ -50,15 +47,11 @@ android {
   }
 }
 
-
 dependencies {
   implementation project(':expo-modules-core')
+  implementation project(':expo-modules-kotlin')
   implementation 'androidx.activity:activity-ktx:1.7.2'
-  
-  // Kotlin
   implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.2'
   implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.2'
-  
-  // Biometric
   implementation "androidx.biometric:biometric-ktx:1.4.0-alpha02"
 }

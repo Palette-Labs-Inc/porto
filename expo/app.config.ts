@@ -43,7 +43,30 @@ const config: ExpoConfig = {
     bundler: 'metro',
     favicon: './assets/images/favicon.png',
   },
-  plugins: ['expo-router'],
+  plugins: [
+    'expo-router',
+    [
+      'expo-build-properties',
+      {
+        android: {
+          targetSdkVersion: 34,
+          minSdkVersion: 23, // minSdkVersion for biometrics on android.
+          kotlinVersion: '1.9.24',
+        },
+        ios: {
+          deploymentTarget: '15.4', // min iOS version for passkeys on iOS.
+          useFrameworks: 'static',
+        },
+      },
+    ],
+    [
+      '@porto/expo-p256',
+      {
+        faceIDPermission:
+          'Allow Porto to use Face ID for secure authentication',
+      },
+    ],
+  ],
   experiments: {
     typedRoutes: true,
   },

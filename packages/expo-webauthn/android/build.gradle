@@ -1,7 +1,11 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
-group = 'expo.modules.webauthn'
-version = '0.1.0'
+// Read version from package.json
+def packageJson = new groovy.json.JsonSlurper().parseText(file("../package.json").text)
+
+group = 'com.porto.webauthn'
+version = packageJson.version
 
 def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
 apply from: expoModulesCorePlugin
@@ -25,34 +29,24 @@ if (useManagedAndroidSdkVersions) {
   project.android {
     compileSdkVersion safeExtGet("compileSdkVersion", 34)
     defaultConfig {
-      minSdkVersion safeExtGet("minSdkVersion", 21)
+      minSdkVersion safeExtGet("minSdkVersion", 23)
       targetSdkVersion safeExtGet("targetSdkVersion", 34)
     }
   }
 }
 
 android {
+  namespace "expo.porto.webauthn"
+  defaultConfig {
+    versionCode 1
+    versionName packageJson.version
+  }
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_17
     targetCompatibility JavaVersion.VERSION_17
   }
-
   kotlinOptions {
     jvmTarget = JavaVersion.VERSION_17.majorVersion
-  }
-
-  namespace "expo.modules.webauthn"
-  defaultConfig {
-    versionCode 1
-    versionName '0.0.0'
-  }
-  lintOptions {
-    abortOnError false
-  }
-
-    compileOptions {
-    sourceCompatibility JavaVersion.VERSION_17
-    targetCompatibility JavaVersion.VERSION_17
   }
 }
 

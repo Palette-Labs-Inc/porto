@@ -1,7 +1,7 @@
 {
   "name": "@porto/expo-p256",
   "version": "0.0.1",
-  "description": "Provides a way to encrypt and securely store key-value pairs locally on the device.",
+  "description": "Expo module providing platform-specific implementations for NIST P256 ECDSA operations (createKeyPair, sign, verify) to match the Ox WebCryptoP256 module.",
   "main": "build/P256.js",
   "types": "build/P256.d.ts",
   "source": {

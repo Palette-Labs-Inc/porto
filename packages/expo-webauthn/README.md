@@ -1,13 +1,14 @@
 # @porto/expo-webauthn
+Native WebAuthn support with [ox's WebAuthn-P256](https://oxlib.sh/guides/webauthn)
 
-Expo Module for WebAuthN on iOS 15.0+ and Android API 28+ using Expo.
+This module implements the native WebAuthn APIs for Expo, with `ox`'s `WebAuthnP256` handling cryptographic operations.
 
 ## Installation
 
 #### Javascript
 
 ```sh
-yarn add @porto/expo-webauthn
+pnpm add @porto/expo-webauthn
 ```
 
 #### Native
@@ -183,75 +184,137 @@ Note: While `npx expo run:android -d` is convenient for debug mode, it won't wor
 
 ## Usage
 
-#### Check if WebAuthN is supported on this device
-
-```ts
-import { Passkey } from '@porto/expo-webauthn'
-
-// Use this method to check if passkeys are supported on the device
-
-const isSupported: boolean = Passkey.isSupported()
-```
-
 #### Creating a new Passkey
 
 ```ts
-import { Passkey, PasskeyRegistrationResult } from '@porto/expo-webauthn'
-
-// Retrieve a valid FIDO2 attestation request from your server
-// The challenge inside the request needs to be a base64URL encoded string
-// There are plenty of libraries which can be used for this (e.g. fido2-lib)
+import * as WebAuthN from '@porto/expo-webauthn'
+import type { CredentialCreationOptions } from '@porto/expo-webauthn'
 
 try {
-  // Call the `create` method with the retrieved request in JSON format
-  // A native overlay will be displayed
-  const result: PasskeyRegistrationResult = await Passkey.create(requestJson)
+  // Retrieve a valid FIDO2 attestation request from your server
+  // The challenge inside the request needs to be a base64URL encoded string
+  const options: CredentialCreationOptions = {
+    publicKey: {
+      rp: { id: 'example.com', name: 'Example' },
+      user: { 
+        id: new Uint8Array([1,2,3]), 
+        name: 'user', 
+        displayName: 'User' 
+      },
+      challenge: new Uint8Array([1,2,3])
+    }
+  }
 
-  // The `create` method returns a FIDO2 attestation result
+  // Call createCredential with the options
+  // A native overlay will be displayed
+  const credential = await WebAuthN.createCredential(options)
+
+  // The credential includes the attestation response
   // Pass it to your server for verification
 } catch (error) {
-  // Handle Error...
+  // Handle specific error types:
+  // - MissingOptionsError: When options are undefined
+  // - InvalidOptionsError: When options format is invalid
+  // - MissingFieldError: When required fields are missing
+  // - ParseError: When response parsing fails
+  // - PublicKeyExtractionError: When key extraction fails
 }
 ```
 
 #### Authenticating with existing Passkey
 
 ```ts
-import { Passkey, PasskeyAuthenticationResult } from '@porto/expo-webauthn'
-
-// Retrieve a valid FIDO2 assertion request from your server
-// The challenge inside the request needs to be a base64URL encoded string
-// There are plenty of libraries which can be used for this (e.g. fido2-lib)
+import * as WebAuthN from '@porto/expo-webauthn'
+import type { CredentialRequestOptions } from '@porto/expo-webauthn'
 
 try {
-  // Call the `get` method with the retrieved request in JSON format
-  // A native overlay will be displayed
-  const result: PasskeyAuthResult = await Passkey.get(requestJson)
+  // Retrieve a valid FIDO2 assertion request from your server
+  // The challenge inside the request needs to be a base64URL encoded string
+  const options: CredentialRequestOptions = {
+    publicKey: {
+      challenge: new Uint8Array([1,2,3]),
+      rpId: 'example.com',
+      allowCredentials: [{
+        id: new Uint8Array([4,5,6]),
+        type: 'public-key'
+      }]
+    }
+  }
 
-  // The `get` method returns a FIDO2 assertion result
+  // Call getCredential with the options
+  // A native overlay will be displayed
+  const assertion = await WebAuthN.getCredential(options)
+
+  // The assertion includes the authentication response
   // Pass it to your server for verification
 } catch (error) {
-  // Handle Error...
+  // Handle specific error types:
+  // - MissingOptionsError: When options are undefined
+  // - InvalidOptionsError: When options format is invalid
+  // - MissingFieldError: When required fields are missing
+  // - ParseError: When response parsing fails
 }
 ```
 
-### Force Platform or Security Key (iOS-specific)
-You can force users to register and authenticate using either a platform key, a security key (like [Yubikey](https://www.yubico.com/)) or allow both using the following methods. This only works on iOS, Android will ignore these instructions.
+### Integration with WebAuthnP256
 
-#### Create Passkey
+This module can be used with the `ox` library's WebAuthnP256 module for advanced cryptographic operations. The WebAuthnP256 module provides utilities for working with WebAuthn-P256 Signers, which can be used for transaction signing and arbitrary payload verification.
 
-- `Passkey.create()` - Allow the user to choose between platform and security passkey
-- `Passkey.createPlatformKey()` - Force the user to create a platform passkey (iOS only)
-- `Passkey.createSecurityKey()` - Force the user to create a security passkey (iOS only)
+#### Registering a WebAuthn Credential
 
-#### Get Passkey
+```ts
+import * as WebAuthnP256 from 'ox'
+import * as WebAuthN from '@porto/expo-webauthn'
+import { Platform } from 'react-native'
 
-- `Passkey.get()` - Allow the user to choose between platform and security passkey
-- `Passkey.getPlatformKey()` - Force the user to authenticate using a platform passkey (iOS only)
-- `Passkey.getSecurityKey()` - Force the user to authenticate using a security passkey (iOS only)
+// Register a new WebAuthn credential
+const credential = await WebAuthnP256.createCredential({
+  name: 'Example',
+  createFn: Platform.OS !== 'web'
+    ? (options) => WebAuthN.createCredential(options)
+    : undefined
+})
 
+// The credential object contains:
+type P256Credential = {
+  id: string          // The credential ID
+  publicKey: string   // The P256 public key
+  name: string        // The friendly name
+}
+```
 
----
+#### Signing Payloads
+
+```ts
+// Sign a challenge (payload)
+const { metadata, signature } = await WebAuthnP256.sign({
+  challenge: '0xdeadbeef',
+  credentialId: credential.id,
+  getFn: Platform.OS !== 'web'
+    ? (options) => WebAuthN.getCredential(options)
+    : undefined
+})
+```
+
+## API Reference
+
+| Function | Description |
+|----------|-------------|
+| `createCredential` | Creates a new WebAuthn credential with platform authenticator |
+| `getCredential` | Retrieves and authenticates with an existing credential |
+| `isSupported` | Checks if WebAuthn is supported on the device |
+| `createPlatformKey` | Creates a credential using platform authenticator (iOS only) |
+| `createSecurityKey` | Creates a credential using security key (iOS only) |
+| `getPlatformKey` | Authenticates using platform authenticator (iOS only) |
+| `getSecurityKey` | Authenticates using security key (iOS only) |
+
+### Integration Functions
+
+| Function | Description |
+|----------|-------------|
+| `WebAuthnP256.createCredential` | Creates a WebAuthn-P256 credential for Ethereum operations |
+| `WebAuthnP256.sign` | Signs Ethereum transactions and payloads |
+| `WebAuthnP256.verify` | Verifies WebAuthn-P256 signatures |
 
 ## License
 

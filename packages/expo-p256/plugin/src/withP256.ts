@@ -54,7 +54,7 @@ const withP256: ConfigPlugin<
 
     console.warn(
       'Expo-p256 tried to apply Android Auto Backup rules, but other backup rules are already present. ' +
-        'Refer to the Expo-secure-store docs (https://docs.expo.dev/versions/latest/sdk/securestore/) to configure your backup rules.',
+        'You can refer to the Expo-secure-store docs (https://docs.expo.dev/versions/latest/sdk/securestore/) to configure your backup rules.',
     )
     return config
   })

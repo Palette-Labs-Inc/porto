@@ -1,56 +1,143 @@
+# @porto/expo-p256
 
-Provides a way to create and manage P256 key pairs using secure enclave on iOS and Android Keystore on Android.
+Native P256 implementation for Expo applications using secure hardware (iOS Secure Enclave, Android Keystore).
 
-# Installation in managed Expo projects
+## Overview
 
-For [managed](https://docs.expo.dev/archive/managed-vs-bare/) Expo projects, please follow the installation instructions in the [API documentation for the latest stable release](https://docs.expo.dev/versions/latest/sdk/securestore/).
+This module provides NIST P256 ECDSA operations using platform-specific secure hardware:
+- iOS: Secure Enclave for key generation and operations
+- Android: Android Keystore System for key storage and operations
 
-# Installation in bare React Native projects
+## Installation
 
-For bare React Native projects, you must ensure that you have [installed and configured the `expo` package](https://docs.expo.dev/bare/installing-expo-modules/) before continuing.
-
-### Add the package to your npm dependencies
-
+```sh
+pnpm install @porto/expo-p256
 ```
-npx expo install expo-p256
-```
 
-### Configure for Android
-
-No additional set up necessary.
-
-### Configure for iOS
-
+### iOS Setup
 Run `npx pod-install` after installing the npm package.
 
-# Platform Implementation Details
+### Android Setup
+No additional setup required.
 
-## P256 Key Pair Generation
-The implementation of P256 key pair generation differs between iOS and Android:
+## Examples
 
-### iOS
-On iOS, keys are generated in the Secure Enclave, and a reference to the key must be stored in the Keychain. This means:
-- The private key is generated and stored in the Secure Enclave
-- A reference to this key is stored in the Keychain
-- You must maintain both the key in the Secure Enclave and its reference in the Keychain
+### Creating Key Pairs
 
-### Android
-On Android, keys are stored directly in the Android Keystore System using aliases. This means:
-- The key pair is generated and stored directly in the KeyStore
-- Keys are referenced directly by their alias
-- No additional reference storage is needed
+```ts
+import * as P256 from '@porto/expo-p256'
 
-## Authentication Requirements
-Authentication requirements for key operations are determined at key creation time and cannot be modified afterwards:
+// Create a new key pair with biometric protection
+const key = await P256.createKeyPair({
+  requireAuthentication: true,
+  authenticationPrompt: "Create your Porto key"
+})
 
-- When creating a key pair with `createP256KeyPair(key, { requireAuthentication: true })`, the authentication requirement is permanently bound to the key
-- Subsequent operations like `signWithP256KeyPair` will require authentication based on how the key was created, regardless of the options passed to these methods
-- This is a security feature that prevents bypassing authentication requirements after key creation
-- On iOS, this is enforced by the Secure Enclave
-- On Android, this is enforced by the KeyStore's `setUserAuthenticationRequired` flag
+// The key object contains:
+type P256Key = {
+  publicKey: PublicKey      // P256 public key
+  privateKeyStorageKey: string  // Reference to secure storage
+}
+```
 
-These implementation differences are handled automatically by the module, but they're important to understand when dealing with key lifecycle, storage behavior, and authentication requirements across platforms.
+### Signing Payloads
 
-# Contributing
+```ts
+import * as P256 from '@porto/expo-p256'
 
-Contributions are very welcome! Please refer to guidelines described in the [contributing guide](https://github.com/expo/expo#contributing).
+// Sign a payload
+const signature = await P256.sign({ 
+  privateKeyStorageKey: key.privateKeyStorageKey,
+  payload: '0xdeadbeef',
+  authenticationPrompt: "Sign transaction"
+})
+```
+
+### Verifying Signatures
+
+```ts
+import * as P256 from '@porto/expo-p256'
+
+const verified = await P256.verify({ 
+  publicKey: key.publicKey,
+  signature: signature,
+  payload: '0xdeadbeef'
+})
+```
+
+## Platform Implementation Details
+
+### P256 Key Pair Generation
+
+#### iOS
+- Private key is generated and stored in the Secure Enclave
+- Reference to the key is stored in the Keychain
+- Authentication requirements are enforced by Secure Enclave
+- Requires maintaining both Secure Enclave key and Keychain reference
+
+#### Android
+- Key pair is generated and stored in Android Keystore System
+- Keys are referenced by alias
+- Authentication requirements bound at creation time
+- No additional reference storage needed
+
+### Authentication Requirements
+
+Authentication settings are determined at key creation time and cannot be modified:
+
+```ts
+// Create key with authentication
+const key = await P256.createKeyPair({
+  requireAuthentication: true,  // Permanent setting
+  authenticationPrompt: "Authentication required"
+})
+
+// Subsequent operations will require authentication
+const signature = await P256.sign({
+  privateKeyStorageKey: key.privateKeyStorageKey,
+  payload: '0xdeadbeef',
+  // Authentication required regardless of options
+})
+
+// Counter example: Key without authentication
+const simpleKey = await P256.createKeyPair({
+  requireAuthentication: false  // Default setting
+})
+
+// No authentication required for operations
+const simpleSignature = await P256.sign({
+  privateKeyStorageKey: simpleKey.privateKeyStorageKey,
+  payload: '0xdeadbeef'
+})
+```
+
+### Error Handling
+
+```ts
+try {
+  await P256.createKeyPair()
+} catch (error) {
+  // Handle specific error types:
+  // - UnsupportedPlatformError: Device doesn't support P256
+  // - BiometricAuthenticationError: Biometrics unavailable
+  // - InvalidKeyPairError: Key generation failed
+  // - InvalidKeyFormatError: Invalid key format
+  // - InvalidSignatureError: Signature operation failed
+}
+```
+
+## API Reference
+
+| Function | Description |
+|----------|-------------|
+| `createKeyPair` | Creates a P256 key pair in secure hardware |
+| `getKeyPair` | Retrieves a stored key pair |
+| `sign` | Signs data using a stored key pair |
+| `verify` | Verifies a signature |
+| `isAvailableAsync` | Checks P256 hardware support |
+| `deleteItemAsync` | Deletes a stored key pair |
+| `canUseBiometricAuthentication` | Checks biometric availability |
+
+## License
+
+MIT

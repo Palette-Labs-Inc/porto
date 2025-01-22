@@ -1,23 +1,64 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
-group = 'host.exp.exponent'
-version = '0.0.0'
+// Read version from package.json
+def packageJson = new groovy.json.JsonSlurper().parseText(file("../package.json").text)
+
+group = 'com.porto.p256'
+version = packageJson.version
 
 def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
 apply from: expoModulesCorePlugin
 applyKotlinExpoModulesCorePlugin()
 useCoreDependencies()
-useDefaultAndroidSdkVersions()
 useExpoPublishing()
 
-android {
-  namespace "expo.modules.p256"
-  defaultConfig {
-    versionCode 1
-    versionName '0.0.0'
+// If you want to use the managed Android SDK versions from expo-modules-core, set this to true.
+// The Android SDK versions will be bumped from time to time in SDK releases and may introduce breaking changes in your module code.
+// Most of the time, you may like to manage the Android SDK versions yourself.
+def useManagedAndroidSdkVersions = false
+if (useManagedAndroidSdkVersions) {
+  useDefaultAndroidSdkVersions()
+} else {
+  buildscript {
+    // Simple helper that allows the root project to override versions declared by this library.
+    ext.safeExtGet = { prop, fallback ->
+      rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+    }
+  }
+  project.android {
+    compileSdkVersion safeExtGet("compileSdkVersion", 34)
+    defaultConfig {
+      minSdkVersion safeExtGet("minSdkVersion", 23)
+      targetSdkVersion safeExtGet("targetSdkVersion", 34)
+    }
   }
 }
 
+android {
+  namespace "expo.porto.webauthn"
+  defaultConfig {
+    versionCode 1
+    versionName packageJson.version
+  }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+  }
+  kotlinOptions {
+    jvmTarget = JavaVersion.VERSION_17.majorVersion
+  }
+}
+
+
 dependencies {
-  api "androidx.biometric:biometric:1.1.0"
+  implementation project(':expo-modules-core')
+  implementation 'androidx.activity:activity-ktx:1.7.2'
+  
+  // Kotlin
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.2'
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.2'
+  
+  // Biometric
+  implementation "androidx.biometric:biometric-ktx:1.4.0-alpha02"
 }

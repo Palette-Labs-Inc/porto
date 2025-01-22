@@ -1,11 +1,10 @@
 {
   "name": "@porto/expo-webauthn",
   "version": "0.0.1",
-  "description": "expo webauthn",
+  "description": "Native Expo module provideing platform-specific implementations for createFn and getFn methods of the Ox WebAuthnP256 module.",
   "source": {
     "git": "https://github.com/Palette-Labs-Inc/porto.git"
   },
-  "summary": "An expo module for passkeys",
   "type": "module",
   "main": "./build/WebAuthN.js",
   "types": "./build/WebAuthN.d.ts",

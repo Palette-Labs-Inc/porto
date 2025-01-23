@@ -26,12 +26,13 @@ function resolvePortoModule(context, moduleName) {
   }
 
   // Convert module path to typescript source path
-  const relativePath = moduleName === 'porto'
-    ? 'index.ts'
-    : moduleName.replace('porto/', '').replace('.js', '.ts')
+  const relativePath =
+    moduleName === 'porto'
+      ? 'index.ts'
+      : moduleName.replace('porto/', '').replace('.js', '.ts')
 
   const sourcePath = path.join(PATHS.portoSource, relativePath)
-  
+
   // Check if source file exists
   if (fs.existsSync(sourcePath)) {
     return {
@@ -47,13 +48,16 @@ function resolvePortoModule(context, moduleName) {
  * Resolves .js imports to .ts source files within porto
  */
 function resolveTypescriptFile(context, moduleName) {
-  if (!context.originModulePath.includes(PATHS.portoSource) || !moduleName.endsWith('.js')) {
+  if (
+    !context.originModulePath.includes(PATHS.portoSource) ||
+    !moduleName.endsWith('.js')
+  ) {
     return null
   }
 
   const tsPath = path.join(
     path.dirname(context.originModulePath),
-    moduleName.replace('.js', '.ts')
+    moduleName.replace('.js', '.ts'),
   )
 
   if (fs.existsSync(tsPath)) {
@@ -72,7 +76,7 @@ const expoConfig = getDefaultConfig(PATHS.project)
 /** @type {import('expo/metro-config').MetroConfig} */
 module.exports = makeMetroConfig({
   ...expoConfig,
-  
+
   // Module resolution configuration
   resolver: {
     ...expoConfig.resolver,
@@ -87,7 +91,11 @@ module.exports = makeMetroConfig({
 
       // Finally try symlinks resolution
       try {
-        const symlinkResolution = symlinksResolver(context, moduleName, platform)
+        const symlinkResolution = symlinksResolver(
+          context,
+          moduleName,
+          platform,
+        )
         if (symlinkResolution) return symlinkResolution
       } catch {}
 
@@ -110,7 +118,7 @@ module.exports = makeMetroConfig({
     extraNodeModules: {
       // Map porto to source
       porto: PATHS.portoSource,
-      
+
       // Node.js core polyfills
       crypto: require.resolve('react-native-quick-crypto'),
       buffer: require.resolve('buffer'),
@@ -120,11 +128,7 @@ module.exports = makeMetroConfig({
   },
 
   // Directories to watch for changes
-  watchFolders: [
-    PATHS.workspace,
-    PATHS.packages,
-    PATHS.portoSource,
-  ],
+  watchFolders: [PATHS.workspace, PATHS.packages, PATHS.portoSource],
 
   // Transformer configuration
   transformer: {

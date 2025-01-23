@@ -1,4 +1,4 @@
-package expo.modules.webauthn
+package expo.porto.webauthn
 
 import android.content.Context
 import expo.modules.kotlin.Promise

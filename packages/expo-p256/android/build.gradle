@@ -1,11 +1,8 @@
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
 
 // Read version from package.json
-def packageJson = new groovy.json.JsonSlurper().parseText(file("../package.json").text)
-
 group = 'com.porto.p256'
-version = packageJson.version
+version = '0.0.1'
 
 def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
 apply from: expoModulesCorePlugin
@@ -39,7 +36,7 @@ android {
   namespace "expo.porto.p256"
   defaultConfig {
     versionCode 1
-    versionName packageJson.version
+    versionName "0.0.1"
   }
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_17

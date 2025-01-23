@@ -1,10 +1,8 @@
 apply plugin: 'com.android.library'
 
 // Read version from package.json
-def packageJson = new groovy.json.JsonSlurper().parseText(file("../package.json").text)
-
 group = 'com.porto.webauthn'
-version = packageJson.version
+version = '0.0.1'
 
 def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
 apply from: expoModulesCorePlugin
@@ -38,7 +36,7 @@ android {
   namespace "expo.porto.webauthn"
   defaultConfig {
     versionCode 1
-    versionName packageJson.version
+    versionName "0.0.1"
   }
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_17

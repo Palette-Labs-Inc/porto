@@ -2,6 +2,7 @@
   "name": "@porto/expo-p256",
   "version": "0.0.1",
   "description": "Expo module providing platform-specific implementations for NIST P256 ECDSA operations (createKeyPair, sign, verify) to match the Ox WebCryptoP256 module.",
+  "summary": "Native WebCryptoP256 implementation",
   "main": "build/P256.js",
   "types": "build/P256.d.ts",
   "source": {

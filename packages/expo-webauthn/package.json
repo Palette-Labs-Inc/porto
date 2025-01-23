@@ -2,6 +2,7 @@
   "name": "@porto/expo-webauthn",
   "version": "0.0.1",
   "description": "Native Expo module provideing platform-specific implementations for createFn and getFn methods of the Ox WebAuthnP256 module.",
+  "summary": "Native WebAuthnP256 implementation",
   "source": {
     "git": "https://github.com/Palette-Labs-Inc/porto.git"
   },

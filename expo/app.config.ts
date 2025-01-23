@@ -55,7 +55,7 @@ const config: ExpoConfig = {
       {
         android: {
           targetSdkVersion: 34,
-          minSdkVersion: 23, // minSdkVersion for biometrics on android.
+          minSdkVersion: 24, // minSdkVersion for biometrics on android.
           kotlinVersion: '1.9.24',
         },
         ios: {

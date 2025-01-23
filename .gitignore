@@ -50,3 +50,4 @@ expo/ios
 expo/android
 packages/expo-p256/.eslintrc.js
 packages/expo-webauthn/.eslintrc.js
+/packages/expo-webauthn/android/build

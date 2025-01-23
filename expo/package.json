@@ -11,7 +11,7 @@
     "prebuild": "expo prebuild",
     "prebuild:ios": "expo prebuild --platform ios",
     "prebuild:android": "expo prebuild --platform android",
-    "clean": "rm -rf .expo .turbo node_modules ios android dist build",
+    "clean": "rm -rf .expo node_modules ios android dist build",
     "run:android": "EXPO_DEBUG=1 expo run:android",
     "run:ios": "EXPO_DEBUG=1 expo run:ios",
     "build:android": "EXPO_DEBUG=1 expo build:android",

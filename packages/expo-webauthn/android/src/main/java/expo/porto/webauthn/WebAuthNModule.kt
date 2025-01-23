@@ -1,4 +1,4 @@
-package expo.modules.passkeys
+package expo.porto.webauthn
 
 import androidx.credentials.exceptions.CreateCredentialException
 import androidx.credentials.exceptions.GetCredentialException
@@ -26,7 +26,7 @@ class WebAuthNModule : Module() {
                     }
                 }
             } catch (e: Exception) {
-                promise.reject("Passkey Create", e.message, e)
+                handleCreateFailure(e, promise)
             }
         }
 

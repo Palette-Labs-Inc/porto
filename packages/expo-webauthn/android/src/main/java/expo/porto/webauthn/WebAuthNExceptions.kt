@@ -1,4 +1,4 @@
-package expo.modules.passkeys
+package expo.porto.webauthn
 
 import androidx.credentials.exceptions.CreateCredentialCancellationException
 import androidx.credentials.exceptions.CreateCredentialCustomException

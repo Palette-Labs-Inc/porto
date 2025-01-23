@@ -18,7 +18,7 @@
     "build:android": "EXPO_DEBUG=1 USE_PORTO_SOURCE=true expo build:android",
     "build:ios": "EXPO_DEBUG=1 expo build:ios",
     "ios:debug": "EXPO_DEBUG=1 USE_PORTO_SOURCE=true EXPO_USE_METRO_WORKSPACE_ROOT=1 expo run:ios",
-    "android:debug": "USE_PORTO_SOURCE=true expo start --android",
+    "android:debug": "EXPO_DEBUG=1 USE_PORTO_SOURCE=true EXPO_USE_METRO_WORKSPACE_ROOT=1 expo run:android",
     "studio:android": "pnpm prebuild:android && open -a /Applications/Android\\ Studio.app ./android"
   },
   "dependencies": {

@@ -16,18 +16,14 @@ class WebAuthNModule : Module() {
         Name("ExpoWebAuthN")
 
         AsyncFunction("createCredential") { request: String, promise: Promise ->
-            try {
                 mainScope.launch {
                     try {
                         val response = createCredential(request, appContext)
                         promise.resolve(response)
                     } catch (e: CreateCredentialException) {
-                        handleCreateFailure(e, promise)
+                        handleCreateCredentialFailure(e, promise)
                     }
                 }
-            } catch (e: Exception) {
-                handleCreateFailure(e, promise)
-            }
         }
 
         AsyncFunction("getCredential") { request: String, promise: Promise ->
@@ -36,7 +32,7 @@ class WebAuthNModule : Module() {
                     val response = getCredential(request, appContext)
                     promise.resolve(response)
                 } catch (e: GetCredentialException) {
-                    handleGetFailure(e, promise)
+                    handleGetCredentialFailure(e, promise)
                 }
             }
         }

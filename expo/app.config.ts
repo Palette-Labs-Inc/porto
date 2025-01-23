@@ -68,9 +68,10 @@ const config: ExpoConfig = {
       '@porto/expo-p256',
       {
         configureAndroidBackup: true,
-        faceIDPermission: "Allow Porto Wallet to access your Face ID biometric data."
-      }
-    ]
+        faceIDPermission:
+          'Allow Porto Wallet to access your Face ID biometric data.',
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,

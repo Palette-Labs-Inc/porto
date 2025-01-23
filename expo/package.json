@@ -12,12 +12,13 @@
     "prebuild:ios": "expo prebuild --platform ios",
     "prebuild:android": "expo prebuild --platform android",
     "clean": "rm -rf .expo .turbo node_modules ios android dist build",
-    "run:android": "expo run:android",
-    "run:ios": "expo run:ios",
-    "build:android": "expo build:android",
-    "build:ios": "expo build:ios",
-    "ios:debug": "USE_PORTO_SOURCE=true EXPO_USE_METRO_WORKSPACE_ROOT=1 expo run:ios",
-    "android:debug": "USE_PORTO_SOURCE=true expo start --android"
+    "run:android": "EXPO_DEBUG=1 expo run:android",
+    "run:ios": "EXPO_DEBUG=1 expo run:ios",
+    "build:android": "EXPO_DEBUG=1 expo build:android",
+    "build:ios": "EXPO_DEBUG=1 expo build:ios",
+    "ios:debug": "EXPO_DEBUG=1 USE_PORTO_SOURCE=true EXPO_USE_METRO_WORKSPACE_ROOT=1 expo run:ios",
+    "android:debug": "USE_PORTO_SOURCE=true expo start --android",
+    "studio:project": "pnpm prebuild:android && open -a /Applications/Android\\ Studio.app ./android"
   },
   "dependencies": {
     "@peculiar/webcrypto": "^1.5.0",
@@ -33,6 +34,7 @@
     "expo-crypto": "^14.0.2",
     "expo-linking": "^7.0.4",
     "expo-router": "^4.0.16",
+    "expo-splash-screen": "^0.29.21",
     "expo-status-bar": "~2.0.0",
     "ox": "catalog:",
     "porto": "workspace:*",

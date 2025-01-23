@@ -9,6 +9,11 @@ const config: ExpoConfig = {
   icon: './assets/images/icon.png',
   userInterfaceStyle: 'light',
   newArchEnabled: true,
+  splash: {
+    image: './assets/images/splash-icon.png',
+    resizeMode: 'contain',
+    backgroundColor: '#ffffff',
+  },
   updates: {
     fallbackToCacheTimeout: 0,
   },
@@ -62,10 +67,10 @@ const config: ExpoConfig = {
     [
       '@porto/expo-p256',
       {
-        faceIDPermission:
-          'Allow Porto to use Face ID for secure authentication',
-      },
-    ],
+        configureAndroidBackup: true,
+        faceIDPermission: "Allow Porto Wallet to access your Face ID biometric data."
+      }
+    ]
   ],
   experiments: {
     typedRoutes: true,

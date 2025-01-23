@@ -4,6 +4,6 @@
     "modules": ["P256Module"]
   },
   "android": {
-    "modules": ["expo.modules.p256.P256Module"]
+    "modules": ["expo.porto.p256.P256Module"]
   }
 }

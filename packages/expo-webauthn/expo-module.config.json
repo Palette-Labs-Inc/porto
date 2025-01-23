@@ -4,6 +4,6 @@
     "modules": ["WebAuthNModule"]
   },
   "android": {
-    "modules": ["expo.modules.webauthn.WebAuthNModule"]
+    "modules": ["expo.porto.webauthn.WebAuthNModule"]
   }
 }

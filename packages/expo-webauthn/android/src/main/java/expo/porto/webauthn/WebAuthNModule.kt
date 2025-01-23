@@ -1,7 +1,6 @@
-package expo.porto.webauthn
+package expo.modules.webauthn
 
-import androidx.credentials.exceptions.CreateCredentialException
-import androidx.credentials.exceptions.GetCredentialException
+import android.content.Context
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
@@ -10,29 +9,44 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class WebAuthNModule : Module() {
-    private val mainScope = CoroutineScope(Dispatchers.Default)
+    private val moduleScope = CoroutineScope(Dispatchers.Default)
+    private lateinit var manager: WebAuthNManager
+    
+    // Safely get the React context
+    private val reactContext: Context
+        get() = appContext.reactContext ?: throw WebAuthNException("React context is lost")
 
     override fun definition() = ModuleDefinition {
         Name("ExpoWebAuthN")
 
-        AsyncFunction("createCredential") { request: String, promise: Promise ->
-                mainScope.launch {
-                    try {
-                        val response = createCredential(request, appContext)
-                        promise.resolve(response)
-                    } catch (e: CreateCredentialException) {
-                        handleCreateCredentialFailure(e, promise)
-                    }
-                }
+        OnCreate {
+            manager = WebAuthNManager(reactContext)
         }
 
-        AsyncFunction("getCredential") { request: String, promise: Promise ->
-            mainScope.launch {
+        AsyncFunction("createCredential") { options: CredentialCreationOptions, promise: Promise ->
+            moduleScope.launch {
                 try {
-                    val response = getCredential(request, appContext)
-                    promise.resolve(response)
-                } catch (e: GetCredentialException) {
-                    handleGetCredentialFailure(e, promise)
+                    manager.createCredential(options, promise)
+                } catch (e: Exception) {
+                    promise.reject(
+                        AuthenticationFailedException(
+                            e.localizedMessage ?: "Unknown error during credential creation"
+                        )
+                    )
+                }
+            }
+        }
+
+        AsyncFunction("getCredential") { options: CredentialRequestOptions, promise: Promise ->
+            moduleScope.launch {
+                try {
+                    manager.getCredential(options, promise)
+                } catch (e: Exception) {
+                    promise.reject(
+                        AuthenticationFailedException(
+                            e.localizedMessage ?: "Unknown error during credential retrieval"
+                        )
+                    )
                 }
             }
         }

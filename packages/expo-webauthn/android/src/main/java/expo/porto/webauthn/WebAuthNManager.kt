@@ -1,33 +1,141 @@
 package expo.porto.webauthn
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.ContextWrapper
+import android.app.Activity
+import androidx.credentials.CreateCredentialResponse
 import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
+import androidx.credentials.GetCredentialResponse
 import androidx.credentials.GetPublicKeyCredentialOption
-import expo.modules.kotlin.AppContext
+import androidx.credentials.PublicKeyCredential
+import androidx.credentials.exceptions.*
+import androidx.credentials.exceptions.publickeycredential.*
+import expo.modules.kotlin.Promise
 
-suspend fun createCredential(
-    request: String,
-    appContext: AppContext
-): String? {
-    val credentialManager = CredentialManager.create(appContext.reactContext?.applicationContext!!)
-    val createRequest = CreatePublicKeyCredentialRequest(request)
+class WebAuthNManager(private val context: Context) {
+    private val credentialManager = CredentialManager.create(context)
 
-    val result = appContext.currentActivity?.let {
-        credentialManager.createCredential(it, createRequest)
+    @SuppressLint("PublicKeyCredential")
+    suspend fun createCredential(options: CredentialCreationOptions, promise: Promise) {
+        val activity = context.getCurrentActivity()
+            ?: throw WebAuthNException("Activity is not available")
+            
+        try {
+            options.validate()
+
+            val request = CreatePublicKeyCredentialRequest(
+                requestJson = options.toJson(),
+                preferImmediatelyAvailableCredentials = false,
+                isAutoSelectAllowed = true
+            )
+
+            val result = credentialManager.createCredential(
+                activity,
+                request
+            )
+
+            handleCreateCredentialResponse(result, promise)
+        } catch (e: CreateCredentialException) {
+            handleCreateCredentialError(e, promise)
+        } catch (e: Exception) {
+            promise.reject(AuthenticationFailedException(e.localizedMessage ?: "Unknown error"))
+        }
     }
-    return result?.data?.getString("androidx.credentials.BUNDLE_KEY_REGISTRATION_RESPONSE_JSON")
+
+    suspend fun getCredential(options: CredentialRequestOptions, promise: Promise) {
+        val activity = context.getCurrentActivity()
+            ?: throw WebAuthNException("Activity is not available")
+            
+        try {
+            options.validate()
+
+            val credentialOption = GetPublicKeyCredentialOption(
+                requestJson = options.toJson()
+            )
+
+            val request = GetCredentialRequest(
+                credentialOptions = listOf(credentialOption)
+            )
+
+            val result = credentialManager.getCredential(
+                activity,
+                request
+            )
+
+            handleGetCredentialResponse(result, promise)
+        } catch (e: GetCredentialException) {
+            handleGetCredentialError(e, promise)
+        } catch (e: Exception) {
+            promise.reject(AuthenticationFailedException(e.localizedMessage ?: "Unknown error"))
+        }
+    }
+
+    private fun handleCreateCredentialResponse(response: CreateCredentialResponse, promise: Promise) {
+        try {
+            // Handle the successful credential creation response
+            promise.resolve(response)
+        } catch (e: Exception) {
+            promise.reject(AuthenticationFailedException(e.localizedMessage ?: "Failed to process credential response"))
+        }
+    }
+
+    private fun handleGetCredentialResponse(response: GetCredentialResponse, promise: Promise) {
+        try {
+            // Handle the successful credential retrieval response
+            promise.resolve(response)
+        } catch (e: Exception) {
+            promise.reject(AuthenticationFailedException(e.localizedMessage ?: "Failed to process credential response"))
+        }
+    }
+
+    private fun handleCreateCredentialError(error: CreateCredentialException, promise: Promise) {
+        when (error) {
+            is CreateCredentialCancellationException -> 
+                promise.reject(AuthorizationCanceledException())
+            is CreateCredentialInterruptedException -> 
+                promise.reject(AuthorizationNotHandledException())
+            is CreateCredentialProviderConfigurationException -> 
+                promise.reject(NotSupportedException())
+            is CreatePublicKeyCredentialDomException -> 
+                promise.reject(InvalidResponseException())
+            is CreateCredentialCustomException -> 
+                promise.reject(InvalidCreationOptionsException(error.message ?: "Custom error during credential creation"))
+            is CreateCredentialUnknownException -> 
+                promise.reject(UnknownAuthorizationException(error.message ?: "Unknown error during credential creation"))
+            else -> 
+                promise.reject(UnknownAuthorizationException(error.message ?: "Unexpected error during credential creation"))
+        }
+    }
+
+    private fun handleGetCredentialError(error: GetCredentialException, promise: Promise) {
+        when (error) {
+            is GetCredentialCancellationException -> 
+                promise.reject(AuthorizationCanceledException())
+            is GetCredentialInterruptedException -> 
+                promise.reject(AuthorizationNotHandledException())
+            is GetCredentialProviderConfigurationException -> 
+                promise.reject(NotSupportedException())
+            is GetPublicKeyCredentialDomException -> 
+                promise.reject(InvalidResponseException())
+            is NoCredentialException -> 
+                promise.reject(InvalidCredentialException())
+            is GetCredentialUnsupportedException -> 
+                promise.reject(NotSupportedException())
+            is GetCredentialUnknownException -> 
+                promise.reject(UnknownAuthorizationException(error.message ?: "Unknown error during credential retrieval"))
+            else -> 
+                promise.reject(UnknownAuthorizationException(error.message ?: "Unexpected error during credential retrieval"))
+        }
+    }
+
+    private fun Context.getCurrentActivity(): Activity? {
+        return when (this) {
+            is Activity -> this
+            is ContextWrapper -> baseContext.getCurrentActivity()
+            else -> null
+        }
+    }
 }
-
-suspend fun getCredential(
-    request: String,
-    appContext: AppContext
-): String? {
-    val credentialManager = CredentialManager.create(appContext.reactContext?.applicationContext!!)
-    val getCredentialRequest = GetCredentialRequest(listOf(GetPublicKeyCredentialOption(request)))
-
-    val result = appContext.currentActivity?.let {
-        credentialManager.getCredential(it, getCredentialRequest)
-    }
-    return result?.credential?.data?.getString("androidx.credentials.BUNDLE_KEY_AUTHENTICATION_RESPONSE_JSON")
-} 

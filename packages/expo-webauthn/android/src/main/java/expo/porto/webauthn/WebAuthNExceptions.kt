@@ -1,140 +1,84 @@
 package expo.porto.webauthn
 
-import androidx.credentials.exceptions.CreateCredentialCancellationException
-import androidx.credentials.exceptions.CreateCredentialCustomException
-import androidx.credentials.exceptions.CreateCredentialException
-import androidx.credentials.exceptions.CreateCredentialInterruptedException
-import androidx.credentials.exceptions.CreateCredentialProviderConfigurationException
-import androidx.credentials.exceptions.CreateCredentialUnknownException
-import androidx.credentials.exceptions.GetCredentialCancellationException
-import androidx.credentials.exceptions.GetCredentialException
-import androidx.credentials.exceptions.GetCredentialInterruptedException
-import androidx.credentials.exceptions.GetCredentialProviderConfigurationException
-import androidx.credentials.exceptions.GetCredentialUnknownException
-import androidx.credentials.exceptions.GetCredentialUnsupportedException
-import androidx.credentials.exceptions.NoCredentialException
-import androidx.credentials.exceptions.publickeycredential.CreatePublicKeyCredentialDomException
-import androidx.credentials.exceptions.publickeycredential.GetPublicKeyCredentialDomException
-import expo.modules.kotlin.Promise
+import expo.modules.kotlin.exception.CodedException
 
-//https://developer.android.com/identity/sign-in/credential-manager#create-passkey
-fun handleCreateCredentialFailure(e: CreateCredentialException, promise: Promise) {
-    when (e) {
-        is CreatePublicKeyCredentialDomException -> {
-            // Handle the passkey DOM errors thrown according to the
-            // WebAuthn spec.
-            promise.reject("CreatePublicKeyCredentialDomException", e.domError.toString(), e)
-        }
+// Base WebAuthN Exception
+open class WebAuthNException(
+    message: String
+) : CodedException("ERR_WEBAUTHN", message, null)
 
-        is CreateCredentialCancellationException -> {
-            // The user intentionally canceled the operation and chose not
-            // to register the credential.
-            promise.reject(
-                "CreateCredentialCancellationException", e.message,
-                e
-            )
+// Input Validation Exceptions
+internal class InvalidChallengeException : CodedException(
+    "ERR_WEBAUTHN_INVALID_CHALLENGE",
+    "Invalid challenge provided or not properly encoded",
+    null
+)
 
+internal class InvalidUserException : CodedException(
+    "ERR_WEBAUTHN_INVALID_USER",
+    "Invalid user information provided",
+    null
+)
 
-        }
+internal class InvalidCredentialException : CodedException(
+    "ERR_WEBAUTHN_INVALID_CREDENTIAL",
+    "Invalid credential or credential not found",
+    null
+)
 
-        is CreateCredentialInterruptedException -> {
-            // Retry-able error. Consider retrying the call.
-            promise.reject(
-                "CreateCredentialInterruptedException",
-                e.message,
-                e
-            )
-        }
+// Authorization Exceptions
+internal class AuthorizationCanceledException : CodedException(
+    "ERR_WEBAUTHN_CANCELED",
+    "Operation was canceled by the user",
+    null
+)
 
-        is CreateCredentialProviderConfigurationException -> {
-            // Your app is missing the provider configuration dependency.
-            // Most likely, you're missing the
-            // "credentials-play-services-auth" module.
-            promise.reject(
-                "CreateCredentialProviderConfigurationException",
-                e.message,
-                e
-            )
-        }
+internal class AuthorizationNotHandledException : CodedException(
+    "ERR_WEBAUTHN_NOT_HANDLED",
+    "The authorization request was not handled",
+    null
+)
 
-        is CreateCredentialUnknownException -> {
-            promise.reject(
-                "CreateCredentialUnknownException",
-                e.message,
-                e
-            )
-        }
+internal class AuthorizationFailedException : CodedException(
+    "ERR_WEBAUTHN_FAILED",
+    "The authorization request failed",
+    null
+)
 
-        is CreateCredentialCustomException -> {
-            // You have encountered an error from a 3rd-party SDK. If you
-            // make the API call with a request object that's a subclass of
-            // CreateCustomCredentialRequest using a 3rd-party SDK, then you
-            // should check for any custom exception type constants within
-            // that SDK to match with e.type. Otherwise, drop or log the
-            // exception.
-            promise.reject(
-                "CreateCredentialCustomException",
-                e.message,
-                e
-            )
-        }
+internal class InvalidResponseException : CodedException(
+    "ERR_WEBAUTHN_INVALID_RESPONSE",
+    "The authorization request received an invalid response",
+    null
+)
 
-        else -> promise.reject("Error", e.message, e)
-    }
-}
+internal class NotInteractiveException : CodedException(
+    "ERR_WEBAUTHN_NOT_INTERACTIVE",
+    "The authorization request was not interacted with",
+    null
+)
 
-fun handleGetCredentialFailure(e: GetCredentialException, promise: Promise) {
+internal class UnknownAuthorizationException(detail: String) : CodedException(
+    "ERR_WEBAUTHN_UNKNOWN",
+    "An unknown authorization error occurred: $detail",
+    null
+)
 
-    when (e) {
-        is GetPublicKeyCredentialDomException -> {
-            promise.reject("GetPublicKeyCredentialDomException", e.domError.toString(), e)
-        }
+// Platform/Support Exceptions
+internal class NotSupportedException : CodedException(
+    "ERR_WEBAUTHN_NOT_SUPPORTED",
+    "WebAuthN is not supported on this device",
+    null
+)
 
-        is GetCredentialInterruptedException -> {
-            promise.reject("GetCredentialInterruptedException", e.message, e)
-        }
+// Operation Exceptions
+internal class InvalidCreationOptionsException(detail: String) : CodedException(
+    "ERR_WEBAUTHN_INVALID_OPTIONS",
+    detail,
+    null
+)
 
-        is GetCredentialCancellationException -> {
-            promise.reject(
-                "GetCredentialCancellationException",
-                e.message,
-                e
-            )
-        }
-
-        is GetCredentialUnknownException -> {
-            promise.reject("GetCredentialUnknownException", e.message, e)
-        }
-
-
-        is GetCredentialProviderConfigurationException -> {
-            promise.reject(
-                "GetCredentialProviderConfigurationException",
-                e.message,
-                e
-            )
-        }
-
-
-        is GetCredentialUnsupportedException -> {
-            promise.reject(
-                "GetCredentialUnsupportedException",
-                e.message,
-                e
-            )
-        }
-
-        is NoCredentialException -> {
-            promise.reject(
-                "NoCredentialException",
-                e.message,
-                e
-            )
-        }
-
-        else -> {
-            promise.reject("Error", e.message, e)
-        }
-    }
-
-}
+internal class AuthenticationFailedException(detail: String) : CodedException(
+    "ERR_WEBAUTHN_AUTH_FAILED",
+    "Authentication failed: $detail",
+    null
+) 

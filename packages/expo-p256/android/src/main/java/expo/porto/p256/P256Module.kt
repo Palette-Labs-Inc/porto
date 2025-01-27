@@ -24,9 +24,9 @@ import java.security.KeyStore.PrivateKeyEntry
 import java.security.KeyStore.SecretKeyEntry
 import java.security.spec.ECGenParameterSpec
 import android.security.keystore.KeyGenParameterSpec
-import javax.crypto.BadPaddingException
-import android.security.keystore.UserNotAuthenticatedException
 import android.security.keystore.KeyInfo
+import android.security.keystore.UserNotAuthenticatedException
+import javax.crypto.BadPaddingException
 import androidx.annotation.RequiresApi
 
 open class P256Module : Module() {
@@ -72,7 +72,14 @@ open class P256Module : Module() {
 
         val alias = "${options.keychainService}-$key"
         val keyPair = createP256KeyPair(alias, options.requireAuthentication)
-        return@Coroutine Base64.encodeToString(keyPair.public.encoded, Base64.NO_WRAP)
+        Log.d(TAG, "Created key pair with alias: $alias")
+        
+        val result = mapOf(
+          "privateKey" to Base64.encodeToString(keyPair.private.encoded, Base64.NO_WRAP),
+          "publicKey" to Base64.encodeToString(keyPair.public.encoded, Base64.NO_WRAP)
+        )
+        
+        return@Coroutine result
       } catch (e: Exception) {
         throw EncryptException("Failed to generate P256 key pair: ${e.message}", key, options.keychainService, e)
       }
@@ -83,8 +90,12 @@ open class P256Module : Module() {
         val alias = "${options.keychainService}-$key"
         val keyPair = getP256KeyPairFromKeystore(alias) ?: return@Coroutine null
         
-        // Return only the public key encoded in DER format
-        return@Coroutine Base64.encodeToString(keyPair.public.encoded, Base64.NO_WRAP)
+        val result = mapOf(
+          "privateKey" to Base64.encodeToString(keyPair.private.encoded, Base64.NO_WRAP),
+          "publicKey" to Base64.encodeToString(keyPair.public.encoded, Base64.NO_WRAP)
+        )
+        
+        return@Coroutine result
       } catch (e: Exception) {
         throw DecryptException("Failed to retrieve P256 key pair: ${e.message}", key, options.keychainService, e)
       }

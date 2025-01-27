@@ -1,5 +1,26 @@
 package expo.porto.p256
 
+/**
+ * P256Module handles P-256 (secp256r1) key pair generation, storage, and signing operations.
+ * 
+ * Key Format Handling:
+ * 1. Android KeyStore returns public keys in X.509/DER format (91 bytes)
+ * 2. We convert this to raw format (65 bytes) for compatibility with ox library:
+ *    - 1 byte: prefix (0x04 for uncompressed)
+ *    - 32 bytes: X coordinate
+ *    - 32 bytes: Y coordinate
+ * 
+ * The conversion process:
+ * 1. Get key from KeyStore in DER format
+ * 2. Find 0x04 prefix in DER structure (indicates uncompressed point format)
+ * 3. Extract 65 bytes starting from prefix
+ * 4. Base64 encode for transport
+ * 
+ * This ensures the public key format matches what ox's PublicKey.from() expects:
+ * - Uncompressed format (65 bytes): prefix (0x04) + x-coord (32 bytes) + y-coord (32 bytes)
+ * - Compressed format (33 bytes): prefix (0x02/0x03) + x-coord (32 bytes)
+ */
+
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
@@ -24,9 +45,9 @@ import java.security.KeyStore.PrivateKeyEntry
 import java.security.KeyStore.SecretKeyEntry
 import java.security.spec.ECGenParameterSpec
 import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyInfo
-import android.security.keystore.UserNotAuthenticatedException
 import javax.crypto.BadPaddingException
+import android.security.keystore.UserNotAuthenticatedException
+import android.security.keystore.KeyInfo
 import androidx.annotation.RequiresApi
 
 open class P256Module : Module() {
@@ -72,11 +93,12 @@ open class P256Module : Module() {
 
         val alias = "${options.keychainService}-$key"
         val keyPair = createP256KeyPair(alias, options.requireAuthentication)
-        Log.d(TAG, "Created key pair with alias: $alias")
+        
+        // Convert DER to raw format
+        val rawPublicKey = extractRawPublicKeyFromDER(keyPair.public.encoded)
         
         val result = mapOf(
-          "privateKey" to Base64.encodeToString(keyPair.private.encoded, Base64.NO_WRAP),
-          "publicKey" to Base64.encodeToString(keyPair.public.encoded, Base64.NO_WRAP)
+          "publicKey" to Base64.encodeToString(rawPublicKey, Base64.NO_WRAP)
         )
         
         return@Coroutine result
@@ -90,9 +112,11 @@ open class P256Module : Module() {
         val alias = "${options.keychainService}-$key"
         val keyPair = getP256KeyPairFromKeystore(alias) ?: return@Coroutine null
         
+        // Convert DER to raw format
+        val rawPublicKey = extractRawPublicKeyFromDER(keyPair.public.encoded)
+        
         val result = mapOf(
-          "privateKey" to Base64.encodeToString(keyPair.private.encoded, Base64.NO_WRAP),
-          "publicKey" to Base64.encodeToString(keyPair.public.encoded, Base64.NO_WRAP)
+          "publicKey" to Base64.encodeToString(rawPublicKey, Base64.NO_WRAP)
         )
         
         return@Coroutine result
@@ -521,6 +545,7 @@ open class P256Module : Module() {
     
     val keyPair = keyPairGenerator.generateKeyPair()
     Log.d(TAG, "Successfully generated P256 key pair")
+    val publicKey = keyPair.public
     
     return keyPair
   }
@@ -534,6 +559,27 @@ open class P256Module : Module() {
       ?: throw KeyStoreException("Bad format for private key")
       
     return KeyPair(entry.certificate.publicKey, entry.privateKey)
+  }
+
+  /**
+   * Extracts the raw public key format from X.509/DER format.
+   * The ox library's PublicKey.from() expects:
+   * - Raw uncompressed format (65 bytes): 0x04 + x-coord (32 bytes) + y-coord (32 bytes)
+   * - Raw compressed format (33 bytes): (0x02 or 0x03) + x-coord (32 bytes)
+   * 
+   * @param derBytes The DER encoded public key bytes from Android KeyStore
+   * @return Raw format public key bytes (65 bytes for uncompressed)
+   * @throws InvalidKeyException if the 0x04 prefix cannot be found
+   */
+  private fun extractRawPublicKeyFromDER(derBytes: ByteArray): ByteArray {
+    // Find the 0x04 prefix that indicates uncompressed point format
+    val keyIndex = derBytes.indexOfFirst { it == 0x04.toByte() }
+    if (keyIndex != -1) {
+      // Extract 65 bytes (0x04 + 32 bytes X + 32 bytes Y)
+      return derBytes.slice(keyIndex until keyIndex + 65).toByteArray()
+    } else {
+      throw InvalidKeyException()
+    }
   }
 
   companion object {

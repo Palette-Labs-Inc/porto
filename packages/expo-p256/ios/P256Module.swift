@@ -82,7 +82,6 @@ public final class P256Module: Module {
       }
         
       let result = [
-        "privateKey": privateKey.dataRepresentation.base64EncodedString(),
         "publicKey": privateKey.publicKey.rawRepresentation.base64EncodedString()
       ]
       
@@ -102,7 +101,6 @@ public final class P256Module: Module {
         }
         
         return [
-          "privateKey": privateKey.dataRepresentation.base64EncodedString(),
           "publicKey": privateKey.publicKey.rawRepresentation.base64EncodedString()
         ]
       }

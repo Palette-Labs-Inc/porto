@@ -4,7 +4,7 @@ import { Base64, Errors } from "ox";
 import ExpoP256 from "./ExpoP256";
 import {
   type InvalidKeyFormatError,
-  InvalidKeyPairError,
+  InvalidKeyError,
   InvalidSignatureError,
   convertPayloadToBase64,
   ensureValidKey,
@@ -60,7 +60,7 @@ export type P256Options = {
 
 // ============= Constants =============
 
-export const KEY_PREFIX = "porto-p256-key";
+export const KEY_PREFIX = "porto-";
 
 /**
  * The data in the keychain item cannot be accessed after a restart until the device has been
@@ -149,11 +149,13 @@ export type KeychainAccessibilityConstant = number;
  * - iOS:
  *   - The private key is generated and stored in the Secure Enclave
  *   - A reference to this key is stored in the Keychain
+ *   - Returns both public and private key material
  *   - If requireAuthentication is true, the key is created with `.userPresence` flag
  *   - Authentication and NSFaceIDUsageDescription is required for signing if `requireAuthentication` is true
  *
  * - Android:
  *   - The key pair is generated and stored directly in the Android Keystore System
+ *   - Returns only the public key, private key remains in the Keystore
  *   - If requireAuthentication is true, the authentication requirement is permanently bound to the key
  *   - This affects all subsequent operations with this key
  *
@@ -178,12 +180,9 @@ export async function createKeyPair(
 
   const storageKey = generateStorageKey();
   const nativeResponse = await ExpoP256.createP256KeyPair(storageKey, options);
-
-  console.info("[p256.native: createKeyPair] nativeResponse");
   console.info(nativeResponse);
   return fromNativeKeyPair({
     storageKey,
-    privateKey: nativeResponse.privateKey,
     publicKey: nativeResponse.publicKey,
   });
 }
@@ -200,11 +199,14 @@ export declare namespace createKeyPair {
  * This function handles the conversion of native key material into the standardized
  * P256Key format used throughout the library.
  *
+ * Platform Implementation Details:
+ * - iOS: Receives the public key material from the Secure Enclave
+ * - Android: Receives only public key material from the Android Keystore
+ *
  * @example
  * ```ts
  * const key = P256.fromNativeKeyPair({
  *   storageKey: "key-reference",
- *   privateKey: "base64-private-key",
  *   publicKey: "base64-der-public-key"
  * })
  * ```
@@ -212,11 +214,11 @@ export declare namespace createKeyPair {
 export function fromNativeKeyPair(
   parameters: fromNativeKeyPair.Parameters,
 ): fromNativeKeyPair.ReturnType {
-  const { storageKey, privateKey, publicKey } = parameters;
+  const { storageKey, publicKey } = parameters;
   console.info("[p256.native: fromNativeKeyPair] parameters");
   console.info(parameters);
-  if (!privateKey || !publicKey) {
-    throw new InvalidKeyPairError();
+  if (!publicKey) {
+    throw new InvalidKeyError();
   }
 
   return {
@@ -227,12 +229,13 @@ export function fromNativeKeyPair(
 
 export declare namespace fromNativeKeyPair {
   type Parameters = {
-    storageKey: string; // used to retrieve the key pair from the native module's keychain/keystore
-    privateKey: string; // base64 reference
-    publicKey: string; // base64 DER
+    /** Used to retrieve the key pair from the native module's keychain/keystore */
+    storageKey: string;
+    /** Base64 DER encoded public key */
+    publicKey: string;
   };
   type ReturnType = P256Key;
-  type ErrorType = InvalidKeyPairError;
+  type ErrorType = InvalidKeyError;
 }
 
 /**
@@ -266,7 +269,6 @@ export async function getKeyPair(
   if (!nativeResponse) return null;
   return fromNativeKeyPair({
     storageKey: privateKeyStorageKey,
-    privateKey: nativeResponse.privateKey,
     publicKey: nativeResponse.publicKey,
   });
 }

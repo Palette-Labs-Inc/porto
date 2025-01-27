@@ -10,6 +10,7 @@ export const createKeyPair = async <const role extends Key['role']>(
   const keyPair = await ExpoP256.createKeyPair({
     keychainService: ExpoP256.KEY_PREFIX,
   })
+
   return fromNativeCryptoP256({
     ...parameters,
     keyPair,

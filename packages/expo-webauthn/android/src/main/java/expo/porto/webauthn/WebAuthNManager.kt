@@ -17,14 +17,14 @@ import expo.modules.kotlin.Promise
 import expo.porto.webauthn.translators.CreateResponse
 import expo.porto.webauthn.translators.GetResponse
 
-class WebAuthNManager(private val context: Context) {
+class WebAuthNManager(
+    private val context: Context,
+    private val activity: Activity
+) {
     private val credentialManager = CredentialManager.create(context)
 
     @SuppressLint("PublicKeyCredential")
     suspend fun createCredential(options: CredentialCreationOptions, promise: Promise) {
-        val activity = context.getCurrentActivity()
-            ?: throw WebAuthNException("Activity is not available")
-            
         try {
             options.validate()
 
@@ -48,9 +48,6 @@ class WebAuthNManager(private val context: Context) {
     }
 
     suspend fun getCredential(options: CredentialRequestOptions, promise: Promise) {
-        val activity = context.getCurrentActivity()
-            ?: throw WebAuthNException("Activity is not available")
-            
         try {
             options.validate()
 

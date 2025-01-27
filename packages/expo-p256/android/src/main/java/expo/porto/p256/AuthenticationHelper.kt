@@ -3,7 +3,6 @@ package expo.porto.p256
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
-import android.os.Build
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
@@ -40,9 +39,6 @@ class AuthenticationHelper(
     cipher: Cipher,
     title: String
   ): BiometricPrompt.AuthenticationResult {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-      throw AuthenticationException("Biometric authentication requires Android API 23")
-    }
     if (isAuthenticating) {
       throw AuthenticationException("Authentication is already in progress")
     }
@@ -69,9 +65,6 @@ class AuthenticationHelper(
     signature: Signature,
     title: String
   ): BiometricPrompt.AuthenticationResult {
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-      throw AuthenticationException("Biometric authentication requires Android API 23")
-    }
     if (isAuthenticating) {
       throw AuthenticationException("Authentication is already in progress")
     }

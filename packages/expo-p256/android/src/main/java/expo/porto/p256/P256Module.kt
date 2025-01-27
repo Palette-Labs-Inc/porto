@@ -2,6 +2,7 @@ package expo.porto.p256
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
 import android.preference.PreferenceManager
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.KeyProperties
@@ -15,7 +16,6 @@ import expo.modules.kotlin.modules.ModuleDefinition
 import expo.porto.p256.encryptors.AESEncryptor
 import expo.porto.p256.encryptors.HybridAESEncryptor
 import expo.porto.p256.encryptors.KeyBasedEncryptor
-import kotlinx.coroutines.runBlocking
 import org.json.JSONException
 import org.json.JSONObject
 import java.security.*
@@ -23,12 +23,11 @@ import java.security.KeyStore
 import java.security.KeyStore.PrivateKeyEntry
 import java.security.KeyStore.SecretKeyEntry
 import java.security.spec.ECGenParameterSpec
-import java.security.interfaces.ECPrivateKey
-import java.security.interfaces.ECPublicKey
 import android.security.keystore.KeyGenParameterSpec
 import javax.crypto.BadPaddingException
 import android.security.keystore.UserNotAuthenticatedException
 import android.security.keystore.KeyInfo
+import androidx.annotation.RequiresApi
 
 open class P256Module : Module() {
   private val mAESEncryptor = AESEncryptor()
@@ -39,6 +38,7 @@ open class P256Module : Module() {
   private lateinit var hybridAESEncryptor: HybridAESEncryptor
   private lateinit var authenticationHelper: AuthenticationHelper
 
+  @RequiresApi(Build.VERSION_CODES.R)
   override fun definition() = ModuleDefinition {
     Name("ExpoP256")
 
@@ -335,7 +335,7 @@ open class P256Module : Module() {
     encryptedItem.put(AuthenticationHelper.REQUIRE_AUTHENTICATION_PROPERTY, requireAuthentication)
 
     val encryptedItemString = encryptedItem.toString()
-    if (encryptedItemString.isNullOrEmpty()) { // JSONObject#toString() may return null
+    if (encryptedItemString.isEmpty()) { // JSONObject#toString() may return null
       throw WriteException("Could not JSON-encode the encrypted item for P256 - the string $encryptedItemString is null or empty", key, keychainService)
     }
 
@@ -465,7 +465,7 @@ open class P256Module : Module() {
     }
   }
 
-  fun getSharedPreferences(): SharedPreferences {
+  private fun getSharedPreferences(): SharedPreferences {
     return reactContext.getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE)
   }
 
@@ -477,6 +477,7 @@ open class P256Module : Module() {
     return "$keychainService-$key"
   }
 
+  @RequiresApi(Build.VERSION_CODES.R)
   private fun createP256KeyPair(alias: String, requireAuthentication: Boolean): KeyPair {
     Log.d(TAG, "Creating P256 key pair for alias: $alias, requireAuthentication: $requireAuthentication")
     

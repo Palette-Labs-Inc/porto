@@ -53,7 +53,6 @@ class WebAuthNResponder: NSObject, ASAuthorizationControllerDelegate, ASAuthoriz
         if let credential = authorization.credential as? ASAuthorizationPlatformPublicKeyCredentialRegistration {
             let response = CredentialResponse(
                 id: credential.credentialID.toBase64URLEncodedString(),
-                rawId: credential.credentialID.toBase64URLEncodedString(),
                 type: "public-key",
                 authenticatorAttachment: "platform",
                 response: AuthenticatorAttestationResponse(
@@ -65,7 +64,6 @@ class WebAuthNResponder: NSObject, ASAuthorizationControllerDelegate, ASAuthoriz
         } else if let credential = authorization.credential as? ASAuthorizationPlatformPublicKeyCredentialAssertion {
             let response = AssertionResponse(
                 id: credential.credentialID.toBase64URLEncodedString(),
-                rawId: credential.credentialID.toBase64URLEncodedString(),
                 type: "public-key",
                 authenticatorAttachment: "platform",
                 response: AuthenticatorAssertionResponse(

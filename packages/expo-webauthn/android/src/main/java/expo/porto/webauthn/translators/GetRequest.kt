@@ -3,6 +3,7 @@ package expo.porto.webauthn.translators
 import org.json.JSONArray
 import org.json.JSONObject
 import expo.porto.webauthn.*
+import expo.porto.webauthn.translators.Base64Utils.fromBase64URLString
 
 internal object GetRequest {
     fun toJsonString(options: CredentialRequestOptions): String = JSONObject().apply {
@@ -18,7 +19,7 @@ internal object GetRequest {
         credentials.forEach { credential ->
             put(JSONObject().apply {
                 put("type", "public-key")
-                put("id", credential.id)
+                put("id", credential.id.fromBase64URLString())
                 credential.transports?.let { transports ->
                     put("transports", JSONArray(transports))
                 }

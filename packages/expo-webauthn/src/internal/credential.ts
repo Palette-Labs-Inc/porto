@@ -307,7 +307,7 @@ export function fromNativeAttestation(
 
     return {
       id: response.id,
-      rawId: base64URLToArrayBuffer(response.rawId),
+      rawId: base64URLToArrayBuffer(response.id),
       response: {
         attestationObject: base64URLToArrayBuffer(
           response.response.attestationObject,
@@ -342,8 +342,7 @@ export declare namespace fromNativeAttestation {
    * This is the format returned by the native module after credential creation.
    */
   type Parameters = {
-    id: string
-    rawId: string
+    id: string // credential.credentialId on iOS.
     response: {
       attestationObject: string
       clientDataJSON: string

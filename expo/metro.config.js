@@ -21,9 +21,11 @@ const symlinksResolver = MetroSymlinksResolver()
  */
 function resolvePortoModule(context, moduleName) {
   // Not a porto module or expo package, skip
-  if (!moduleName.startsWith('porto') && 
-      !moduleName.startsWith('expo-webauthn') && 
-      !moduleName.startsWith('expo-p256')) {
+  if (
+    !moduleName.startsWith('porto') &&
+    !moduleName.startsWith('expo-webauthn') &&
+    !moduleName.startsWith('expo-p256')
+  ) {
     return null
   }
 
@@ -32,10 +34,14 @@ function resolvePortoModule(context, moduleName) {
   if (moduleName === 'porto') {
     sourcePath = path.join(PATHS.portoSource, 'index.ts')
   } else if (moduleName.startsWith('expo-webauthn')) {
-    const relativePath = moduleName.replace('expo-webauthn', 'src').replace('.js', '.ts')
+    const relativePath = moduleName
+      .replace('expo-webauthn', 'src')
+      .replace('.js', '.ts')
     sourcePath = path.join(PATHS.packages, 'expo-webauthn', relativePath)
   } else if (moduleName.startsWith('expo-p256')) {
-    const relativePath = moduleName.replace('expo-p256', 'src').replace('.js', '.ts')
+    const relativePath = moduleName
+      .replace('expo-p256', 'src')
+      .replace('.js', '.ts')
     sourcePath = path.join(PATHS.packages, 'expo-p256', relativePath)
   } else {
     const relativePath = moduleName.replace('porto/', '').replace('.js', '.ts')

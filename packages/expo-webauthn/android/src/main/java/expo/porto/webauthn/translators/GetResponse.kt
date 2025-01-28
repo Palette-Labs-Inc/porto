@@ -7,6 +7,7 @@ import expo.porto.webauthn.AssertionResponse
 import expo.porto.webauthn.AuthenticatorAssertionResponse
 import expo.porto.webauthn.InvalidResponseException
 import org.json.JSONObject
+import expo.porto.webauthn.translators.Base64Utils.toBase64URLString
 
 object GetResponse {
     fun toAssertionResponse(response: GetCredentialResponse): AssertionResponse {
@@ -24,8 +25,7 @@ object GetResponse {
         val rawResponse = responseData.getJSONObject("response")
 
         return AssertionResponse(
-            id = responseData.getString("id"),
-            rawId = responseData.getString("id"),
+            id = responseData.getString("id").toBase64URLString(),
             type = responseData.getString("type"),
             authenticatorAttachment = responseData.optString("authenticatorAttachment", "platform"),
             response = AuthenticatorAssertionResponse(

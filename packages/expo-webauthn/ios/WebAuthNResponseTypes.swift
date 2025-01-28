@@ -6,12 +6,11 @@ public struct CredentialResponse: Record {
     public init() {}
     
     @Field var id: CredentialIDString
-    @Field var rawId: Base64URLString
     @Field var type: String  // "public-key", not base64
     @Field var authenticatorAttachment: String?  // "platform", not base64
     @Field var response: AuthenticatorAttestationResponse
 
-    init(id: CredentialIDString, rawId: Base64URLString, type: String, authenticatorAttachment: String?, response: AuthenticatorAttestationResponse) {
+    init(id: CredentialIDString, type: String, authenticatorAttachment: String?, response: AuthenticatorAttestationResponse) {
         self.id = id
         self.rawId = rawId
         self.type = type
@@ -37,14 +36,12 @@ public struct AssertionResponse: Record {
     public init() {}
     
     @Field var id: CredentialIDString
-    @Field var rawId: Base64URLString
     @Field var type: String  // "public-key", not base64
     @Field var authenticatorAttachment: String?  // "platform", not base64
     @Field var response: AuthenticatorAssertionResponse
 
-    init(id: CredentialIDString, rawId: Base64URLString, type: String, authenticatorAttachment: String?, response: AuthenticatorAssertionResponse) {
+    init(id: CredentialIDString, type: String, authenticatorAttachment: String?, response: AuthenticatorAssertionResponse) {
         self.id = id
-        self.rawId = rawId
         self.type = type
         self.authenticatorAttachment = authenticatorAttachment
         self.response = response

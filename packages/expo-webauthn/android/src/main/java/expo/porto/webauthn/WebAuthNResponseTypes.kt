@@ -9,9 +9,6 @@ data class CredentialResponse(
     val id: String,
 
     @Field
-    val rawId: String,
-
-    @Field
     val type: String,  // "public-key"
 
     @Field
@@ -33,9 +30,6 @@ data class AuthenticatorAttestationResponse(
 data class AssertionResponse(
     @Field
     val id: String,
-
-    @Field
-    val rawId: String,
 
     @Field
     val type: String,  // "public-key"

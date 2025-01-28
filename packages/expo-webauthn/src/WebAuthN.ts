@@ -51,11 +51,11 @@ export async function createCredential(
   if (!options) {
     throw new MissingOptionsError('Credential creation')
   }
-
   const nativeOptions = credential.createNativeCredential(options)
+  console.info('[WebAuthN: createCredential] nativeOptions', nativeOptions)
   const nativeResponse = await ExpoWebAuthN.createCredential(nativeOptions)
   console.info('[WebAuthN: createCredential] nativeResponse', credential.fromNativeAttestation(nativeResponse))
-  // return credential.fromNativeAttestation(nativeResponse)
+  return credential.fromNativeAttestation(nativeResponse)
 }
 
 export declare namespace createCredential {
@@ -121,7 +121,9 @@ export async function getCredential(
   }
 
   const nativeOptions = assertion.createNativeAssertion(options)
+  console.info('[WebAuthN: getCredential] nativeOptions', nativeOptions)
   const nativeResponse = await ExpoWebAuthN.getCredential(nativeOptions)
+  console.info('[WebAuthN: getCredential] nativeResponse', nativeResponse)
   return assertion.fromNativeAssertion(nativeResponse)
 }
 

@@ -88,9 +88,12 @@ export function createNativeAssertion(
       throw new InvalidOptionsError('Missing publicKey')
     }
 
-    console.info('[WebAuthN: createNativeAssertion] publicKey challenge',  bufferSourceToBase64(publicKey.challenge))
+    console.info(
+      '[WebAuthN: createNativeAssertion] publicKey challenge',
+      bufferSourceToBase64(publicKey.challenge),
+    )
 
-    // TODO: Better type assertion, shouldn't have to cast rpId to empty string. 
+    // TODO: Better type assertion, shouldn't have to cast rpId to empty string.
     validateOptions({
       challenge: publicKey.challenge,
       rpId: publicKey.rpId,

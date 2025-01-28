@@ -1,7 +1,7 @@
-import { type Bytes, Hex, PublicKey, Signature } from "ox";
-import { Base64, Errors } from "ox";
+import { type Bytes, Hex, PublicKey, Signature } from 'ox'
+import { Base64, Errors } from 'ox'
 
-import ExpoP256 from "./ExpoP256";
+import ExpoP256 from './ExpoP256'
 import {
   InvalidKeyError,
   type InvalidKeyFormatError,
@@ -9,7 +9,7 @@ import {
   convertPayloadToBase64,
   ensureValidKey,
   generateStorageKey,
-} from "./internal/utils";
+} from './internal/utils'
 
 // ============= Types =============
 
@@ -20,9 +20,9 @@ import {
  * - Android: Key pair is stored in Android Keystore System
  */
 export type P256Key = {
-  publicKey: PublicKey.PublicKey;
-  privateKeyStorageKey: string;
-};
+  publicKey: PublicKey.PublicKey
+  privateKeyStorageKey: string
+}
 
 /** Options for P256 key operations */
 export type P256Options = {
@@ -33,7 +33,7 @@ export type P256Options = {
    * - iOS: The item's service namespace, equivalent to [`kSecAttrService`].
    * @see Apple's documentation on [kSecAttrService](https://developer.apple.com/documentation/security/ksecattrservice/).
    */
-  keychainService?: string;
+  keychainService?: string
   /**
    * Option for enabling user authentication methods while signing.
    * - Android: Equivalent to [`setUserAuthenticationRequired(true)`](https://developer.android.com/reference/android/security/keystore/KeyGenParameterSpec.Builder#setUserAuthenticationRequired(boolean))
@@ -42,12 +42,12 @@ export type P256Options = {
    * Note: Authentication requirements are determined at key creation time.
    * @default false
    */
-  requireAuthentication?: boolean;
+  requireAuthentication?: boolean
   /**
    * Custom message displayed during authentication.
    * @default ""
    */
-  authenticationPrompt?: string;
+  authenticationPrompt?: string
   /**
    * iOS keychain accessibility level.
    * Specifies when the stored entry is accessible, using iOS's `kSecAttrAccessible` property.
@@ -55,12 +55,12 @@ export type P256Options = {
    * @default SecureStore.WHEN_UNLOCKED
    * @platform ios
    */
-  keychainAccessible?: KeychainAccessibilityConstant;
-};
+  keychainAccessible?: KeychainAccessibilityConstant
+}
 
 // ============= Constants =============
 
-export const KEY_PREFIX = "porto-";
+export const KEY_PREFIX = 'porto-'
 
 /**
  * The data in the keychain item cannot be accessed after a restart until the device has been
@@ -68,64 +68,64 @@ export const KEY_PREFIX = "porto-";
  * is locked.
  */
 export const AFTER_FIRST_UNLOCK: KeychainAccessibilityConstant =
-  ExpoP256.AFTER_FIRST_UNLOCK;
+  ExpoP256.AFTER_FIRST_UNLOCK
 
 /**
  * Similar to `AFTER_FIRST_UNLOCK`, except the entry is not migrated to a new device when restoring
  * from a backup.
  */
 export const AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY: KeychainAccessibilityConstant =
-  ExpoP256.AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY;
+  ExpoP256.AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY
 
 /**
  * The data in the keychain item can always be accessed regardless of whether the device is locked.
  * This is the least secure option.
  * @deprecated Use an accessibility level that provides some user protection, such as `AFTER_FIRST_UNLOCK`.
  */
-export const ALWAYS: KeychainAccessibilityConstant = ExpoP256.ALWAYS;
+export const ALWAYS: KeychainAccessibilityConstant = ExpoP256.ALWAYS
 
 /**
  * Similar to `WHEN_UNLOCKED_THIS_DEVICE_ONLY`, except the user must have set a passcode in order to
  * store an entry. If the user removes their passcode, the entry will be deleted.
  */
 export const WHEN_PASSCODE_SET_THIS_DEVICE_ONLY: KeychainAccessibilityConstant =
-  ExpoP256.WHEN_PASSCODE_SET_THIS_DEVICE_ONLY;
+  ExpoP256.WHEN_PASSCODE_SET_THIS_DEVICE_ONLY
 
 /**
  * Similar to `ALWAYS`, except the entry is not migrated to a new device when restoring from a backup.
  * @deprecated Use an accessibility level that provides some user protection, such as `AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY`.
  */
 export const ALWAYS_THIS_DEVICE_ONLY: KeychainAccessibilityConstant =
-  ExpoP256.ALWAYS_THIS_DEVICE_ONLY;
+  ExpoP256.ALWAYS_THIS_DEVICE_ONLY
 
 /**
  * The data in the keychain item can be accessed only while the device is unlocked by the user.
  */
 export const WHEN_UNLOCKED: KeychainAccessibilityConstant =
-  ExpoP256.WHEN_UNLOCKED;
+  ExpoP256.WHEN_UNLOCKED
 
 /**
  * Similar to `WHEN_UNLOCKED`, except the entry is not migrated to a new device when restoring from
  * a backup.
  */
 export const WHEN_UNLOCKED_THIS_DEVICE_ONLY: KeychainAccessibilityConstant =
-  ExpoP256.WHEN_UNLOCKED_THIS_DEVICE_ONLY;
+  ExpoP256.WHEN_UNLOCKED_THIS_DEVICE_ONLY
 
 // ============= Error Types =============
 
 /** Thrown when P256 operations are attempted on an unsupported platform. */
 export class UnsupportedPlatformError extends Errors.BaseError {
-  override readonly name = "P256.UnsupportedPlatformError";
+  override readonly name = 'P256.UnsupportedPlatformError'
   constructor() {
-    super("P256 operations are not supported on this device");
+    super('P256 operations are not supported on this device')
   }
 }
 
 /** Thrown when biometric authentication is required but not available. */
 export class BiometricAuthenticationError extends Errors.BaseError {
-  override readonly name = "P256.BiometricAuthenticationError";
+  override readonly name = 'P256.BiometricAuthenticationError'
   constructor() {
-    super("Biometric authentication is not available on this device");
+    super('Biometric authentication is not available on this device')
   }
 }
 
@@ -133,12 +133,12 @@ export declare namespace P256Errors {
   type CommonErrorType =
     | UnsupportedPlatformError
     | BiometricAuthenticationError
-    | Errors.GlobalErrorType;
+    | Errors.GlobalErrorType
 }
 
 // ============= Types =============
 
-export type KeychainAccessibilityConstant = number;
+export type KeychainAccessibilityConstant = number
 
 // ============= Core Functions =============
 
@@ -171,26 +171,26 @@ export async function createKeyPair(
   options: createKeyPair.Options = {},
 ): Promise<createKeyPair.ReturnType> {
   if (!(await isAvailableAsync())) {
-    throw new UnsupportedPlatformError();
+    throw new UnsupportedPlatformError()
   }
 
   if (options.requireAuthentication && !canUseBiometricAuthentication()) {
-    throw new BiometricAuthenticationError();
+    throw new BiometricAuthenticationError()
   }
 
-  const storageKey = generateStorageKey();
-  const nativeResponse = await ExpoP256.createP256KeyPair(storageKey, options);
-  console.info(nativeResponse);
+  const storageKey = generateStorageKey()
+  const nativeResponse = await ExpoP256.createP256KeyPair(storageKey, options)
+  console.info(nativeResponse)
   return fromNativeKeyPair({
     storageKey,
     publicKey: nativeResponse.publicKey,
-  });
+  })
 }
 
 export declare namespace createKeyPair {
-  type Options = P256Options;
-  type ReturnType = P256Key;
-  type ErrorType = P256Errors.CommonErrorType | fromNativeKeyPair.ErrorType;
+  type Options = P256Options
+  type ReturnType = P256Key
+  type ErrorType = P256Errors.CommonErrorType | fromNativeKeyPair.ErrorType
 }
 
 /**
@@ -214,28 +214,28 @@ export declare namespace createKeyPair {
 export function fromNativeKeyPair(
   parameters: fromNativeKeyPair.Parameters,
 ): fromNativeKeyPair.ReturnType {
-  const { storageKey, publicKey } = parameters;
-  console.info("[p256.native: fromNativeKeyPair] parameters");
-  console.info(parameters);
+  const { storageKey, publicKey } = parameters
+  console.info('[p256.native: fromNativeKeyPair] parameters')
+  console.info(parameters)
   if (!publicKey) {
-    throw new InvalidKeyError();
+    throw new InvalidKeyError()
   }
 
   return {
     publicKey: PublicKey.from(Base64.toBytes(publicKey)) as PublicKey.PublicKey,
     privateKeyStorageKey: storageKey,
-  };
+  }
 }
 
 export declare namespace fromNativeKeyPair {
   type Parameters = {
     /** Used to retrieve the key pair from the native module's keychain/keystore */
-    storageKey: string;
+    storageKey: string
     /** Base64 DER encoded public key */
-    publicKey: string;
-  };
-  type ReturnType = P256Key;
-  type ErrorType = InvalidKeyError;
+    publicKey: string
+  }
+  type ReturnType = P256Key
+  type ErrorType = InvalidKeyError
 }
 
 /**
@@ -255,33 +255,33 @@ export async function getKeyPair(
   options: getKeyPair.Options,
 ): Promise<getKeyPair.ReturnType> {
   if (!(await isAvailableAsync())) {
-    throw new UnsupportedPlatformError();
+    throw new UnsupportedPlatformError()
   }
 
-  const { privateKeyStorageKey, ...p256Options } = options;
-  ensureValidKey(privateKeyStorageKey);
+  const { privateKeyStorageKey, ...p256Options } = options
+  ensureValidKey(privateKeyStorageKey)
 
   const nativeResponse = await ExpoP256.getP256KeyPair(
     privateKeyStorageKey,
     p256Options,
-  );
+  )
 
-  if (!nativeResponse) return null;
+  if (!nativeResponse) return null
   return fromNativeKeyPair({
     storageKey: privateKeyStorageKey,
     publicKey: nativeResponse.publicKey,
-  });
+  })
 }
 
 export declare namespace getKeyPair {
   type Options = P256Options & {
-    privateKeyStorageKey: string;
-  };
-  type ReturnType = P256Key | null;
+    privateKeyStorageKey: string
+  }
+  type ReturnType = P256Key | null
   type ErrorType =
     | P256Errors.CommonErrorType
     | InvalidKeyFormatError
-    | fromNativeKeyPair.ErrorType;
+    | fromNativeKeyPair.ErrorType
 }
 
 /**
@@ -302,30 +302,30 @@ export declare namespace getKeyPair {
  */
 export async function sign(options: sign.Options): Promise<sign.ReturnType> {
   if (!(await isAvailableAsync())) {
-    throw new UnsupportedPlatformError();
+    throw new UnsupportedPlatformError()
   }
 
-  const { privateKeyStorageKey, payload, ...p256Options } = options;
+  const { privateKeyStorageKey, payload, ...p256Options } = options
 
-  const base64Payload = convertPayloadToBase64(payload);
+  const base64Payload = convertPayloadToBase64(payload)
   const nativeResponse = await ExpoP256.signWithP256KeyPair(
     privateKeyStorageKey,
     base64Payload,
     p256Options,
-  );
+  )
 
   return fromNativeSignature({
     signature: nativeResponse.signature,
-  });
+  })
 }
 
 export declare namespace sign {
   type Options = P256Options & {
-    privateKeyStorageKey: string;
-    payload: Hex.Hex | Bytes.Bytes;
-  };
-  type ReturnType = Signature.Signature<false>;
-  type ErrorType = P256Errors.CommonErrorType | fromNativeSignature.ErrorType;
+    privateKeyStorageKey: string
+    payload: Hex.Hex | Bytes.Bytes
+  }
+  type ReturnType = Signature.Signature<false>
+  type ErrorType = P256Errors.CommonErrorType | fromNativeSignature.ErrorType
 }
 
 /**
@@ -342,23 +342,23 @@ export declare namespace sign {
 export function fromNativeSignature(
   parameters: fromNativeSignature.Parameters,
 ): fromNativeSignature.ReturnType {
-  const { signature } = parameters;
+  const { signature } = parameters
   if (!signature) {
-    throw new InvalidSignatureError();
+    throw new InvalidSignatureError()
   }
 
-  const signatureBytes = Base64.toBytes(signature);
-  const signatureHex = Hex.fromBytes(signatureBytes);
-  const { r, s } = Signature.fromDerHex(signatureHex);
-  return { r, s };
+  const signatureBytes = Base64.toBytes(signature)
+  const signatureHex = Hex.fromBytes(signatureBytes)
+  const { r, s } = Signature.fromDerHex(signatureHex)
+  return { r, s }
 }
 
 export declare namespace fromNativeSignature {
   type Parameters = {
-    signature: string; // base64 DER
-  };
-  type ReturnType = Signature.Signature<false>;
-  type ErrorType = InvalidSignatureError;
+    signature: string // base64 DER
+  }
+  type ReturnType = Signature.Signature<false>
+  type ErrorType = InvalidSignatureError
 }
 
 /**
@@ -380,30 +380,30 @@ export async function verify(
   options: verify.Options,
 ): Promise<verify.ReturnType> {
   if (!(await isAvailableAsync())) {
-    throw new UnsupportedPlatformError();
+    throw new UnsupportedPlatformError()
   }
 
-  const { publicKey, signature, payload } = options;
+  const { publicKey, signature, payload } = options
   return await ExpoP256.verifyP256Signature(
     publicKey,
     signature,
     payload,
     options,
-  );
+  )
 }
 
 export declare namespace verify {
   type Options = P256Options & {
     /** DER encoded public key */
-    publicKey: string;
+    publicKey: string
     /** Base64 encoded signature */
-    signature: string;
+    signature: string
     /** Data that was signed */
-    payload: string;
-  };
+    payload: string
+  }
   /** Matches WebCryptoP256.verify return type */
-  type ReturnType = boolean;
-  type ErrorType = P256Errors.CommonErrorType | InvalidSignatureError;
+  type ReturnType = boolean
+  type ErrorType = P256Errors.CommonErrorType | InvalidSignatureError
 }
 
 /**
@@ -413,7 +413,7 @@ export declare namespace verify {
  * @returns Promise resolving to boolean indicating availability
  */
 export async function isAvailableAsync(): Promise<boolean> {
-  return !!ExpoP256.createP256KeyPair;
+  return !!ExpoP256.createP256KeyPair
 }
 
 /**
@@ -426,7 +426,7 @@ export async function deleteItemAsync(
   key: string,
   options: P256Options = {},
 ): Promise<void> {
-  await ExpoP256.deleteValueWithKeyAsync(key, options);
+  await ExpoP256.deleteValueWithKeyAsync(key, options)
 }
 
 /**
@@ -438,5 +438,5 @@ export async function deleteItemAsync(
  * @returns boolean indicating if biometric authentication is available
  */
 export function canUseBiometricAuthentication(): boolean {
-  return ExpoP256.canUseBiometricAuthentication();
+  return ExpoP256.canUseBiometricAuthentication()
 }

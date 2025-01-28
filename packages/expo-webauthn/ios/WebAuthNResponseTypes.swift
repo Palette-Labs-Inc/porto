@@ -12,7 +12,6 @@ public struct CredentialResponse: Record {
 
     init(id: CredentialIDString, type: String, authenticatorAttachment: String?, response: AuthenticatorAttestationResponse) {
         self.id = id
-        self.rawId = rawId
         self.type = type
         self.authenticatorAttachment = authenticatorAttachment
         self.response = response

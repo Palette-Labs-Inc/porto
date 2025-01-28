@@ -1,7 +1,8 @@
 import * as Hex from 'ox/Hex'
 import { useState } from 'react'
 import { Platform, StyleSheet, Text, TextInput, View } from 'react-native'
-import { usePorto } from '../providers/PortoProvider'
+import { verifyMessage } from 'viem/actions'
+import { usePorto, useClient } from '../providers/PortoProvider'
 import { Button } from './Button'
 
 function useMessageSigner() {
@@ -36,18 +37,25 @@ function useMessageSigner() {
 
 function useMessageVerifier(message: string, signature: string | null) {
   const porto = usePorto()
+  const client = useClient()
   const [isValid, setIsValid] = useState<boolean | null>(null)
 
   const handleVerify = async () => {
     if (!signature) return
-    const [account] = await porto.provider.request({
-      method: 'eth_accounts',
-    })
-    const result = (await porto.provider.request({
-      method: 'personal_ecRecover',
-      params: [Hex.fromString(message), signature],
-    })) as `0x${string}`
-    setIsValid(result.toLowerCase() === account.toLowerCase())
+    try {
+      const [account] = await porto.provider.request({
+        method: 'eth_accounts',
+      })
+      const valid = await verifyMessage(client, {
+        address: account,
+        message,
+        signature: signature as `0x${string}`,
+      })
+      setIsValid(valid)
+    } catch (error) {
+      console.error('Verification failed:', error)
+      setIsValid(false)
+    }
   }
 
   return {

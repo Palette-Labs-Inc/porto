@@ -1,9 +1,8 @@
 import { TypedData } from 'ox'
 import { useState } from 'react'
 import { Platform, StyleSheet, Text, View } from 'react-native'
-import { createClient, custom } from 'viem'
 import { verifyTypedData } from 'viem/actions'
-import { usePorto } from '../providers/PortoProvider'
+import { usePorto, useClient } from '../providers/PortoProvider'
 import { Button } from './Button'
 
 const typedData = {
@@ -89,11 +88,8 @@ function useTypedDataSigner() {
 
 function useTypedDataVerifier(signature: string | null) {
   const porto = usePorto()
+  const client = useClient()
   const [valid, setValid] = useState<boolean | null>(null)
-
-  const client = createClient({
-    transport: custom(porto.provider),
-  })
 
   const handleVerify = async () => {
     if (!signature) return

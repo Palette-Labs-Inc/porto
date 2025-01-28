@@ -3,14 +3,13 @@ import {
   type ReactNode,
   createContext,
   useContext,
-  useEffect,
-  useRef,
 } from 'react'
-
+import { type Client, createClient, custom } from 'viem'
 import { MMKV } from 'react-native-mmkv'
 
 type PortoInstance = ReturnType<typeof Porto.create>
 const PortoContext = createContext<PortoInstance | null>(null)
+const ClientContext = createContext<Client | null>(null)
 
 const mmkvStorage = new MMKV()
 
@@ -46,26 +45,25 @@ const createMMKVStorage = (storage: MMKV) =>
     },
   })
 
+// Create Porto instance at module level
+const porto: PortoInstance = Porto.create({
+  implementation: Implementation.local({
+    keystoreHost: 'mperhats.github.io',
+  }),
+  storage: createMMKVStorage(mmkvStorage)
+})
+
+// Create viem client at module level
+const client = createClient({
+  transport: custom(porto.provider),
+})
+
 export function PortoProvider({ children }: { children: ReactNode }) {
-  const portoRef = useRef<PortoInstance>(
-    Porto.create({
-      implementation: Implementation.local({
-        keystoreHost: 'mperhats.github.io',
-      }),
-      storage: createMMKVStorage(mmkvStorage),
-    }),
-  )
-
-  useEffect(() => {
-    const porto = portoRef.current
-    return () => {
-      porto.destroy?.()
-    }
-  }, [])
-
   return (
-    <PortoContext.Provider value={portoRef.current}>
-      {children}
+    <PortoContext.Provider value={porto}>
+      <ClientContext.Provider value={client}>
+        {children}
+      </ClientContext.Provider>
     </PortoContext.Provider>
   )
 }
@@ -74,6 +72,14 @@ export function usePorto() {
   const context = useContext(PortoContext)
   if (!context) {
     throw new Error('usePorto must be used within a PortoProvider')
+  }
+  return context
+}
+
+export function useClient() {
+  const context = useContext(ClientContext)
+  if (!context) {
+    throw new Error('useClient must be used within a PortoProvider')
   }
   return context
 }

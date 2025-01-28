@@ -3,6 +3,8 @@ import AuthenticationServices
 
 // MARK: - Credential Creation Response Types
 public struct CredentialResponse: Record {
+    public init() {}
+    
     @Field var id: CredentialIDString
     @Field var rawId: Base64URLString
     @Field var type: String  // "public-key", not base64
@@ -19,6 +21,8 @@ public struct CredentialResponse: Record {
 }
 
 public struct AuthenticatorAttestationResponse: Record {
+    public init() {}
+    
     @Field var clientDataJSON: Base64URLString
     @Field var attestationObject: Base64URLString
 
@@ -30,6 +34,8 @@ public struct AuthenticatorAttestationResponse: Record {
 
 // MARK: - Credential Request Response Types
 public struct AssertionResponse: Record {
+    public init() {}
+    
     @Field var id: CredentialIDString
     @Field var rawId: Base64URLString
     @Field var type: String  // "public-key", not base64
@@ -46,6 +52,8 @@ public struct AssertionResponse: Record {
 }
 
 public struct AuthenticatorAssertionResponse: Record {
+    public init() {}
+    
     @Field var clientDataJSON: Base64URLString
     @Field var authenticatorData: Base64URLString
     @Field var signature: Base64URLString
@@ -60,6 +68,7 @@ public struct AuthenticatorAssertionResponse: Record {
 }
 
 public struct StoredCredentialResponse: Record {
+    public init() {}
     @Field var id: CredentialIDString
     @Field var type: String  // "public-key", not base64
     @Field var transports: [String]?  // Transport strings, not base64

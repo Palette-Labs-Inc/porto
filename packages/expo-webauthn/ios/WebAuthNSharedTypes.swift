@@ -103,7 +103,8 @@ public enum AttestationConveyancePreference: String, Enumerable {
 
 // MARK: - Common Types
 public struct PublicKeyCredentialDescriptor: Record {
-    
+    public init () {}
+
     @Field 
     var type: PublicKeyCredentialType = .publicKey
     
@@ -142,11 +143,15 @@ public struct PublicKeyCredentialDescriptor: Record {
 }
 
 public struct RelyingParty: Record {
+    public init () {}
+
     @Field var id: String
     @Field var name: String
 }
 
 public struct User: Record {
+    public init () {}
+
     @Field var id: Base64URLString
     @Field var name: String
     @Field var displayName: String

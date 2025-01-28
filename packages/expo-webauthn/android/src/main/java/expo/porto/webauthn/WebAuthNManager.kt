@@ -20,7 +20,6 @@ import androidx.credentials.exceptions.NoCredentialException
 import androidx.credentials.exceptions.publickeycredential.CreatePublicKeyCredentialDomException
 import androidx.credentials.exceptions.publickeycredential.GetPublicKeyCredentialDomException
 import expo.modules.kotlin.Promise
-import expo.porto.webauthn.Base64Utils.toBase64URLString
 
 class WebAuthNManager(
     context: Context,
@@ -73,7 +72,7 @@ class WebAuthNManager(
 
     private fun handleCreateCredentialResponse(response: CreateCredentialResponse, promise: Promise) {
         try {
-            val credentialResponse = CredentialResponse.fromCreateCredentialResponse(response)
+            val credentialResponse = response.toCredentialResponse()
             promise.resolve(credentialResponse)
         } catch (e: Exception) {
             promise.reject(AuthenticationFailedException(e.localizedMessage ?: "Failed to process credential response"))
@@ -82,7 +81,7 @@ class WebAuthNManager(
 
     private fun handleGetCredentialResponse(response: GetCredentialResponse, promise: Promise) {
         try {
-            val assertionResponse = AssertionResponse.fromGetCredentialResponse(response)
+            val assertionResponse = response.toAssertionResponse()
             promise.resolve(assertionResponse)
         } catch (e: Exception) {
             promise.reject(AuthenticationFailedException(e.localizedMessage ?: "Failed to process credential response"))

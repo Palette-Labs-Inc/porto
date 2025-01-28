@@ -2,12 +2,9 @@ package expo.porto.webauthn
 
 import expo.modules.kotlin.records.Field
 import expo.modules.kotlin.records.Record
-import expo.porto.webauthn.translators.CreateRequest
-import expo.porto.webauthn.translators.GetRequest
-import expo.porto.webauthn.translators.Base64Utils.toBase64URLString
 import org.json.JSONObject
 import org.json.JSONArray
-import android.util.Log
+import expo.porto.webauthn.Base64Utils.toBase64URLString
 
 // MARK: - Credential Creation Types
 data class CredentialCreationOptions(
@@ -35,21 +32,7 @@ data class CredentialCreationOptions(
     @Field
     val attestation: AttestationConveyancePreference? = null
 ) : Record {
-    internal fun toJsonString(): String {
-        return JSONObject().apply {
-            put("rp", JSONObject().apply {
-                put("id", rp.id)
-                put("name", rp.name)
-            })
-            put("user", JSONObject().apply {
-                put("id", user.id.toBase64URLString())
-                put("name", user.name)
-                put("displayName", user.displayName)
-            })
-            put("challenge", challenge.toBase64URLString())
-            // ... rest of the conversion ...
-        }.toString()
-    }
+    internal fun toJsonString(): String = RequestParser.createCredentialOptionsJson(this)
 }
 
 data class PublicKeyCredentialParameters(
@@ -91,21 +74,72 @@ data class CredentialRequestOptions(
     @Field
     val timeout: Double? = null
 ) : Record {
-    internal fun toJsonString(): String {
+    internal fun toJsonString(): String = RequestParser.createRequestOptionsJson(this)
+}
+
+// MARK: - Request Parsing
+private object RequestParser {
+    fun createCredentialOptionsJson(options: CredentialCreationOptions): String {
         return JSONObject().apply {
-            put("challenge", challenge.toBase64URLString())
-            put("rpId", rpId)
+            put("rp", createRelyingPartyJson(options.rp))
+            put("user", createUserJson(options.user))
+            put("challenge", options.challenge.toBase64URLString())
+            put("pubKeyCredParams", createPubKeyParamsJson(options.pubKeyCredParams))
             
-            allowCredentials?.let { credentials ->
-                put("allowCredentials", JSONArray().apply {
-                    credentials.forEach { credential ->
-                        put(credential.toJSON())
-                    }
-                })
-            }
-            
-            userVerification?.let { put("userVerification", it.value) }
-            timeout?.let { put("timeout", it.toLong()) }
+            options.timeout?.let { put("timeout", it.toLong()) }
+            options.excludeCredentials?.let { put("excludeCredentials", createCredentialDescriptorsJson(it)) }
+            options.authenticatorSelection?.let { put("authenticatorSelection", createAuthenticatorSelectionJson(it)) }
+            options.attestation?.let { put("attestation", it.value) }
         }.toString()
+    }
+
+    fun createRequestOptionsJson(options: CredentialRequestOptions): String {
+        return JSONObject().apply {
+            put("challenge", options.challenge.toBase64URLString())
+            put("rpId", options.rpId)
+            
+            options.allowCredentials?.let { put("allowCredentials", createCredentialDescriptorsJson(it)) }
+            options.userVerification?.let { put("userVerification", it.value) }
+            options.timeout?.let { put("timeout", it.toLong()) }
+        }.toString()
+    }
+
+    private fun createRelyingPartyJson(rp: RelyingParty) = JSONObject().apply {
+        put("id", rp.id)
+        put("name", rp.name)
+    }
+
+    private fun createUserJson(user: User) = JSONObject().apply {
+        put("id", user.id.toBase64URLString())
+        put("name", user.name)
+        put("displayName", user.displayName)
+    }
+
+    private fun createPubKeyParamsJson(params: List<PublicKeyCredentialParameters>) = JSONArray().apply {
+        params.forEach { param ->
+            put(JSONObject().apply {
+                put("type", "public-key")
+                put("alg", param.alg.value)
+            })
+        }
+    }
+
+    private fun createCredentialDescriptorsJson(credentials: List<PublicKeyCredentialDescriptor>) = JSONArray().apply {
+        credentials.forEach { credential ->
+            put(JSONObject().apply {
+                put("type", "public-key")
+                put("id", credential.id.toBase64URLString())
+                credential.transports?.let { transports ->
+                    put("transports", JSONArray(transports))
+                }
+            })
+        }
+    }
+
+    private fun createAuthenticatorSelectionJson(selection: AuthenticatorSelectionCriteria) = JSONObject().apply {
+        selection.authenticatorAttachment?.let { put("authenticatorAttachment", it) }
+        selection.requireResidentKey?.let { put("requireResidentKey", it) }
+        selection.residentKey?.let { put("residentKey", it.value) }
+        selection.userVerification?.let { put("userVerification", it.value) }
     }
 }

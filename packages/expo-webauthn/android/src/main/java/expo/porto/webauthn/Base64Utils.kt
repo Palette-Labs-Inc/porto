@@ -12,7 +12,7 @@ object Base64Utils {
                   .replace("/", "_")
     }
 
-    fun String.fromBase64URLString(): String {
+    private fun String.fromBase64URLString(): String {
         var base64 = this
             .replace('-', '+')
             .replace('_', '/')

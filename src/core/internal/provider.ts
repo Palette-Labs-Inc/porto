@@ -186,6 +186,8 @@ export function from<
             },
           })
 
+          console.info('[provider] key', key)
+
           store.setState((x) => {
             const index = x.accounts.findIndex((x) =>
               account ? Address.isEqual(x.address, account.address) : true,

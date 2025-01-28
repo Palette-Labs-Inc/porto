@@ -154,7 +154,7 @@ export function fromNativeAssertion(
   try {
     return {
       id: response.id,
-      rawId: base64URLToArrayBuffer(response.rawId),
+      rawId: base64URLToArrayBuffer(response.id),
       response: {
         authenticatorData: base64URLToArrayBuffer(
           response.response.authenticatorData,

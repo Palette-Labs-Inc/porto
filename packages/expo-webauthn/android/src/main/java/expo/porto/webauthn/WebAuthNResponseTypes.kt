@@ -70,12 +70,12 @@ private object ResponseParser {
         Log.d("WebAuthN", "Raw registration response: $responseData")
 
         return CredentialResponse(
-            id = responseData.getString("id").toBase64URLString(),
+            id = responseData.getString("id"),
             type = responseData.getString("type"),
             authenticatorAttachment = responseData.optString("authenticatorAttachment", "platform"),
             response = AuthenticatorAttestationResponse(
-                clientDataJSON = rawResponse.getString("clientDataJSON"),
-                attestationObject = rawResponse.getString("attestationObject")
+                clientDataJSON = rawResponse.getString("clientDataJSON").toBase64URLString(),
+                attestationObject = rawResponse.getString("attestationObject").toBase64URLString()
             )
         )
     }
@@ -108,14 +108,14 @@ private object ResponseParser {
         Log.d("WebAuthN", "Raw authentication response: $responseData")
 
         return AssertionResponse(
-            id = responseData.getString("id").toBase64URLString(),
+            id = responseData.getString("id"),
             type = responseData.getString("type"),
             authenticatorAttachment = responseData.optString("authenticatorAttachment", "platform"),
             response = AuthenticatorAssertionResponse(
-                clientDataJSON = rawResponse.getString("clientDataJSON"),
-                authenticatorData = rawResponse.getString("authenticatorData"),
-                signature = rawResponse.getString("signature"),
-                userHandle = if (rawResponse.has("userHandle")) rawResponse.getString("userHandle") else null
+                clientDataJSON = rawResponse.getString("clientDataJSON").toBase64URLString(),
+                authenticatorData = rawResponse.getString("authenticatorData").toBase64URLString(),
+                signature = rawResponse.getString("signature").toBase64URLString(),
+                userHandle = rawResponse.optString("userHandle")?.toBase64URLString()
             )
         )
     }

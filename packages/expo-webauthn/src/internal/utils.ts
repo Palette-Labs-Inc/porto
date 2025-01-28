@@ -25,6 +25,7 @@ export function base64ToArrayBuffer(base64: string): ArrayBuffer {
  * Handles URL-safe characters and padding according to RFC 4648.
  */
 export function base64URLToArrayBuffer(base64url: string): ArrayBuffer {
+  console.info('[base64URLToArrayBuffer] base64url', base64url)
   const base64 = base64url
     .replace(/-/g, '+')
     .replace(/_/g, '/')

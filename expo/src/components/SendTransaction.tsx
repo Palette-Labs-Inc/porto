@@ -1,10 +1,17 @@
 import { ExperimentERC20 } from '@/src/contracts'
+import * as Linking from 'expo-linking'
 import { AbiFunction, type Hex, Value } from 'ox'
 import { useState } from 'react'
-import { Platform, Pressable, StyleSheet, Text, View, ScrollView } from 'react-native'
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
-import * as Linking from 'expo-linking'
 
 type TransactionHistory = {
   hash: Hex.Hex
@@ -73,10 +80,13 @@ function useSendTransaction() {
         params: [transaction],
       })) as Hex.Hex
 
-      setTransactions(prev => [{
-        hash,
-        timestamp: Date.now()
-      }, ...prev])
+      setTransactions((prev) => [
+        {
+          hash,
+          timestamp: Date.now(),
+        },
+        ...prev,
+      ])
     } catch (error) {
       console.error('[SendTransaction] Failed:', error)
     }
@@ -132,7 +142,7 @@ export function SendTransaction() {
       <Button onPress={handleSendTransaction} text="Send" />
       {transactions.length > 0 && (
         <View style={styles.transactionListContainer}>
-          <ScrollView 
+          <ScrollView
             style={styles.transactionList}
             contentContainerStyle={styles.transactionListContent}
             showsVerticalScrollIndicator={true}
@@ -142,8 +152,14 @@ export function SendTransaction() {
           >
             {transactions.map((tx) => (
               <View key={tx.hash} style={styles.transactionItem}>
-                <Text style={styles.codeBlock} numberOfLines={1} ellipsizeMode="middle">{tx.hash}</Text>
-                <Pressable 
+                <Text
+                  style={styles.codeBlock}
+                  numberOfLines={1}
+                  ellipsizeMode="middle"
+                >
+                  {tx.hash}
+                </Text>
+                <Pressable
                   onPress={() => handleOpenExplorer(tx.hash)}
                   style={styles.linkContainer}
                 >

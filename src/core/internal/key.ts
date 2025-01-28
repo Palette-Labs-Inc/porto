@@ -669,7 +669,6 @@ export async function sign(
       ]
     }
     if (keyType === 'webauthn-p256') {
-
       const { credential, rpId } = key
       const {
         signature: { r, s },

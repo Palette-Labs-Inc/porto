@@ -126,7 +126,10 @@ export async function getCredential(
   const nativeOptions = assertion.createNativeAssertion(options)
   console.info('[WebAuthN: getCredential] nativeOptions', nativeOptions)
   const nativeResponse = await ExpoWebAuthN.getCredential(nativeOptions)
-  console.info('[WebAuthN: getCredential] nativeResponse', assertion.fromNativeAssertion(nativeResponse))
+  console.info(
+    '[WebAuthN: getCredential] nativeResponse',
+    assertion.fromNativeAssertion(nativeResponse),
+  )
   return assertion.fromNativeAssertion(nativeResponse)
 }
 

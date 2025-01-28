@@ -471,6 +471,5 @@ open class P256Module : Module() {
     const val AUTHENTICATED_KEYSTORE_SUFFIX = "keystoreAuthenticated"
     const val UNAUTHENTICATED_KEYSTORE_SUFFIX = "keystoreUnauthenticated"
     private const val SCHEME_PROPERTY = "scheme"
-    private const val KEYSTORE_ALIAS_PROPERTY = "keystoreAlias"
   }
 }

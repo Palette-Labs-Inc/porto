@@ -1,7 +1,6 @@
 package expo.porto.webauthn
 
 import android.content.Context
-import android.util.Log
 import expo.modules.kotlin.Promise
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
@@ -33,7 +32,6 @@ class WebAuthNModule : Module() {
                 try {
                     manager.createCredential(options, promise)
                 } catch (e: Exception) {
-                    Log.e("WebAuthN", "Error creating credential", e)
                     promise.reject(
                         AuthenticationFailedException(
                             e.localizedMessage ?: "Unknown error during credential creation"

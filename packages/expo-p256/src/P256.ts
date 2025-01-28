@@ -3,8 +3,8 @@ import { Base64, Errors } from "ox";
 
 import ExpoP256 from "./ExpoP256";
 import {
-  type InvalidKeyFormatError,
   InvalidKeyError,
+  type InvalidKeyFormatError,
   InvalidSignatureError,
   convertPayloadToBase64,
   ensureValidKey,

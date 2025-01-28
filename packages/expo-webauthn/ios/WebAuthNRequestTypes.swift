@@ -13,26 +13,12 @@ public struct CredentialCreationOptions: Record {
     @Field var excludeCredentials: [PublicKeyCredentialDescriptor]?
     @Field var authenticatorSelection: AuthenticatorSelectionCriteria?
     @Field var attestation: AttestationConveyancePreference?
-    
-    func validate() throws {
-        guard !rp.name.isEmpty else {
-            throw InvalidCreationOptionsException("Missing relying party name")
-        }
-        guard !user.name.isEmpty else {
-            throw InvalidCreationOptionsException("Missing user name")
-        }
-        guard !challenge.isEmpty else {
-            throw InvalidCreationOptionsException("Missing challenge")
-        }
-    }
 }
 
 /// Represents the parameters for creating a new public key credential
 /// - Note: Follows the WebAuthn Level 2 specification and AuthenticationServices framework
 /// @see https://developer.apple.com/documentation/authenticationservices/asauthorizationpublickeycredentialparameters
-public struct PublicKeyCredentialParameters: Record {
-    public init() {}
-    
+public struct PublicKeyCredentialParameters: Record {    
     @Field var type: PublicKeyCredentialType = .publicKey
     
     @Field var alg: PublicKeyCredentialAlgorithm = .es256
@@ -68,7 +54,6 @@ public struct AuthenticatorSelectionCriteria: Record {
 
 // MARK: - Credential Request Types
 public struct CredentialRequestOptions: Record {
-    public init() {}
     @Field var challenge: Base64URLString
     @Field var rpId: String
     @Field var allowCredentials: [PublicKeyCredentialDescriptor]?

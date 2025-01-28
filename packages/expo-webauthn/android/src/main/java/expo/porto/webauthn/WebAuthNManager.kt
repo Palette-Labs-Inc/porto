@@ -2,15 +2,14 @@ package expo.porto.webauthn
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.ContextWrapper
 import android.app.Activity
+import android.util.Log
 import androidx.credentials.CreateCredentialResponse
 import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.GetPublicKeyCredentialOption
-import androidx.credentials.PublicKeyCredential
 import androidx.credentials.exceptions.*
 import androidx.credentials.exceptions.publickeycredential.*
 import expo.modules.kotlin.Promise
@@ -18,7 +17,7 @@ import expo.porto.webauthn.translators.CreateResponse
 import expo.porto.webauthn.translators.GetResponse
 
 class WebAuthNManager(
-    private val context: Context,
+    context: Context,
     private val activity: Activity
 ) {
     private val credentialManager = CredentialManager.create(context)
@@ -26,10 +25,8 @@ class WebAuthNManager(
     @SuppressLint("PublicKeyCredential")
     suspend fun createCredential(options: CredentialCreationOptions, promise: Promise) {
         try {
-            options.validate()
-
             val request = CreatePublicKeyCredentialRequest(
-                requestJson = options.toJson(),
+                requestJson = options.toJsonString(),
                 preferImmediatelyAvailableCredentials = false,
                 isAutoSelectAllowed = true
             )
@@ -49,10 +46,8 @@ class WebAuthNManager(
 
     suspend fun getCredential(options: CredentialRequestOptions, promise: Promise) {
         try {
-            options.validate()
-
             val credentialOption = GetPublicKeyCredentialOption(
-                requestJson = options.toJson()
+                requestJson = options.toJsonString()
             )
 
             val request = GetCredentialRequest(
@@ -111,30 +106,22 @@ class WebAuthNManager(
 
     private fun handleGetCredentialError(error: GetCredentialException, promise: Promise) {
         when (error) {
-            is GetCredentialCancellationException -> 
+            is GetCredentialCancellationException ->
                 promise.reject(AuthorizationCanceledException())
-            is GetCredentialInterruptedException -> 
+            is GetCredentialInterruptedException ->
                 promise.reject(AuthorizationNotHandledException())
-            is GetCredentialProviderConfigurationException -> 
+            is GetCredentialProviderConfigurationException ->
                 promise.reject(NotSupportedException())
-            is GetPublicKeyCredentialDomException -> 
+            is GetPublicKeyCredentialDomException ->
                 promise.reject(InvalidResponseException())
-            is NoCredentialException -> 
+            is NoCredentialException ->
                 promise.reject(InvalidCredentialException())
-            is GetCredentialUnsupportedException -> 
+            is GetCredentialUnsupportedException ->
                 promise.reject(NotSupportedException())
-            is GetCredentialUnknownException -> 
+            is GetCredentialUnknownException ->
                 promise.reject(UnknownAuthorizationException(error.message ?: "Unknown error during credential retrieval"))
-            else -> 
+            else ->
                 promise.reject(UnknownAuthorizationException(error.message ?: "Unexpected error during credential retrieval"))
-        }
-    }
-
-    private fun Context.getCurrentActivity(): Activity? {
-        return when (this) {
-            is Activity -> this
-            is ContextWrapper -> baseContext.getCurrentActivity()
-            else -> null
         }
     }
 }

@@ -4,9 +4,6 @@ import expo.modules.kotlin.records.Field
 import expo.modules.kotlin.records.Record
 import expo.porto.webauthn.translators.CreateRequest
 import expo.porto.webauthn.translators.GetRequest
-import org.json.JSONArray
-import org.json.JSONObject
-import android.util.Base64
 
 // MARK: - Credential Creation Types
 data class CredentialCreationOptions(
@@ -34,13 +31,7 @@ data class CredentialCreationOptions(
     @Field
     val attestation: AttestationConveyancePreference? = null
 ) : Record {
-    internal fun toJson(): String = CreateRequest.toJsonString(this)
-
-    internal fun validate() {
-        require(rp.name.isNotEmpty()) { "Missing relying party name" }
-        require(user.name.isNotEmpty()) { "Missing user name" }
-        require(challenge.isNotEmpty()) { "Missing challenge" }
-    }
+    internal fun toJsonString(): String = CreateRequest.toJsonString(this)
 }
 
 data class PublicKeyCredentialParameters(
@@ -82,10 +73,5 @@ data class CredentialRequestOptions(
     @Field
     val timeout: Double? = null
 ) : Record {
-    internal fun toJson(): String = GetRequest.toJsonString(this)
-
-    internal fun validate() {
-        require(challenge.isNotEmpty()) { "Missing challenge" }
-        require(rpId.isNotEmpty()) { "Missing rpId" }
-    }
+    internal fun toJsonString(): String = GetRequest.toJsonString(this)
 }

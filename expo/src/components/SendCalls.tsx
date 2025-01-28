@@ -1,9 +1,10 @@
 import { ExperimentERC20 } from '@/src/contracts'
 import { AbiFunction, type Hex, Value } from 'ox'
 import { useState } from 'react'
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Platform, Pressable, StyleSheet, Text, View, ScrollView } from 'react-native'
 import { usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
+import * as Linking from 'expo-linking'
 
 type Call = {
   to: Hex.Hex
@@ -11,9 +12,14 @@ type Call = {
   value?: Hex.Hex
 }
 
+type Transaction = {
+  hash: Hex.Hex
+  timestamp: number
+}
+
 function useSendCalls() {
   const porto = usePorto()
-  const [hash, setHash] = useState<Hex.Hex | null>(null)
+  const [transactions, setTransactions] = useState<Transaction[]>([])
   const [selectedAction, setSelectedAction] = useState<string>('mint')
 
   const callOptions = [
@@ -93,28 +99,41 @@ function useSendCalls() {
         ],
       })) as Hex.Hex
 
-      setHash(hash)
+      setTransactions(prev => [{
+        hash,
+        timestamp: Date.now()
+      }, ...prev])
     } catch (error) {
       console.error('[SendCalls] Failed:', error)
     }
   }
 
+  const handleOpenExplorer = async (hash: Hex.Hex) => {
+    const url = `https://odyssey-explorer.ithaca.xyz/tx/${hash}`
+    const canOpen = await Linking.canOpenURL(url)
+    if (canOpen) {
+      await Linking.openURL(url)
+    }
+  }
+
   return {
-    hash,
+    transactions,
     selectedAction,
     setSelectedAction,
     callOptions,
     handleSendCalls,
+    handleOpenExplorer,
   }
 }
 
 export function SendCalls() {
   const {
-    hash,
+    transactions,
     selectedAction,
     setSelectedAction,
     callOptions,
     handleSendCalls,
+    handleOpenExplorer,
   } = useSendCalls()
 
   return (
@@ -137,12 +156,32 @@ export function SendCalls() {
         ))}
       </View>
       <Button onPress={handleSendCalls} text="Send" />
-      {hash && (
-        <View>
-          <Text style={styles.codeBlock}>{hash}</Text>
-          <Text style={styles.link}>
-            View on Explorer: https://odyssey-explorer.ithaca.xyz/tx/{hash}
-          </Text>
+      {transactions.length > 0 && (
+        <View style={styles.transactionListContainer}>
+          <ScrollView 
+            style={styles.transactionList}
+            contentContainerStyle={styles.transactionListContent}
+            showsVerticalScrollIndicator={true}
+            nestedScrollEnabled={true}
+            scrollEnabled={true}
+            overScrollMode="always"
+          >
+            {transactions.map((tx) => (
+              <View key={tx.hash} style={styles.transactionItem}>
+                <Text style={styles.codeBlock} numberOfLines={1} ellipsizeMode="middle">{tx.hash}</Text>
+                <Pressable 
+                  onPress={() => handleOpenExplorer(tx.hash)}
+                  style={styles.linkContainer}
+                >
+                  <Text style={styles.link}>View on Explorer</Text>
+                  <Text style={styles.linkArrow}>→</Text>
+                </Pressable>
+                <Text style={styles.timestamp}>
+                  {new Date(tx.timestamp).toLocaleString()}
+                </Text>
+              </View>
+            ))}
+          </ScrollView>
         </View>
       )}
     </View>
@@ -194,8 +233,45 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 4,
   },
+  transactionListContainer: {
+    marginTop: 16,
+    height: 200,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  transactionList: {
+    flex: 1,
+  },
+  transactionListContent: {
+    padding: 8,
+    flexGrow: 1,
+  },
+  transactionItem: {
+    marginBottom: 16,
+    padding: 8,
+    backgroundColor: '#e8e8e8',
+    borderRadius: 4,
+  },
+  timestamp: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+  },
+  linkContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
   link: {
     color: '#2196F3',
-    marginTop: 8,
+    fontSize: 16,
+    textDecorationLine: 'underline',
+  },
+  linkArrow: {
+    color: '#2196F3',
+    fontSize: 16,
+    marginLeft: 4,
   },
 })

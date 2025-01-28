@@ -1,11 +1,7 @@
 import { Implementation, Porto, Storage } from 'porto'
-import {
-  type ReactNode,
-  createContext,
-  useContext,
-} from 'react'
-import { type Client, createClient, custom } from 'viem'
+import { type ReactNode, createContext, useContext } from 'react'
 import { MMKV } from 'react-native-mmkv'
+import { type Client, createClient, custom } from 'viem'
 
 type PortoInstance = ReturnType<typeof Porto.create>
 const PortoContext = createContext<PortoInstance | null>(null)
@@ -50,7 +46,7 @@ const porto: PortoInstance = Porto.create({
   implementation: Implementation.local({
     keystoreHost: 'mperhats.github.io',
   }),
-  storage: createMMKVStorage(mmkvStorage)
+  storage: createMMKVStorage(mmkvStorage),
 })
 
 // Create viem client at module level
@@ -61,9 +57,7 @@ const client = createClient({
 export function PortoProvider({ children }: { children: ReactNode }) {
   return (
     <PortoContext.Provider value={porto}>
-      <ClientContext.Provider value={client}>
-        {children}
-      </ClientContext.Provider>
+      <ClientContext.Provider value={client}>{children}</ClientContext.Provider>
     </PortoContext.Provider>
   )
 }

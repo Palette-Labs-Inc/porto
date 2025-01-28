@@ -2,7 +2,7 @@ import * as Hex from 'ox/Hex'
 import { useState } from 'react'
 import { Platform, StyleSheet, Text, TextInput, View } from 'react-native'
 import { verifyMessage } from 'viem/actions'
-import { usePorto, useClient } from '../providers/PortoProvider'
+import { useClient, usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
 
 function useMessageSigner() {

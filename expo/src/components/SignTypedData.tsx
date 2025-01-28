@@ -2,7 +2,7 @@ import { TypedData } from 'ox'
 import { useState } from 'react'
 import { Platform, StyleSheet, Text, View } from 'react-native'
 import { verifyTypedData } from 'viem/actions'
-import { usePorto, useClient } from '../providers/PortoProvider'
+import { useClient, usePorto } from '../providers/PortoProvider'
 import { Button } from './Button'
 
 const typedData = {

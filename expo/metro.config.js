@@ -20,18 +20,27 @@ const symlinksResolver = MetroSymlinksResolver()
  * Resolves porto module imports to source files
  */
 function resolvePortoModule(context, moduleName) {
-  // Not a porto module, skip
-  if (!moduleName.startsWith('porto')) {
+  // Not a porto module or expo package, skip
+  if (!moduleName.startsWith('porto') && 
+      !moduleName.startsWith('expo-webauthn') && 
+      !moduleName.startsWith('expo-p256')) {
     return null
   }
 
   // Convert module path to typescript source path
-  const relativePath =
-    moduleName === 'porto'
-      ? 'index.ts'
-      : moduleName.replace('porto/', '').replace('.js', '.ts')
-
-  const sourcePath = path.join(PATHS.portoSource, relativePath)
+  let sourcePath
+  if (moduleName === 'porto') {
+    sourcePath = path.join(PATHS.portoSource, 'index.ts')
+  } else if (moduleName.startsWith('expo-webauthn')) {
+    const relativePath = moduleName.replace('expo-webauthn', 'src').replace('.js', '.ts')
+    sourcePath = path.join(PATHS.packages, 'expo-webauthn', relativePath)
+  } else if (moduleName.startsWith('expo-p256')) {
+    const relativePath = moduleName.replace('expo-p256', 'src').replace('.js', '.ts')
+    sourcePath = path.join(PATHS.packages, 'expo-p256', relativePath)
+  } else {
+    const relativePath = moduleName.replace('porto/', '').replace('.js', '.ts')
+    sourcePath = path.join(PATHS.portoSource, relativePath)
+  }
 
   // Check if source file exists
   if (fs.existsSync(sourcePath)) {

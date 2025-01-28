@@ -15,7 +15,7 @@ const callScopes = [
 function useAuthorizeKey() {
   const porto = usePorto()
   const [result, setResult] = useState<any | null>(null)
-  const [expiry, setExpiry] = useState<string>('')
+  const [expiry, setExpiry] = useState<string>('22222') // 22222 seconds is 6 hours
 
   const handleAuthorizeKey = async () => {
     try {

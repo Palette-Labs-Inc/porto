@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import android.app.Activity
+import android.util.Log
 
 class WebAuthNModule : Module() {
     private val moduleScope = CoroutineScope(Dispatchers.Default)
@@ -44,6 +45,7 @@ class WebAuthNModule : Module() {
         AsyncFunction("getCredential") { options: CredentialRequestOptions, promise: Promise ->
             moduleScope.launch {
                 try {
+                    Log.d("ExpoWebAuthN", "getCredential called with options: $options")
                     manager.getCredential(options, promise)
                 } catch (e: Exception) {
                     promise.reject(

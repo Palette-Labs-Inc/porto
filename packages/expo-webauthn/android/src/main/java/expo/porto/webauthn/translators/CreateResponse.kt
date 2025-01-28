@@ -7,6 +7,7 @@ import androidx.credentials.PublicKeyCredential
 import expo.porto.webauthn.CredentialResponse
 import expo.porto.webauthn.AuthenticatorAttestationResponse
 import expo.porto.webauthn.InvalidResponseException
+import org.json.JSONObject
 
 object CreateResponse {
     fun toCredentialResponse(response: CreateCredentialResponse): CredentialResponse {
@@ -17,14 +18,18 @@ object CreateResponse {
         val publicKeyResponse = response as? CreatePublicKeyCredentialResponse
             ?: throw InvalidResponseException()
 
+        // Parse the registration response JSON
+        val responseData = JSONObject(publicKeyResponse.registrationResponseJson)
+        val rawResponse = responseData.getJSONObject("response")
+
         return CredentialResponse(
-            id = publicKeyResponse.registrationResponseJson,
-            rawId = publicKeyResponse.registrationResponseJson,
-            type = "public-key",
-            authenticatorAttachment = "platform", // Android always uses platform authenticator
+            id = responseData.getString("id"),
+            rawId = responseData.getString("rawId"),
+            type = responseData.getString("type"),
+            authenticatorAttachment = responseData.optString("authenticatorAttachment", "platform"),
             response = AuthenticatorAttestationResponse(
-                clientDataJSON = publicKeyResponse.registrationResponseJson,
-                attestationObject = publicKeyResponse.registrationResponseJson
+                clientDataJSON = rawResponse.getString("clientDataJSON"),
+                attestationObject = rawResponse.getString("attestationObject")
             )
         )
     }

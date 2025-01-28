@@ -26,9 +26,7 @@ class WebAuthNManager(
     suspend fun createCredential(options: CredentialCreationOptions, promise: Promise) {
         try {
             val request = CreatePublicKeyCredentialRequest(
-                requestJson = options.toJsonString(),
-                preferImmediatelyAvailableCredentials = false,
-                isAutoSelectAllowed = true
+                requestJson = options.toJsonString()
             )
 
             val result = credentialManager.createCredential(

@@ -211,7 +211,6 @@ export function create(
 
   return {
     destroy() {
-      console.info('[porto] destroy')
       destroy()
       provider._internal.destroy()
     },

@@ -278,9 +278,6 @@ export function local(parameters: local.Parameters = {}) {
       async loadAccounts(parameters) {
         const { authorizeKeys, internal } = parameters
         const { client } = internal
-
-        console.info('[Implementation] loadAccounts', parameters)
-
         const { address, credentialId } = await (async () => {
           // If the address and credentialId are provided, we can skip the
           // WebAuthn discovery step.
@@ -296,8 +293,6 @@ export function local(parameters: local.Parameters = {}) {
             challenge: '0x',
             rpId: keystoreHost,
           })
-
-          console.info('[Implementation] credential', credential)
 
           const response = credential.raw
             .response as AuthenticatorAssertionResponse

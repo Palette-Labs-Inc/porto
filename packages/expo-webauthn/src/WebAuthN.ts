@@ -54,7 +54,10 @@ export async function createCredential(
   const nativeOptions = credential.createNativeCredential(options)
   console.info('[WebAuthN: createCredential] nativeOptions', nativeOptions)
   const nativeResponse = await ExpoWebAuthN.createCredential(nativeOptions)
-  console.info('[WebAuthN: createCredential] nativeResponse', credential.fromNativeAttestation(nativeResponse))
+  console.info(
+    '[WebAuthN: createCredential] nativeResponse',
+    credential.fromNativeAttestation(nativeResponse),
+  )
   return credential.fromNativeAttestation(nativeResponse)
 }
 

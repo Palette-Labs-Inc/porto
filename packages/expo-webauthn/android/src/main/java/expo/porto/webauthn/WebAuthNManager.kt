@@ -3,18 +3,24 @@ package expo.porto.webauthn
 import android.annotation.SuppressLint
 import android.content.Context
 import android.app.Activity
-import android.util.Log
-import androidx.credentials.CreateCredentialResponse
-import androidx.credentials.CreatePublicKeyCredentialRequest
-import androidx.credentials.CredentialManager
-import androidx.credentials.GetCredentialRequest
-import androidx.credentials.GetCredentialResponse
-import androidx.credentials.GetPublicKeyCredentialOption
-import androidx.credentials.exceptions.*
-import androidx.credentials.exceptions.publickeycredential.*
+import androidx.credentials.*
+import androidx.credentials.exceptions.CreateCredentialCancellationException
+import androidx.credentials.exceptions.CreateCredentialCustomException
+import androidx.credentials.exceptions.CreateCredentialException
+import androidx.credentials.exceptions.CreateCredentialInterruptedException
+import androidx.credentials.exceptions.CreateCredentialProviderConfigurationException
+import androidx.credentials.exceptions.CreateCredentialUnknownException
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.GetCredentialInterruptedException
+import androidx.credentials.exceptions.GetCredentialProviderConfigurationException
+import androidx.credentials.exceptions.GetCredentialUnknownException
+import androidx.credentials.exceptions.GetCredentialUnsupportedException
+import androidx.credentials.exceptions.NoCredentialException
+import androidx.credentials.exceptions.publickeycredential.CreatePublicKeyCredentialDomException
+import androidx.credentials.exceptions.publickeycredential.GetPublicKeyCredentialDomException
 import expo.modules.kotlin.Promise
-import expo.porto.webauthn.translators.CreateResponse
-import expo.porto.webauthn.translators.GetResponse
+import expo.porto.webauthn.Base64Utils.toBase64URLString
 
 class WebAuthNManager(
     context: Context,
@@ -67,7 +73,7 @@ class WebAuthNManager(
 
     private fun handleCreateCredentialResponse(response: CreateCredentialResponse, promise: Promise) {
         try {
-            val credentialResponse = CreateResponse.toCredentialResponse(response)
+            val credentialResponse = CredentialResponse.fromCreateCredentialResponse(response)
             promise.resolve(credentialResponse)
         } catch (e: Exception) {
             promise.reject(AuthenticationFailedException(e.localizedMessage ?: "Failed to process credential response"))
@@ -76,7 +82,7 @@ class WebAuthNManager(
 
     private fun handleGetCredentialResponse(response: GetCredentialResponse, promise: Promise) {
         try {
-            val assertionResponse = GetResponse.toAssertionResponse(response)
+            val assertionResponse = AssertionResponse.fromGetCredentialResponse(response)
             promise.resolve(assertionResponse)
         } catch (e: Exception) {
             promise.reject(AuthenticationFailedException(e.localizedMessage ?: "Failed to process credential response"))
@@ -85,17 +91,17 @@ class WebAuthNManager(
 
     private fun handleCreateCredentialError(error: CreateCredentialException, promise: Promise) {
         when (error) {
-            is CreateCredentialCancellationException -> 
+            is CreateCredentialCancellationException ->
                 promise.reject(AuthorizationCanceledException())
-            is CreateCredentialInterruptedException -> 
+            is CreateCredentialInterruptedException ->
                 promise.reject(AuthorizationNotHandledException())
-            is CreateCredentialProviderConfigurationException -> 
+            is CreateCredentialProviderConfigurationException ->
                 promise.reject(NotSupportedException())
-            is CreatePublicKeyCredentialDomException -> 
+            is CreatePublicKeyCredentialDomException ->
                 promise.reject(InvalidResponseException())
-            is CreateCredentialCustomException -> 
+            is CreateCredentialCustomException ->
                 promise.reject(InvalidCreationOptionsException(error.message ?: "Custom error during credential creation"))
-            is CreateCredentialUnknownException -> 
+            is CreateCredentialUnknownException ->
                 promise.reject(UnknownAuthorizationException(error.message ?: "Unknown error during credential creation"))
             else -> 
                 promise.reject(UnknownAuthorizationException(error.message ?: "Unexpected error during credential creation"))

@@ -3,10 +3,12 @@ package expo.porto.webauthn
 import expo.modules.kotlin.records.Field
 import expo.modules.kotlin.records.Record
 import expo.modules.kotlin.types.Enumerable
+import expo.porto.webauthn.translators.Base64Utils.toBase64URLString
 import android.util.Base64
-import androidx.credentials.PublicKeyCredential
+import org.json.JSONObject
+import org.json.JSONArray
 
-// MARK: - Type Aliases
+// MARK: - Type Aliases and Constants
 typealias Base64URLString = String
 typealias CredentialIDString = Base64URLString
 
@@ -55,7 +57,15 @@ data class PublicKeyCredentialDescriptor(
 
     @Field
     val transports: List<AuthenticatorTransport>? = null
-) : Record
+) : Record {
+    internal fun toJSON(): JSONObject = JSONObject().apply {
+        put("type", "public-key")
+        put("id", id.toBase64URLString())
+        transports?.let { 
+            put("transports", JSONArray(it.map { transport -> transport.value }))
+        }
+    }
+}
 
 data class RelyingParty(
     @Field

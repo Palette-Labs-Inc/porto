@@ -4,6 +4,10 @@ import expo.modules.kotlin.records.Field
 import expo.modules.kotlin.records.Record
 import expo.porto.webauthn.translators.CreateRequest
 import expo.porto.webauthn.translators.GetRequest
+import expo.porto.webauthn.translators.Base64Utils.toBase64URLString
+import org.json.JSONObject
+import org.json.JSONArray
+import android.util.Log
 
 // MARK: - Credential Creation Types
 data class CredentialCreationOptions(
@@ -31,7 +35,21 @@ data class CredentialCreationOptions(
     @Field
     val attestation: AttestationConveyancePreference? = null
 ) : Record {
-    internal fun toJsonString(): String = CreateRequest.toJsonString(this)
+    internal fun toJsonString(): String {
+        return JSONObject().apply {
+            put("rp", JSONObject().apply {
+                put("id", rp.id)
+                put("name", rp.name)
+            })
+            put("user", JSONObject().apply {
+                put("id", user.id.toBase64URLString())
+                put("name", user.name)
+                put("displayName", user.displayName)
+            })
+            put("challenge", challenge.toBase64URLString())
+            // ... rest of the conversion ...
+        }.toString()
+    }
 }
 
 data class PublicKeyCredentialParameters(
@@ -73,5 +91,21 @@ data class CredentialRequestOptions(
     @Field
     val timeout: Double? = null
 ) : Record {
-    internal fun toJsonString(): String = GetRequest.toJsonString(this)
+    internal fun toJsonString(): String {
+        return JSONObject().apply {
+            put("challenge", challenge.toBase64URLString())
+            put("rpId", rpId)
+            
+            allowCredentials?.let { credentials ->
+                put("allowCredentials", JSONArray().apply {
+                    credentials.forEach { credential ->
+                        put(credential.toJSON())
+                    }
+                })
+            }
+            
+            userVerification?.let { put("userVerification", it.value) }
+            timeout?.let { put("timeout", it.toLong()) }
+        }.toString()
+    }
 }

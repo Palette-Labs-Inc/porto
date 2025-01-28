@@ -128,36 +128,24 @@ open class P256Module : Module() {
     AsyncFunction("signWithP256KeyPair") Coroutine { key: String, payload: String, options: P256Options ->
       try {
         val alias = "${options.keychainService}-$key"
-        Log.d(TAG, "Attempting to sign with key alias: $alias")
-        
+
         val keyPair = getP256KeyPairFromKeystore(alias)
           ?: throw DecryptException("Key not found in Keystore", key, options.keychainService)
-        Log.d(TAG, "Successfully retrieved key pair from keystore")
-        
+
         // Get the private key entry directly
         val keyEntry = keyStore.getEntry(alias, null) as PrivateKeyEntry
-        Log.d(TAG, "Retrieved KeyStore entry type: ${keyEntry::class.java.simpleName}")
-        
+
         // Get the private key
         val privateKey = keyEntry.privateKey
-        Log.d(TAG, "Private key class: ${privateKey::class.java.simpleName}")
-        Log.d(TAG, "Private key algorithm: ${privateKey.algorithm}")
-        
         // Create KeyFactory and get KeyInfo without casting the private key
         val keyFactory = KeyFactory.getInstance(privateKey.algorithm, KEYSTORE_PROVIDER)
         val keySpec = keyFactory.getKeySpec(privateKey, KeyInfo::class.java)
-        
-        Log.d(TAG, "Key authentication required: ${keySpec.isUserAuthenticationRequired}")
-        Log.d(TAG, "Key authentication validity duration: ${keySpec.userAuthenticationValidityDurationSeconds}")
-        Log.d(TAG, "Key inside secure hardware: ${keySpec.isInsideSecureHardware}")
-        
+
         // Create signature object
         val signature = Signature.getInstance("SHA256withECDSA")
-        Log.d(TAG, "Created signature instance with algorithm: SHA256withECDSA")
-        
+
         // Only use authenticateSignature if the key requires authentication
         val signatureBytes = if (keySpec.isUserAuthenticationRequired) {
-          Log.d(TAG, "Key requires authentication, prompting user...")
           authenticationHelper.authenticateSignature(
             signature.apply { 
               initSign(privateKey)
@@ -167,30 +155,23 @@ open class P256Module : Module() {
             options.authenticationPrompt ?: "Authenticate to sign"
           ).sign()
         } else {
-          Log.d(TAG, "Key does not require authentication, signing directly...")
           signature.apply {
             initSign(privateKey)
             update(Base64.decode(payload, Base64.NO_WRAP))
           }.sign()
         }
-        
-        Log.d(TAG, "Successfully generated signature")
-        
+
         val result = mapOf(
           "signature" to Base64.encodeToString(signatureBytes, Base64.NO_WRAP),
           "publicKey" to Base64.encodeToString(keyPair.public.encoded, Base64.NO_WRAP)
         )
-        Log.d(TAG, "Returning signature result with length: ${signatureBytes.size}")
-        
+
         return@Coroutine result
       } catch (e: KeyPermanentlyInvalidatedException) {
-        Log.e(TAG, "Key has been permanently invalidated", e)
         throw DecryptException("Key has been permanently invalidated", key, options.keychainService, e)
       } catch (e: UserNotAuthenticatedException) {
-        Log.e(TAG, "User authentication required but not provided", e)
         throw AuthenticationException("User authentication required", e)
       } catch (e: Exception) {
-        Log.e(TAG, "Failed to sign with P256 key pair", e)
         throw DecryptException("Failed to sign with P256 key pair: ${e.message}", key, options.keychainService, e)
       }
     }
@@ -312,71 +293,6 @@ open class P256Module : Module() {
     }
   }
 
-  private suspend fun setItemImpl(key: String, value: String?, options: P256Options, keyIsInvalidated: Boolean) {
-    val keychainAwareKey = createKeychainAwareKey(key, options.keychainService)
-    val prefs: SharedPreferences = getSharedPreferences()
-
-    if (value == null) {
-      val success = prefs.edit().putString(keychainAwareKey, null).commit()
-      if (!success) {
-        throw WriteException("Could not write a null value to P256", key, options.keychainService)
-      }
-      return
-    }
-
-    try {
-      if (keyIsInvalidated) {
-        // Invalidated keys will block writing even though it's not possible to re-validate them
-        // so we remove them before saving.
-        val alias = mAESEncryptor.getExtendedKeyStoreAlias(options, options.requireAuthentication)
-        removeKeyFromKeystore(alias, options.keychainService)
-      }
-
-      /* Android API 23+ supports storing symmetric keys in the keystore and on older Android
-       versions we store an asymmetric key pair and use hybrid encryption. We store the scheme we
-       use in the encrypted JSON item so that we know how to decode and decrypt it when reading
-       back a value.
-       */
-      val secretKeyEntry: SecretKeyEntry = getOrCreateKeyEntry(SecretKeyEntry::class.java, mAESEncryptor, options, options.requireAuthentication)
-      val encryptedItem = mAESEncryptor.createEncryptedItem(value, secretKeyEntry, options.requireAuthentication, options.authenticationPrompt, authenticationHelper)
-      encryptedItem.put(SCHEME_PROPERTY, AESEncryptor.NAME)
-      saveEncryptedItem(encryptedItem, prefs, keychainAwareKey, options.requireAuthentication, options.keychainService)
-
-      // If a legacy value exists under this key we remove it to avoid unexpected errors in the future
-      if (prefs.contains(key)) {
-        prefs.edit().remove(key).apply()
-      }
-    } catch (e: KeyPermanentlyInvalidatedException) {
-      if (!keyIsInvalidated) {
-        Log.w(TAG, "Key has been invalidated, retrying with the key deleted")
-        return setItemImpl(key, value, options, true)
-      }
-      throw EncryptException("Encryption Failed. The key $key has been permanently invalidated and cannot be reinitialized", key, options.keychainService, e)
-    } catch (e: GeneralSecurityException) {
-      throw EncryptException(e.message, key, options.keychainService, e)
-    } catch (e: CodedException) {
-      throw e
-    } catch (e: Exception) {
-      throw WriteException(e.message, key, options.keychainService, e)
-    }
-  }
-
-  private fun saveEncryptedItem(encryptedItem: JSONObject, prefs: SharedPreferences, key: String, requireAuthentication: Boolean, keychainService: String): Boolean {
-    // We need a way to recognize entries that have been saved under an alias created with getExtendedKeychain
-    encryptedItem.put(USES_KEYSTORE_SUFFIX_PROPERTY, true)
-    // In order to be able to have the same keys under different keychains
-    // we need a way to recognize what is the keychain of the item when we read it
-    encryptedItem.put(KEYSTORE_ALIAS_PROPERTY, keychainService)
-    encryptedItem.put(AuthenticationHelper.REQUIRE_AUTHENTICATION_PROPERTY, requireAuthentication)
-
-    val encryptedItemString = encryptedItem.toString()
-    if (encryptedItemString.isEmpty()) { // JSONObject#toString() may return null
-      throw WriteException("Could not JSON-encode the encrypted item for P256 - the string $encryptedItemString is null or empty", key, keychainService)
-    }
-
-    return prefs.edit().putString(key, encryptedItemString).commit()
-  }
-
   private fun deleteItemImpl(key: String, options: P256Options) {
     var success = true
     val prefs = getSharedPreferences()
@@ -397,36 +313,6 @@ open class P256Module : Module() {
 
     if (!success) {
       throw DeleteException("Could not delete the item from P256", key, options.keychainService)
-    }
-  }
-
-  private fun removeKeyFromKeystore(keyStoreAlias: String, keychainService: String) {
-    keyStore.deleteEntry(keyStoreAlias)
-    removeAllEntriesUnderKeychainService(keychainService)
-  }
-
-  private fun removeAllEntriesUnderKeychainService(keychainService: String) {
-    val sharedPreferences = getSharedPreferences()
-    val allEntries: Map<String, *> = sharedPreferences.all
-
-    // In order to avoid decryption failures we need to remove all entries that are using the deleted encryption key
-    for ((key: String, value) in allEntries) {
-      val valueString = value as? String ?: continue
-      val jsonEntry = try {
-        JSONObject(valueString)
-      } catch (e: JSONException) {
-        continue
-      }
-
-      val entryKeychainService = jsonEntry.optString(KEYSTORE_ALIAS_PROPERTY) ?: continue
-      val requireAuthentication = jsonEntry.optBoolean(AuthenticationHelper.REQUIRE_AUTHENTICATION_PROPERTY, false)
-
-      // Entries which don't require authentication use separate keychains which can't be invalidated,
-      // so we shouldn't delete them.
-      if (requireAuthentication && keychainService == entryKeychainService) {
-        sharedPreferences.edit().remove(key).apply()
-        Log.w(TAG, "Removing entry: $key due to the encryption key being deleted")
-      }
     }
   }
 
@@ -514,7 +400,6 @@ open class P256Module : Module() {
 
   @RequiresApi(Build.VERSION_CODES.R)
   private fun createP256KeyPair(alias: String, requireAuthentication: Boolean): KeyPair {
-    Log.d(TAG, "Creating P256 key pair for alias: $alias, requireAuthentication: $requireAuthentication")
     
     val params = KeyGenParameterSpec.Builder(
       alias,
@@ -524,18 +409,15 @@ open class P256Module : Module() {
       .setDigests(KeyProperties.DIGEST_SHA256)
       
     if (requireAuthentication) {
-      Log.d(TAG, "Configuring key pair with biometric authentication")
       params
         .setUserAuthenticationRequired(true)
         .setUserAuthenticationParameters(0, KeyProperties.AUTH_BIOMETRIC_STRONG)
         .setInvalidatedByBiometricEnrollment(true)
     } else {
-      Log.d(TAG, "Configuring key pair without authentication")
       params.setUserAuthenticationRequired(false)
     }
 
     val generator = params.build()
-    Log.d(TAG, "Initializing key pair generator with EC algorithm")
     
     val keyPairGenerator = KeyPairGenerator.getInstance(
       KeyProperties.KEY_ALGORITHM_EC,
@@ -544,8 +426,6 @@ open class P256Module : Module() {
     keyPairGenerator.initialize(generator)
     
     val keyPair = keyPairGenerator.generateKeyPair()
-    Log.d(TAG, "Successfully generated P256 key pair")
-    val publicKey = keyPair.public
     
     return keyPair
   }

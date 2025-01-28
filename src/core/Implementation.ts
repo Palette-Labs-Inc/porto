@@ -530,7 +530,6 @@ export function dialog(parameters: dialog.Parameters = {}) {
         if (!key) throw new Error('key not found.')
 
         // Send a request off to the dialog to authorize the key.
-        console.info('[Implementation] Authorizing key:', key)
         const provider = getProvider(store)
         await provider.request({
           method: 'experimental_authorizeKey',

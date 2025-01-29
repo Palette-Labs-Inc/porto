@@ -47,7 +47,7 @@ const porto: PortoInstance = Porto.create({
     keystoreHost: 'mperhats.github.io',
   }),
   // Only provide storage for native platforms, else use default storage
-  ...(Platform.OS !== 'web' && { storage: createNativeStorage() })
+  ...(Platform.OS !== 'web' && { storage: createNativeStorage() }),
 })
 
 // Create viem client at module level

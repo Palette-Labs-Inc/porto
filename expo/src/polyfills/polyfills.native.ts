@@ -18,7 +18,3 @@ if (typeof global.Buffer === 'undefined') {
   // @ts-ignore
   global.Buffer = Buffer
 }
-
-// Use @peculiar/webcrypto for proper WebCrypto API support, needed in ox/core/WebAuthnP256 for getPublicKey() method from crypto.subtle
-const crypto = new Crypto()
-global.crypto = crypto

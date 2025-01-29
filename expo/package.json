@@ -17,6 +17,7 @@
     "run:ios": "EXPO_DEBUG=1 USE_PORTO_SOURCE=true expo run:ios",
     "build:android": "EXPO_DEBUG=1 USE_PORTO_SOURCE=true expo build:android",
     "build:ios": "EXPO_DEBUG=1 expo build:ios",
+    "web": "expo start --web",
     "ios:debug": "EXPO_DEBUG=1 USE_PORTO_SOURCE=true EXPO_USE_METRO_WORKSPACE_ROOT=1 expo run:ios",
     "android:debug": "EXPO_DEBUG=1 USE_PORTO_SOURCE=true EXPO_USE_METRO_WORKSPACE_ROOT=1 expo run:android",
     "studio:android": "pnpm prebuild:android && open -a /Applications/Android\\ Studio.app ./android"
@@ -47,7 +48,6 @@
     "react-native-get-random-values": "^1.11.0",
     "react-native-mmkv": "^3.2.0",
     "react-native-nitro-modules": "^0.21.0",
-    "react-native-quick-crypto": "^0.7.11",
     "react-native-safe-area-context": "4.12.0",
     "react-native-screens": "~4.4.0",
     "react-native-web": "~0.19.13",

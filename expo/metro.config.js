@@ -96,6 +96,28 @@ module.exports = makeMetroConfig({
   resolver: {
     ...expoConfig.resolver,
     resolveRequest: (context, moduleName, platform) => {
+      // Only apply polyfills for native platforms
+      if (platform !== 'web') {
+        const nativePolyfills = {
+          crypto: require.resolve('@peculiar/webcrypto'),
+          buffer: require.resolve('buffer'),
+          stream: require.resolve('stream-browserify'),
+          util: require.resolve('util'),
+        }
+
+        if (nativePolyfills[moduleName]) {
+          try {
+            const polyfillPath = nativePolyfills[moduleName]
+            const symlinkResolution = symlinksResolver(
+              context,
+              polyfillPath,
+              platform
+            )
+            if (symlinkResolution) return symlinkResolution
+          } catch {}
+        }
+      }
+
       // Try resolving porto modules first
       const portoResolution = resolvePortoModule(context, moduleName)
       if (portoResolution) return portoResolution
@@ -133,12 +155,6 @@ module.exports = makeMetroConfig({
     extraNodeModules: {
       // Map porto to source
       porto: PATHS.portoSource,
-
-      // Node.js core polyfills
-      crypto: require.resolve('react-native-quick-crypto'),
-      buffer: require.resolve('buffer'),
-      stream: require.resolve('stream-browserify'),
-      util: require.resolve('util'),
     },
   },
 

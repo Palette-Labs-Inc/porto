@@ -18,7 +18,12 @@
     "prepublishOnly": "npm_config_user_agent=yarn expo-module prepublishOnly",
     "postinstall": "pnpm build"
   },
-  "keywords": ["react-native", "expo", "expo-p256", "p256"],
+  "keywords": [
+    "react-native",
+    "expo",
+    "expo-p256",
+    "p256"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/Palette-Labs-Inc/porto-expo.git",
@@ -31,6 +36,7 @@
     "preset": "expo-module-scripts"
   },
   "dependencies": {
+    "@noble/curves": "^1.8.1",
     "ox": "catalog:"
   },
   "devDependencies": {

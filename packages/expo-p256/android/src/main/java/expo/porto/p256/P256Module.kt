@@ -163,7 +163,6 @@ open class P256Module : Module() {
 
         val result = mapOf(
           "signature" to Base64.encodeToString(signatureBytes, Base64.NO_WRAP),
-          "publicKey" to Base64.encodeToString(keyPair.public.encoded, Base64.NO_WRAP)
         )
 
         return@Coroutine result

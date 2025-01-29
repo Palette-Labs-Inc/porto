@@ -5,7 +5,6 @@ import { Button } from './Button'
 
 function useLogin() {
   const porto = usePorto()
-  console.info('Porto instance:', porto)
   const [accounts, setAccounts] = useState<readonly string[] | null>(null)
 
   const handleLogin = async () => {

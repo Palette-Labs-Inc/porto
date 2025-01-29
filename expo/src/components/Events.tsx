@@ -30,8 +30,6 @@ function useEvents() {
   const [responses, setResponses] = useState<EventResponses>({})
 
   useEffect(() => {
-    console.info('[Events] Setting up event listeners')
-
     const handleAccountsChanged = (accounts: AccountsChangedEvent) => {
       console.info('[Events] Received accountsChanged event:', accounts)
       setResponses((prev) => ({ ...prev, accountsChanged: accounts }))
@@ -66,7 +64,6 @@ function useEvents() {
 
     // Cleanup function
     return () => {
-      console.info('[Events] Cleaning up event listeners')
       porto.provider.removeListener('accountsChanged', handleAccountsChanged)
       porto.provider.removeListener('chainChanged', handleChainChanged)
       porto.provider.removeListener('connect', handleConnect)

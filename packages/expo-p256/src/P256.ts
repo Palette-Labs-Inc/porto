@@ -1,5 +1,6 @@
-import { type Bytes, type Hex, PublicKey, Signature } from 'ox'
+import { Bytes, type Hex, PublicKey, type Signature } from 'ox'
 import { Base64, Errors } from 'ox'
+import { p256 } from '@noble/curves/p256'
 
 import ExpoP256 from './ExpoP256'
 import {
@@ -327,7 +328,13 @@ export declare namespace sign {
 
 /**
  * Creates a P256Key from a native ASN.1 DER encoded signature.
- * Converts to the standard ox Signature format.
+ * Converts to the standard ox Signature format with normalized s-values.
+ * 
+ * Process:
+ * 1. Decodes base64 signature from native module
+ * 2. Parses ASN.1 DER format to extract r and s values
+ * 3. Normalizes s-value to be <= n/2 (where n is the curve order)
+ *    This ensures signature malleability resistance
  *
  * @example
  * ```ts
@@ -340,13 +347,17 @@ export function fromNativeSignature(
   parameters: fromNativeSignature.Parameters,
 ): fromNativeSignature.ReturnType {
   const { signature } = parameters
-  if (!signature) {
-    throw new InvalidSignatureError()
-  }
+  if (!signature) throw new InvalidSignatureError()
 
-  const signatureBytes = Base64.toBytes(signature)
-  const { r, s } = Signature.fromDerBytes(signatureBytes)
-  return { r, s }
+  // Convert base64 to hex and parse DER format
+  const derHex = Bytes.toHex(Base64.toBytes(signature))
+  const { r, s } = p256.Signature.fromDER(derHex.slice(2))
+  
+  // Normalize s value to be <= n/2 for signature malleability resistance
+  // Both (r,s) and (r,-s) are valid signatures, we standardize on the smaller s
+  const normalizedS = s > p256.CURVE.n / 2n ? p256.CURVE.n - s : s
+  
+  return { r, s: normalizedS }
 }
 
 export declare namespace fromNativeSignature {

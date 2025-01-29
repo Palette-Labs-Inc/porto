@@ -134,7 +134,6 @@ public final class P256Module: Module {
         
         return [
           "signature": signature.derRepresentation.base64EncodedString(),
-          "publicKey": privateKey.publicKey.derRepresentation.base64EncodedString()
         ]
       }
       

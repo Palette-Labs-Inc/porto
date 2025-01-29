@@ -1,9 +1,9 @@
 import { PublicKey } from 'ox'
 import type * as Hex from 'ox/Hex'
 import * as WebCryptoP256 from 'ox/WebCryptoP256'
+import type { C } from 'vitest/dist/chunks/environment.LoooBwUu.js'
 import type { CallScopes, Key, createWebCryptoP256 } from '../key.js'
 import { from } from '../key.js'
-import type { C } from 'vitest/dist/chunks/environment.LoooBwUu.js'
 
 export const createKeyPair = async <const role extends Key['role']>(
   parameters: createWebCryptoP256.Parameters<role>,
@@ -20,8 +20,6 @@ export const sign = async (options: {
   payload: Hex.Hex
 }) => {
   const { privateKey } = options.key
-
-
 
   const pkAsCryptoKey = options.key.privateKey as CryptoKey
 

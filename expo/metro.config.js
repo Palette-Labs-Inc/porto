@@ -96,7 +96,6 @@ module.exports = makeMetroConfig({
   resolver: {
     ...expoConfig.resolver,
     resolveRequest: (context, moduleName, platform) => {
-      
       if (platform !== 'web') {
         const nativePolyfills = {
           crypto: require.resolve('react-native-quick-crypto'),

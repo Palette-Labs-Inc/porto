@@ -1,4 +1,4 @@
-import { type Bytes, Hex, PublicKey, Signature } from 'ox'
+import { type Bytes, type Hex, PublicKey, Signature } from 'ox'
 import { Base64, Errors } from 'ox'
 
 import ExpoP256 from './ExpoP256'

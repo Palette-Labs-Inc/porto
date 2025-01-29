@@ -1,0 +1,1 @@
+export { keystoreResolver } from './keystore'

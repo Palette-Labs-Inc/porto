@@ -30,8 +30,8 @@
     "importHelpers": true, // This is only used for build validation. Since we do not have `tslib` installed, this will fail if we accidentally make use of anything that'd require injection of helpers.
 
     // Language and environment
-    "moduleResolution": "NodeNext",
-    "module": "NodeNext",
+    "moduleResolution": "node",
+    "module": "ES2020",
     "target": "ES2021",
     "lib": ["ES2023", "DOM"],
 

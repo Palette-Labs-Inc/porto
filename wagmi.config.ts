@@ -3,16 +3,13 @@ import { foundry } from '@wagmi/cli/plugins'
 import { odysseyTestnet } from 'viem/chains'
 
 export default defineConfig({
-  out: 'src/generated.ts',
+  out: 'src/core/internal/generated.ts',
   contracts: [],
   plugins: [
     foundry({
       deployments: {
-        ExperimentalDelegation: {
-          [odysseyTestnet.id]: '0xb46b3f3f7F8B198894d1787b9d6c0effbd3928c9',
-        },
-        ExperimentERC20: {
-          [odysseyTestnet.id]: '0x238c8CD93ee9F8c7Edf395548eF60c0d2e46665E',
+        Delegation: {
+          [odysseyTestnet.id]: '0xde1e05b27289652cf1dcbbaaed1c0e3cb0e8c919',
         },
       },
       project: 'contracts',

@@ -1,0 +1,63 @@
+apply plugin: 'com.android.library'
+
+// Read version from package.json
+group = 'com.porto.webauthn'
+version = '0.0.1'
+
+def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
+apply from: expoModulesCorePlugin
+applyKotlinExpoModulesCorePlugin()
+useCoreDependencies()
+useExpoPublishing()
+
+// If you want to use the managed Android SDK versions from expo-modules-core, set this to true.
+// The Android SDK versions will be bumped from time to time in SDK releases and may introduce breaking changes in your module code.
+// Most of the time, you may like to manage the Android SDK versions yourself.
+def useManagedAndroidSdkVersions = false
+if (useManagedAndroidSdkVersions) {
+  useDefaultAndroidSdkVersions()
+} else {
+  buildscript {
+    // Simple helper that allows the root project to override versions declared by this library.
+    ext.safeExtGet = { prop, fallback ->
+      rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+    }
+  }
+  project.android {
+    compileSdkVersion safeExtGet("compileSdkVersion", 34)
+    defaultConfig {
+      minSdkVersion safeExtGet("minSdkVersion", 24)
+      targetSdkVersion safeExtGet("targetSdkVersion", 34)
+    }
+  }
+}
+
+android {
+  namespace "expo.porto.webauthn"
+  defaultConfig {
+    versionCode 1
+    versionName "0.0.1"
+  }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+  }
+  kotlinOptions {
+    jvmTarget = JavaVersion.VERSION_17.majorVersion
+  }
+}
+
+dependencies {
+  implementation project(':expo-modules-core')
+  implementation 'androidx.activity:activity-ktx:1.7.2'
+
+  // Android Credentials
+  implementation "androidx.credentials:credentials:1.5.0-rc01"
+  implementation "androidx.credentials:credentials-play-services-auth:1.5.0-rc01"
+  implementation "com.google.code.gson:gson:2.8.9"
+
+
+  // Kotlin Coroutines
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.2'
+  implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.2'
+}

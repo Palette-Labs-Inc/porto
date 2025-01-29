@@ -41,3 +41,13 @@ out
 # vercel
 .vercel
 
+
+# expo packages build
+/packages/expo-p256/plugin/build
+/packages/expo-webauthn/build
+/packages/expo-p256/build
+expo/ios
+expo/android
+packages/expo-p256/.eslintrc.js
+packages/expo-webauthn/.eslintrc.js
+/packages/expo-webauthn/android/build

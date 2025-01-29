@@ -1,9 +1,8 @@
 import type * as Address from 'ox/Address'
 import type * as Hex from 'ox/Hex'
 import type * as RpcSchema from 'ox/RpcSchema'
-import type { Authorization } from 'viem/experimental'
-
-import type * as AccountDelegation from './accountDelegation.js'
+import type * as Key from './key.js'
+import type { OneOf } from './types.js'
 
 export type Schema = RpcSchema.From<
   | RpcSchema.Default
@@ -15,132 +14,145 @@ export type Schema = RpcSchema.From<
     }
   | {
       Request: {
-        method: 'experimental_connect'
-        params?: [ConnectParameters] | undefined
+        method: 'experimental_authorizeKey'
+        params: [AuthorizeKeyParameters]
       }
-      ReturnType: ConnectReturnType
+      ReturnType: AuthorizeKeyReturnType
     }
   | {
       Request: {
         method: 'experimental_createAccount'
         params?: [CreateAccountParameters] | undefined
       }
-      ReturnType: Address.Address
+      ReturnType: CreateAccountReturnType
     }
   | {
       Request: {
-        method: 'experimental_disconnect'
+        method: 'experimental_prepareCreateAccount'
+        params: [PrepareCreateAccountParameters]
+      }
+      ReturnType: PrepareCreateAccountReturnType
+    }
+  | {
+      Request: {
+        method: 'experimental_keys'
+        params?: [GetKeysParameters] | undefined
+      }
+      ReturnType: GetKeysReturnType
+    }
+  | {
+      Request: {
+        method: 'experimental_revokeKey'
+        params: [RevokeKeyParameters]
       }
       ReturnType: undefined
     }
   | {
       Request: {
-        method: 'experimental_grantSession'
-        params?: [GrantSessionParameters] | undefined
+        method: 'wallet_connect'
+        params?: [ConnectParameters] | undefined
       }
-      ReturnType: GrantSessionReturnType
+      ReturnType: ConnectReturnType
     }
   | {
       Request: {
-        method: 'experimental_importAccount'
-        params: [ImportAccountParameters]
+        method: 'wallet_disconnect'
       }
-      ReturnType: ImportAccountReturnType
-    }
-  | {
-      Request: {
-        method: 'experimental_prepareImportAccount'
-        params: [PrepareImportAccountParameters]
-      }
-      ReturnType: PrepareImportAccountReturnType
-    }
-  | {
-      Request: {
-        method: 'experimental_sessions'
-        params?: [GetSessionsParameters] | undefined
-      }
-      ReturnType: GetSessionsReturnType
+      ReturnType: undefined
     }
 >
+
+export type AuthorizeKeyParameters = {
+  address?: Address.Address | undefined
+  key?:
+    | OneOf<
+        | {
+            callScopes: Key.Rpc['callScopes']
+            expiry?: Key.Rpc['expiry'] | undefined
+          }
+        | {
+            callScopes: Key.Rpc['callScopes']
+            expiry?: Key.Rpc['expiry'] | undefined
+            publicKey: Key.Rpc['publicKey']
+            role?: 'session' | undefined
+            type: Key.Rpc['type']
+          }
+        | {
+            callScopes?: Key.Rpc['callScopes'] | undefined
+            expiry?: Key.Rpc['expiry'] | undefined
+            publicKey: Key.Rpc['publicKey']
+            role: 'admin'
+            type: Key.Rpc['type']
+          }
+      >
+    | undefined
+}
+
+export type AuthorizeKeyReturnType = GetKeysReturnType[number]
 
 export type ConnectParameters = {
   capabilities?:
     | {
+        authorizeKey?: AuthorizeKeyParameters['key'] | undefined
         createAccount?: boolean | CreateAccountParameters | undefined
-        grantSession?:
-          | boolean
-          | Omit<GrantSessionParameters, 'address'>
-          | undefined
       }
     | undefined
 }
 
-export type ConnectReturnType = readonly {
-  address: Address.Address
-  capabilities?:
-    | {
-        sessions?: GetSessionsReturnType | undefined
-      }
-    | undefined
-}[]
+export type ConnectReturnType = {
+  accounts: readonly {
+    address: Address.Address
+    capabilities?:
+      | {
+          keys?: GetKeysReturnType | undefined
+        }
+      | undefined
+  }[]
+}
 
 export type CreateAccountParameters = {
-  label?: string | undefined
-}
+  chainId?: Hex.Hex | undefined
+} & OneOf<
+  | {
+      label?: string | undefined
+    }
+  | {
+      context: unknown
+      signatures: readonly Hex.Hex[]
+    }
+>
 
-export type GetSessionsParameters = {
-  address?: Address.Address | undefined
-}
-
-export type GetSessionsReturnType = readonly GrantSessionReturnType[]
-
-export type GrantSessionParameters = {
-  address?: Address.Address | undefined
-  expiry?: number | undefined
-  keys?:
-    | readonly {
-        algorithm: 'p256' | 'secp256k1'
-        publicKey: Hex.Hex
-      }[]
-    | undefined
-}
-
-export type GrantSessionReturnType = {
-  expiry: number
-  id: Hex.Hex
-}
-
-export type ImportAccountParameters = {
-  context: PrepareImportAccountReturnType['context']
-  signatures: readonly Hex.Hex[]
-}
-
-export type ImportAccountReturnType = {
+export type CreateAccountReturnType = {
   address: Address.Address
   capabilities?:
     | {
-        sessions?: GetSessionsReturnType | undefined
+        keys?: GetKeysReturnType | undefined
       }
     | undefined
 }
 
-export type PrepareImportAccountParameters = {
+export type GetKeysParameters = {
+  address?: Address.Address | undefined
+}
+
+export type GetKeysReturnType = readonly Key.Rpc[]
+
+export type PrepareCreateAccountParameters = {
   address: Address.Address
   capabilities?:
     | {
-        grantSession?:
-          | boolean
-          | Omit<GrantSessionParameters, 'address'>
-          | undefined
+        authorizeKey?: AuthorizeKeyParameters['key'] | undefined
       }
     | undefined
   label?: string | undefined
 }
 
-export type PrepareImportAccountReturnType = {
-  context: {
-    account: AccountDelegation.Account
-    authorization: Authorization
-  }
+export type PrepareCreateAccountReturnType = {
+  context: unknown
   signPayloads: readonly Hex.Hex[]
+}
+
+export type RevokeKeyParameters = {
+  address?: Address.Address | undefined
+  publicKey: Hex.Hex
 }

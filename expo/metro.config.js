@@ -111,7 +111,7 @@ module.exports = makeMetroConfig({
             const symlinkResolution = symlinksResolver(
               context,
               polyfillPath,
-              platform
+              platform,
             )
             if (symlinkResolution) return symlinkResolution
           } catch {}

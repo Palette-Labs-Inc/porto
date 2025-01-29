@@ -25,7 +25,7 @@ export function parseSPKIFromAttestation(
     const coordinateLength = 0x20 // 32 bytes for P-256
     const cborPrefix = 0x58
 
-    // Find coordinate positions
+    // Find coordinate positions (similar to ox implementation)
     const findStart = (key: number): number | null => {
       const coordinate = new Uint8Array([key, cborPrefix, coordinateLength])
       for (let i = 0; i < data.length - coordinate.length; i++)
@@ -37,56 +37,32 @@ export function parseSPKIFromAttestation(
     const xStart = findStart(0x21)
     const yStart = findStart(0x22)
     if (!xStart || !yStart) {
-      throw new Error(
-        'Could not find public key coordinates in attestation object',
-      )
+      throw new Error('Could not find public key coordinates in attestation object')
     }
+
+    // Extract coordinates
+    const x = data.slice(xStart, xStart + coordinateLength)
+    const y = data.slice(yStart, yStart + coordinateLength)
 
     // SPKI format prefix for P-256 public key
     const spkiPrefix = new Uint8Array([
-      0x30,
-      0x59, // SEQUENCE, length 89
-      0x30,
-      0x13, // SEQUENCE, length 19
-      0x06,
-      0x07, // OBJECT IDENTIFIER, length 7
-      0x2a,
-      0x86,
-      0x48,
-      0xce,
-      0x3d,
-      0x02,
-      0x01, // OID 1.2.840.10045.2.1 (ecPublicKey)
-      0x06,
-      0x08, // OBJECT IDENTIFIER, length 8
-      0x2a,
-      0x86,
-      0x48,
-      0xce,
-      0x3d,
-      0x03,
-      0x01,
-      0x07, // OID 1.2.840.10045.3.1.7 (prime256v1)
-      0x03,
-      0x42, // BIT STRING, length 66
-      0x00, // No unused bits
-      0x04, // Uncompressed point format
+      0x30, 0x59,  // SEQUENCE, length 89
+      0x30, 0x13,  // SEQUENCE, length 19
+      0x06, 0x07,  // OBJECT IDENTIFIER, length 7
+      0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01,  // OID 1.2.840.10045.2.1 (ecPublicKey)
+      0x06, 0x08,  // OBJECT IDENTIFIER, length 8
+      0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07,  // OID 1.2.840.10045.3.1.7 (prime256v1)
+      0x03, 0x42,  // BIT STRING, length 66
+      0x00,        // No unused bits
+      0x04,        // Uncompressed point format
     ])
 
-    // Combine into final public key format
-    const publicKeyBytes = new Uint8Array(
-      spkiPrefix.length + coordinateLength * 2,
-    )
+    // Create final public key bytes
+    const publicKeyBytes = new Uint8Array(spkiPrefix.length + coordinateLength * 2)
     publicKeyBytes.set(spkiPrefix)
-    publicKeyBytes.set(
-      data.slice(xStart, xStart + coordinateLength),
-      spkiPrefix.length,
-    )
-    publicKeyBytes.set(
-      data.slice(yStart, yStart + coordinateLength),
-      spkiPrefix.length + coordinateLength,
-    )
-
+    publicKeyBytes.set(x, spkiPrefix.length)
+    publicKeyBytes.set(y, spkiPrefix.length + coordinateLength)
+    console.info('[expo-webauthn] publicKeyBytes:', publicKeyBytes)
     return publicKeyBytes.buffer
   } catch (error) {
     throw new PublicKeyExtractionError({ cause: error as Error })

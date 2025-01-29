@@ -1,1 +1,1 @@
-export * from './polyfills.native'
+export * from './polyfills'

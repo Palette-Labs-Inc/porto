@@ -1,4 +1,4 @@
-import '../src/polyfills/polyfills.native'
+import '../src/polyfills/polyfills'
 import { Stack } from 'expo-router'
 
 export default function RootLayout() {

@@ -96,10 +96,10 @@ module.exports = makeMetroConfig({
   resolver: {
     ...expoConfig.resolver,
     resolveRequest: (context, moduleName, platform) => {
-      // Only apply polyfills for native platforms
+      
       if (platform !== 'web') {
         const nativePolyfills = {
-          crypto: require.resolve('@peculiar/webcrypto'),
+          crypto: require.resolve('react-native-quick-crypto'),
           buffer: require.resolve('buffer'),
           stream: require.resolve('stream-browserify'),
           util: require.resolve('util'),

@@ -332,7 +332,7 @@ export declare namespace sign {
  * @example
  * ```ts
  * const signature = P256.fromNativeSignature({
- *   signature: "base64-der-signature"
+ *   signature: "base64-der-encoded-signature"
  * })
  * ```
  */
@@ -345,8 +345,7 @@ export function fromNativeSignature(
   }
 
   const signatureBytes = Base64.toBytes(signature)
-  const signatureHex = Hex.fromBytes(signatureBytes)
-  const { r, s } = Signature.fromDerHex(signatureHex)
+  const { r, s } = Signature.fromDerBytes(signatureBytes)
   return { r, s }
 }
 

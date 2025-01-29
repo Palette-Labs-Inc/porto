@@ -23,7 +23,6 @@ export default function PlaygroundScreen() {
       <Stack.Screen options={{ title: 'Porto Playground' }} />
       <ScrollView style={styles.container}>
         <Text style={styles.header}>Porto Playground</Text>
-        <SendCalls />
         <State />
         <Events />
         <Connect />
@@ -35,6 +34,7 @@ export default function PlaygroundScreen() {
         <GetCapabilities />
         <AuthorizeKey />
         <GetKeys />
+        <SendCalls />
         <SendTransaction />
         <SignMessage />
         <SignTypedData />

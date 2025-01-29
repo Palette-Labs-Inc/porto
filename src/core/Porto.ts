@@ -267,10 +267,10 @@ export function getClient<
     chain,
     transport: relay
       ? fallback([
+          getTransport(relay, { include: ['wallet_sendTransaction'] }),
           getTransport(default_, {
             exclude: ['eth_sendTransaction', 'wallet_sendTransaction'],
           }),
-          getTransport(relay, { include: ['wallet_sendTransaction'] }),
         ])
       : default_,
     pollingInterval: 1_000,

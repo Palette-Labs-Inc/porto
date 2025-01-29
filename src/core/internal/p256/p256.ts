@@ -28,7 +28,7 @@ export const sign = async (options: {
   }
 
   throw new Error(
-    'Private key is not a CryptoKey, this package is not properly resolving native vs. web file paths.',
+    'Private key is not a CryptoKey, the porto package is either not properly resolving native vs. web file paths or your choice of storage is not storing the private key material as a CryptoKey.',
   )
 }
 

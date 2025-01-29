@@ -1,13 +1,12 @@
 import { Implementation, Porto, Storage } from 'porto'
 import { type ReactNode, createContext, useContext } from 'react'
+import { Platform } from 'react-native'
 import { MMKV } from 'react-native-mmkv'
 import { type Client, createClient, custom } from 'viem'
 
 type PortoInstance = ReturnType<typeof Porto.create>
 const PortoContext = createContext<PortoInstance | null>(null)
 const ClientContext = createContext<Client | null>(null)
-
-const mmkvStorage = new MMKV()
 
 // Add BigInt serialization helpers
 const replacer = (_key: string, value: any) => {
@@ -27,26 +26,28 @@ const reviver = (_key: string, value: any) => {
   return value
 }
 
-const createMMKVStorage = (storage: MMKV) =>
-  Storage.from({
+// Create native storage only
+const createNativeStorage = () => {
+  const mmkvStorage = new MMKV()
+  return Storage.from({
     getItem: (key) => {
-      const value = storage.getString(key)
+      const value = mmkvStorage.getString(key)
       return value ? JSON.parse(value, reviver) : null
     },
     setItem: (key, value) => {
-      storage.set(key, JSON.stringify(value, replacer))
+      mmkvStorage.set(key, JSON.stringify(value, replacer))
     },
-    removeItem: (key) => {
-      storage.delete(key)
-    },
+    removeItem: (key) => mmkvStorage.delete(key),
   })
+}
 
 // Create Porto instance at module level
 const porto: PortoInstance = Porto.create({
   implementation: Implementation.local({
     keystoreHost: 'mperhats.github.io',
   }),
-  storage: createMMKVStorage(mmkvStorage),
+  // Only provide storage for native platforms, else use default storage
+  ...(Platform.OS !== 'web' && { storage: createNativeStorage() })
 })
 
 // Create viem client at module level

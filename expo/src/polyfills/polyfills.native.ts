@@ -3,8 +3,6 @@ import 'react-native-get-random-values' // needs to precede the other imports
 import { Buffer } from 'buffer'
 import { Crypto } from '@peculiar/webcrypto'
 
-console.info('polyfills native')
-
 if (typeof window === 'undefined') {
   global.window = {} as any
 }

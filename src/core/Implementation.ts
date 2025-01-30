@@ -437,7 +437,7 @@ export declare namespace local {
 }
 
 export function dialog(parameters: dialog.Parameters = {}) {
-  const { host = 'https://exp.porto.sh', renderer = Dialog.iframe() } =
+  const { host = 'https://exp.porto.sh/dialog', renderer = Dialog.iframe() } =
     parameters
 
   const requestStore = RpcRequest.createStore()
@@ -846,7 +846,7 @@ export declare namespace dialog {
   type Parameters = {
     /**
      * Wallet embed host.
-     * @default 'http://wallet.ithaca.xyz/embed'
+     * @default 'http://exp.porto.sh/dialog'
      */
     host?: string | undefined
     /**

@@ -14,7 +14,7 @@ import { ExperimentERC20 } from './contracts'
 
 const porto = Porto.create({
   implementation: Implementation.dialog({
-    host: import.meta.env.VITE_HOST ?? 'https://exp.porto.sh',
+    host: import.meta.env.VITE_HOST ?? 'https://exp.porto.sh/dialog',
   }),
 })
 

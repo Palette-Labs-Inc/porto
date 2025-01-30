@@ -1,7 +1,7 @@
 import LucideLogIn from '~icons/lucide/log-in'
-import { Button } from '../../components/Button'
-import { Layout } from '../../components/Layout'
-import { useAppStore } from '../../lib/app'
+import { Button } from '../../../components/Button'
+import { Layout } from '../../../components/Layout'
+import { useAppStore } from '../../../lib/app'
 
 export function SignUp(props: SignUp.Props) {
   const { enableSignIn, loading, onApprove, onReject } = props

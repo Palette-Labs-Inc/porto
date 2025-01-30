@@ -22,7 +22,7 @@ const offInitialized = Events.onInitialized(porto, (payload) => {
 const offRequests = Events.onRequests(porto, (requests) => {
   const request = requests[0]?.request
   router.navigate({
-    to: request?.method ? `/${request.method}` : '/',
+    to: '/dialog/' + (request?.method ?? ''),
     search: request?.params as never,
   })
 })

@@ -5,10 +5,10 @@ import { erc20Abi } from 'viem'
 import { useReadContract } from 'wagmi'
 
 import LucideKey from '~icons/lucide/key-round'
-import { Button } from '../../components/Button'
-import { Layout } from '../../components/Layout'
-import { useAppStore } from '../../lib/app'
-import { StringFormatter, ValueFormatter } from '../../utils'
+import { Button } from '../../../components/Button'
+import { Layout } from '../../../components/Layout'
+import { useAppStore } from '../../../lib/app'
+import { StringFormatter, ValueFormatter } from '../../../utils'
 import { NotFound } from './NotFound'
 
 export function Authorize(props: Authorize.Props) {

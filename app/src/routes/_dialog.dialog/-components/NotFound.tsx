@@ -2,9 +2,9 @@ import { useMutation } from '@tanstack/react-query'
 import { Actions, Hooks } from 'porto/remote'
 
 import LucideTriangleAlert from '~icons/lucide/triangle-alert'
-import { Button } from '../../components/Button'
-import { Layout } from '../../components/Layout'
-import { porto } from '../../lib/porto'
+import { Button } from '../../../components/Button'
+import { Layout } from '../../../components/Layout'
+import { porto } from '../../../lib/porto'
 
 export function NotFound() {
   const request = Hooks.useRequest(porto)
@@ -29,7 +29,7 @@ export function NotFound() {
         variant="warning"
       />
       <Layout.Content>
-        <pre className="max-h-[600px] overflow-scroll rounded-lg border border-blackA1 bg-blackA1 p-3 text-[14px] text-gray12 leading-[22px] dark:border-whiteA1 dark:bg-whiteA1">
+        <pre className="max-h-[400px] overflow-scroll rounded-lg border border-blackA1 bg-blackA1 p-3 text-[14px] text-gray12 leading-[22px] dark:border-whiteA1 dark:bg-whiteA1">
           {JSON.stringify(request?.request ?? {}, null, 2)}
         </pre>
       </Layout.Content>

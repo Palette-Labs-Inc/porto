@@ -4,39 +4,43 @@ import type { RpcSchema } from 'ox'
 import type { RpcSchema as porto_RpcSchema } from 'porto'
 import { Actions, Hooks } from 'porto/remote'
 
-import { porto } from '../lib/porto'
-import { Authorize } from './-components/Authorize'
+import { porto } from '../../lib/porto'
+import { SignUp } from './-components/SignUp'
 
-export const Route = createFileRoute('/experimental_authorizeKey')({
+export const Route = createFileRoute(
+  '/_dialog/dialog/experimental_createAccount',
+)({
   component: RouteComponent,
   validateSearch(
     search,
   ): RpcSchema.ExtractParams<
     porto_RpcSchema.Schema,
-    'experimental_authorizeKey'
+    'experimental_createAccount'
   > {
     return search as never
   },
 })
 
 function RouteComponent() {
-  const { 0: parameters } = Route.useSearch() ?? {}
+  const address = Hooks.usePortoStore(
+    porto,
+    (state) => state.accounts[0]?.address,
+  )
 
-  const request = Hooks.useRequest(porto)
+  const queued = Hooks.useRequest(porto)
   const respond = useMutation({
     mutationFn() {
-      return Actions.respond(porto, request!)
+      if (!queued) throw new Error('no request queued.')
+      return Actions.respond(porto, queued)
     },
   })
 
   return (
-    <Authorize
-      {...parameters}
-      address={undefined}
-      key={parameters?.key as never}
+    <SignUp
+      enableSignIn={!address}
       loading={respond.isPending}
       onApprove={() => respond.mutate()}
-      onReject={() => Actions.reject(porto, request!)}
+      onReject={() => Actions.reject(porto, queued!)}
     />
   )
 }

@@ -5,12 +5,12 @@ import type { RpcSchema as porto_RpcSchema } from 'porto'
 import { Actions, Hooks } from 'porto/remote'
 import { useEffect, useState } from 'react'
 
-import { porto } from '../lib/porto'
+import { porto } from '../../lib/porto'
 import { Authorize } from './-components/Authorize'
 import { SignIn } from './-components/SignIn'
 import { SignUp } from './-components/SignUp'
 
-export const Route = createFileRoute('/wallet_connect')({
+export const Route = createFileRoute('/_dialog/dialog/wallet_connect')({
   component: RouteComponent,
   validateSearch: (
     search,

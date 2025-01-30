@@ -1,10 +1,10 @@
 import { Hooks } from 'porto/remote'
 import LucideLogIn from '~icons/lucide/log-in'
-import { Button } from '../../components/Button'
-import { Layout } from '../../components/Layout'
-import { useAppStore } from '../../lib/app'
-import { porto } from '../../lib/porto'
-import { StringFormatter } from '../../utils'
+import { Button } from '../../../components/Button'
+import { Layout } from '../../../components/Layout'
+import { useAppStore } from '../../../lib/app'
+import { porto } from '../../../lib/porto'
+import { StringFormatter } from '../../../utils'
 
 export function SignIn(props: SignIn.Props) {
   const { loading, onApprove, onReject } = props

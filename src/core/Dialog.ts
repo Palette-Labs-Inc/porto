@@ -118,13 +118,7 @@ export function iframe() {
         messenger.send('__internal', {
           type: 'init',
           mode: 'iframe',
-          referrer: {
-            icon: (
-              document.querySelector('link[rel="icon"]') as HTMLLinkElement
-            )?.href,
-            origin: location.origin,
-            title: document.title,
-          },
+          referrer: getReferrer(),
         })
       })
       messenger.on('rpc-response', (response) =>
@@ -151,13 +145,7 @@ export function iframe() {
           messenger.send('__internal', {
             type: 'init',
             mode: 'iframe',
-            referrer: {
-              icon: (
-                document.querySelector('link[rel="icon"]') as HTMLLinkElement
-              )?.href,
-              origin: location.origin,
-              title: document.title,
-            },
+            referrer: getReferrer(),
           })
 
           root.showModal()
@@ -240,13 +228,7 @@ export function popup() {
           messenger.send('__internal', {
             type: 'init',
             mode: isMobile() ? 'popup-standalone' : 'popup',
-            referrer: {
-              icon: (
-                document.querySelector('link[rel="icon"]') as HTMLLinkElement
-              )?.href,
-              origin: location.origin,
-              title: document.title,
-            },
+            referrer: getReferrer(),
           })
 
           messenger.on('rpc-response', (response) =>
@@ -302,6 +284,20 @@ const styles = {
 /////////////////////////////////////////////////////////////////////
 // Internal
 /////////////////////////////////////////////////////////////////////
+
+function getReferrer() {
+  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+  const icon = isDark
+    ? (document.querySelector(
+        'link[rel="icon"][media="(prefers-color-scheme: dark)"]',
+      ) as HTMLLinkElement)
+    : (document.querySelector('link[rel="icon"]') as HTMLLinkElement)
+  return {
+    icon: icon?.href,
+    origin: location.origin,
+    title: document.title,
+  }
+}
 
 function handleBlur(store: Store) {
   store.setState((x) => ({

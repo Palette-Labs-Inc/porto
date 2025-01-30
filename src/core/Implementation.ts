@@ -19,10 +19,10 @@ import * as Call from './internal/call.js'
 import * as Delegation from './internal/delegation.js'
 import { delegationAbi } from './internal/generated.js'
 import * as Key from './internal/key.js'
+import { keystoreResolver } from './internal/keystore/index.js'
 import type * as Porto from './internal/porto.js'
 import type * as RpcSchema_porto from './internal/rpcSchema.js'
 import type { Compute, PartialBy } from './internal/types.js'
-import { keystoreResolver } from './internal/keystore/index.js'
 import * as WebAuthNModule from './internal/webauthn'
 
 type Request = RpcSchema.ExtractRequest<RpcSchema_porto.Schema>

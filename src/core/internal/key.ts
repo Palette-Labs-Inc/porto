@@ -17,7 +17,9 @@ import * as WebAuthNModule from './webauthn'
 
 type PrivateKeyFn = () => Hex.Hex
 
-export type Key = OneOf<P256Key | Secp256k1Key | WebCryptoKey | WebAuthnKey | NativeCryptoKey>
+export type Key = OneOf<
+  P256Key | Secp256k1Key | WebCryptoKey | WebAuthnKey | NativeCryptoKey
+>
 export type P256Key = BaseKey<'p256', { privateKey: PrivateKeyFn }>
 export type Secp256k1Key = BaseKey<'secp256k1', { privateKey: PrivateKeyFn }>
 export type WebCryptoKey = BaseKey<

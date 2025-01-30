@@ -1,3 +1,16 @@
+import {
+  type BaseError,
+  type Config,
+  type Connector,
+  ConnectorAlreadyConnectedError,
+  type CreateConnectorFn,
+  ProviderNotFoundError,
+} from '@wagmi/core'
+import {
+  type ConnectReturnType,
+  getConnectorClient,
+  disconnect as wagmi_disconnect,
+} from '@wagmi/core/actions'
 import type { RpcSchema } from 'ox'
 import {
   type Address,
@@ -6,19 +19,6 @@ import {
   type EIP1193Provider,
   type PrivateKeyAccount,
 } from 'viem'
-import {
-  type BaseErrorType,
-  type Config,
-  type Connector,
-  ConnectorAlreadyConnectedError,
-  type CreateConnectorFn,
-  ProviderNotFoundError,
-} from 'wagmi'
-import {
-  type ConnectReturnType,
-  getConnectorClient,
-  disconnect as wagmi_disconnect,
-} from 'wagmi/actions'
 
 import type {
   AuthorizeKeyParameters,
@@ -34,7 +34,7 @@ export async function authorizeKey<config extends Config>(
   config: config,
   parameters: authorizeKey.Parameters<config>,
 ): Promise<authorizeKey.ReturnType> {
-  const { address, chainId, connector, key } = parameters
+  const { address, chainId, connector, ...key } = parameters
 
   const client = await getConnectorClient(config, {
     account: address,
@@ -50,21 +50,21 @@ export async function authorizeKey<config extends Config>(
     ReturnType: RpcSchema.ExtractReturnType<Schema, method>
   }>({
     method,
-    params: [{ address, key }],
+    params: [{ address, ...key }],
   })
 }
 
 export declare namespace authorizeKey {
   type Parameters<config extends Config = Config> = ChainIdParameter<config> &
-    ConnectorParameter & {
+    ConnectorParameter &
+    AuthorizeKeyParameters & {
       address?: Address | undefined
-      key?: AuthorizeKeyParameters['key'] | undefined
     }
 
   type ReturnType = AuthorizeKeyReturnType
 
   // TODO: Exhaustive ErrorType
-  type ErrorType = BaseErrorType
+  type ErrorType = BaseError
 }
 
 export async function connect<config extends Config>(
@@ -148,7 +148,7 @@ export async function connect<config extends Config>(
 
 export declare namespace connect {
   type Parameters<config extends Config = Config> = ChainIdParameter<config> & {
-    authorizeKey?: AuthorizeKeyParameters['key'] | undefined
+    authorizeKey?: AuthorizeKeyParameters | undefined
     connector: Connector | CreateConnectorFn
     createAccount?: boolean | CreateAccountParameters | undefined
   }
@@ -156,7 +156,7 @@ export declare namespace connect {
   type ReturnType<config extends Config = Config> = ConnectReturnType<config>
 
   // TODO: Exhaustive ErrorType
-  type ErrorType = BaseErrorType
+  type ErrorType = BaseError
 }
 
 export async function createAccount<config extends Config>(
@@ -248,7 +248,7 @@ export declare namespace createAccount {
   type ReturnType<config extends Config = Config> = ConnectReturnType<config>
 
   // TODO: Exhaustive ErrorType
-  type ErrorType = BaseErrorType
+  type ErrorType = BaseError
 }
 
 export async function disconnect(
@@ -284,7 +284,7 @@ export declare namespace disconnect {
   type ReturnType = void
 
   // TODO: Exhaustive ErrorType
-  type ErrorType = BaseErrorType
+  type ErrorType = BaseError
 }
 
 export async function keys<config extends Config>(
@@ -320,7 +320,7 @@ export declare namespace keys {
   type ReturnType = GetKeysReturnType
 
   // TODO: Exhaustive ErrorType
-  type ErrorType = BaseErrorType
+  type ErrorType = BaseError
 }
 
 export async function revokeKey<config extends Config>(
@@ -355,7 +355,7 @@ export declare namespace revokeKey {
     }
 
   // TODO: Exhaustive ErrorType
-  type ErrorType = BaseErrorType
+  type ErrorType = BaseError
 }
 
 export async function upgradeAccount<config extends Config>(
@@ -469,7 +469,7 @@ export async function upgradeAccount<config extends Config>(
 
 export declare namespace upgradeAccount {
   type Parameters<config extends Config = Config> = ChainIdParameter<config> & {
-    authorizeKey?: AuthorizeKeyParameters['key'] | undefined
+    authorizeKey?: AuthorizeKeyParameters | undefined
     account: PrivateKeyAccount
     connector: Connector | CreateConnectorFn
     label?: string | undefined
@@ -478,5 +478,5 @@ export declare namespace upgradeAccount {
   type ReturnType<config extends Config = Config> = ConnectReturnType<config>
 
   // TODO: Exhaustive ErrorType
-  type ErrorType = BaseErrorType
+  type ErrorType = BaseError
 }

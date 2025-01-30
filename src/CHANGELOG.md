@@ -1,5 +1,96 @@
 # porto
 
+## 0.0.8
+
+### Patch Changes
+
+- [`dffa6cd`](https://github.com/ithacaxyz/porto/commit/dffa6cdca17b3b8b1018ae0be1d180597eb4936e) Thanks [@jxom](https://github.com/jxom)! - Fixed session key extraction based on call permissions.
+
+## 0.0.7
+
+### Patch Changes
+
+- [`1a3df65`](https://github.com/ithacaxyz/porto/commit/1a3df6555a526c9a006dab4e7876eaed37dd2f2c) Thanks [@jxom](https://github.com/jxom)! - Added `porto/remote` entrypoint.
+
+## 0.0.6
+
+### Patch Changes
+
+- [#29](https://github.com/ithacaxyz/porto/pull/29) [`99bf5bf`](https://github.com/ithacaxyz/porto/commit/99bf5bf77a17d11859bece392811fe2314dd04e0) Thanks [@jxom](https://github.com/jxom)! - Added Spend Permissions via `permissions.spend` property on `wallet_authorizeKey` RPC and the `authorizeKey` capability.
+
+  Example:
+
+  ```ts
+  const key = await porto.provider.request({
+    method: "experimental_authorizeKey",
+    params: [
+      {
+        permissions: {
+          spend: [
+            {
+              limit: 100_000_000n, // 100 USDC
+              period: "day",
+              token: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", // USDC
+            },
+          ],
+        },
+      },
+    ],
+  });
+  ```
+
+- [#29](https://github.com/ithacaxyz/porto/pull/29) [`99bf5bf`](https://github.com/ithacaxyz/porto/commit/99bf5bf77a17d11859bece392811fe2314dd04e0) Thanks [@jxom](https://github.com/jxom)! - **Breaking:** Modified `wallet_authorizeKey` and `authorizeKey` capability APIs.
+
+  - Moved `key.expiry` & `key.role` properties to root level:
+
+  ```diff
+  {
+    address: '0x...',
+  + expiry: 1716537600,
+    key: {
+  -   expiry: 1716537600,
+      publicKey: '0x...',
+      type: 'p256',
+  -   role: 'admin',
+    },
+  + role: 'admin',
+  }
+  ```
+
+  - Removed `callScopes` property in favor of `permissions.calls`:
+
+  ```diff
+  {
+  - callScopes: [
+  + permissions: {
+  +   calls: [
+        {
+          signature: 'mint(address,uint256)',
+          to: '0x...',
+        },
+      ],
+  + }
+  }
+  ```
+
+- [`ca849b3`](https://github.com/ithacaxyz/porto/commit/ca849b32caa93617fab397795805b2dec89b6284) Thanks [@jxom](https://github.com/jxom)! - Added support for Dialog Wallets (cross-origin iframes/popup) in Porto via `Implementation.dialog()`.
+
+  - This feature is work-in-progress and currently has no UI.
+  - In the future, `Implementation.dialog()` will be the default behavior in Porto to communicate with a Wallet.
+  - Currently, the default implementation is `Implementation.local()` – where its behavior is to perform actions locally (ie. "blind sign").
+  - In the future, it will be anticipated for App builders to use `Implementation.dialog()` (the default), and for Dialog Wallet builders to use `Implemetation.local()`.
+  - Documentation for these patterns will emerge as this feature matures.
+
+  If you would like to check out what the experience looks like currently with no UI:
+
+  ```ts
+  import { Porto } from "porto";
+
+  const porto = Porto.create({
+    implementation: Implementation.dialog(),
+  });
+  ```
+
 ## 0.0.5
 
 ### Patch Changes

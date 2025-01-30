@@ -1,0 +1,4 @@
+build/
+eslintrc.js
+node_modules/
+plugin/build/

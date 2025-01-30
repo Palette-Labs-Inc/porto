@@ -10,3 +10,7 @@
     color: #181818;
   }
 }
+
+pre {
+  overflow: scroll;
+}

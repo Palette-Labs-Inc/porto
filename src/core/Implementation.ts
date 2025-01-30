@@ -19,12 +19,10 @@ import * as Call from './internal/call.js'
 import * as Delegation from './internal/delegation.js'
 import { delegationAbi } from './internal/generated.js'
 import * as Key from './internal/key.js'
-import { keystoreResolver } from './internal/keystore'
+import { keystoreResolver } from './internal/keystore/index.js'
 import type * as Porto from './internal/porto.js'
 import type * as RpcSchema_porto from './internal/rpcSchema.js'
 import type { Compute, PartialBy } from './internal/types.js'
-
-// Platform specific modules and import changes.
 import * as WebAuthNModule from './internal/webauthn'
 
 type Request = RpcSchema.ExtractRequest<RpcSchema_porto.Schema>
@@ -42,7 +40,7 @@ export type Implementation = {
       /** Account to authorize the keys for. */
       account: Account.Account
       /** Key to authorize. */
-      key?: RpcSchema_porto.AuthorizeKeyParameters['key'] | undefined
+      key?: RpcSchema_porto.AuthorizeKeyParameters | undefined
       /** Internal properties. */
       internal: ActionsInternal
     }) => Promise<{ key: Key.Key }>
@@ -50,7 +48,7 @@ export type Implementation = {
     createAccount: (parameters: {
       /** Extra keys to authorize. */
       authorizeKeys?:
-        | readonly RpcSchema_porto.AuthorizeKeyParameters['key'][]
+        | readonly RpcSchema_porto.AuthorizeKeyParameters[]
         | undefined
       /** Preparation context (from `prepareCreateAccount`). */
       context?: unknown | undefined
@@ -81,7 +79,7 @@ export type Implementation = {
       address?: Address.Address | undefined
       /** Extra keys to authorize. */
       authorizeKeys?:
-        | readonly RpcSchema_porto.AuthorizeKeyParameters['key'][]
+        | readonly RpcSchema_porto.AuthorizeKeyParameters[]
         | undefined
       /** Credential ID to use to load an existing account. */
       credentialId?: string | undefined
@@ -97,7 +95,7 @@ export type Implementation = {
       address: Address.Address
       /** Extra keys to authorize. */
       authorizeKeys?:
-        | readonly RpcSchema_porto.AuthorizeKeyParameters['key'][]
+        | readonly RpcSchema_porto.AuthorizeKeyParameters[]
         | undefined
       /** Label to associate with the account. */
       label?: string | undefined
@@ -184,7 +182,7 @@ export function local(parameters: local.Parameters = {}) {
 
         // Parse provided (RPC) keys into a list of structured keys (`Key.Key`).
         const keys = await getKeysToAuthorize({
-          authorizeKeys: [keyToAuthorize],
+          authorizeKeys: keyToAuthorize ? [keyToAuthorize] : undefined,
           defaultExpiry,
         })
 
@@ -439,10 +437,8 @@ export declare namespace local {
 }
 
 export function dialog(parameters: dialog.Parameters = {}) {
-  const {
-    host = 'http://localhost:5174', // TODO: change
-    renderer = Dialog.iframe(),
-  } = parameters
+  const { host = 'https://exp.porto.sh', renderer = Dialog.iframe() } =
+    parameters
 
   const requestStore = RpcRequest.createStore()
 
@@ -520,11 +516,11 @@ export function dialog(parameters: dialog.Parameters = {}) {
         if (request.method !== 'experimental_authorizeKey')
           throw new Error('Cannot authorize key for method: ' + request.method)
 
-        const [{ address, key: keyToAuthorize }] = request.params
+        const [{ address, ...keyToAuthorize }] = request.params
 
         // Parse provided (RPC) key into a structured key (`Key.Key`).
         const [key] = await getKeysToAuthorize({
-          authorizeKeys: [keyToAuthorize],
+          authorizeKeys: keyToAuthorize ? [keyToAuthorize] : undefined,
           defaultExpiry,
         })
         if (!key) throw new Error('key not found.')
@@ -536,7 +532,7 @@ export function dialog(parameters: dialog.Parameters = {}) {
           params: [
             {
               address,
-              key: Key.toRpc(key) as any,
+              ...(Key.toRpc(key) as any),
             },
           ],
         })
@@ -599,7 +595,15 @@ export function dialog(parameters: dialog.Parameters = {}) {
                 {
                   capabilities: {
                     ...request.params?.[0]?.capabilities,
-                    authorizeKey: authorizeKey_rpc as any,
+                    authorizeKey: (authorizeKey_rpc?.publicKey
+                      ? {
+                          ...authorizeKey_rpc,
+                          key: {
+                            publicKey: authorizeKey_rpc?.publicKey,
+                            type: authorizeKey_rpc?.type,
+                          },
+                        }
+                      : undefined) as never,
                   },
                 },
               ],
@@ -696,7 +700,6 @@ export function dialog(parameters: dialog.Parameters = {}) {
                 : undefined,
               defaultExpiry,
             })
-            if (!authorizeKey) throw new Error('key not found.')
 
             // Convert the key into RPC format.
             const authorizeKey_rpc = authorizeKey
@@ -711,7 +714,15 @@ export function dialog(parameters: dialog.Parameters = {}) {
                   ...request.params?.[0],
                   capabilities: {
                     ...request.params?.[0]?.capabilities,
-                    authorizeKey: authorizeKey_rpc as any,
+                    authorizeKey: (authorizeKey_rpc?.publicKey
+                      ? {
+                          ...authorizeKey_rpc,
+                          key: {
+                            publicKey: authorizeKey_rpc?.publicKey,
+                            type: authorizeKey_rpc?.type,
+                          },
+                        }
+                      : undefined) as never,
                   },
                 },
               ],
@@ -926,9 +937,7 @@ export function mock() {
 
 async function prepareCreateAccount(parameters: {
   address: Address.Address
-  authorizeKeys:
-    | readonly RpcSchema_porto.AuthorizeKeyParameters['key'][]
-    | undefined
+  authorizeKeys: readonly RpcSchema_porto.AuthorizeKeyParameters[] | undefined
   client: Client
   defaultExpiry: number
   label?: string | undefined
@@ -971,12 +980,22 @@ async function prepareCreateAccount(parameters: {
 
 function getAuthorizeCalls(keys: readonly Key.Key[]): readonly Call.Call[] {
   return keys.flatMap((key) => {
-    if (key.role === 'session' && (key.callScopes ?? []).length === 0)
+    const { permissions } = key
+    if (
+      key.role === 'session' &&
+      (permissions?.calls ?? []).length === 0 &&
+      !permissions?.spend
+    )
       throw new Error(
-        'session key must have at least one call scope (`callScope`).',
+        'session key must have at least one permission (`permissions`).',
       )
-    const scopes = key.callScopes
-      ? key.callScopes.map((scope) => {
+
+    const permissionCalls: Call.Call[] = []
+
+    // Set call scopes.
+    if (permissions?.calls)
+      permissionCalls.push(
+        ...permissions.calls.map((scope) => {
           const selector = (() => {
             if (!scope.signature) return undefined
             if (scope.signature.startsWith('0x'))
@@ -988,9 +1007,19 @@ function getAuthorizeCalls(keys: readonly Key.Key[]): readonly Call.Call[] {
             selector,
             to: scope.to,
           })
-        })
-      : [Call.setCanExecute({ key })]
-    return [...scopes, Call.authorize({ key })]
+        }),
+      )
+    else permissionCalls.push(Call.setCanExecute({ key }))
+
+    // Set spend limits.
+    if (permissions?.spend)
+      permissionCalls.push(
+        ...permissions.spend.map((spend) =>
+          Call.setSpendLimit({ key, ...spend }),
+        ),
+      )
+
+    return [...permissionCalls, Call.authorize({ key })]
   })
 }
 
@@ -1019,22 +1048,22 @@ async function getAuthorizedExecuteKey(parameters: {
     if (key.role !== 'session') return false
     if (key.expiry < BigInt(Math.floor(Date.now() / 1000))) return false
 
-    const hasInvalidScope = key.callScopes?.some((scope) =>
+    const hasValidScope = key.permissions?.calls?.some((scope) =>
       calls.some((call) => {
-        if (scope.to && scope.to !== call.to) return true
+        if (scope.to && scope.to !== call.to) return false
         if (scope.signature) {
-          if (!call.data) return true
+          if (!call.data) return false
           const selector = Hex.slice(call.data, 0, 4)
           if (Hex.validate(scope.signature) && scope.signature !== selector)
-            return true
-          if (AbiItem.getSelector(scope.signature) !== selector) return true
+            return false
+          if (AbiItem.getSelector(scope.signature) !== selector) return false
         }
-        return false
+        return true
       }),
     )
-    if (hasInvalidScope) return false
+    if (hasValidScope) return true
 
-    return true
+    return false
   })
 
   // Fall back to an admin key.
@@ -1046,9 +1075,7 @@ async function getAuthorizedExecuteKey(parameters: {
 }
 
 async function getKeysToAuthorize(parameters: {
-  authorizeKeys:
-    | readonly RpcSchema_porto.AuthorizeKeyParameters['key'][]
-    | undefined
+  authorizeKeys: readonly RpcSchema_porto.AuthorizeKeyParameters[] | undefined
   defaultExpiry: number
 }): Promise<readonly Key.Key[]> {
   const { authorizeKeys, defaultExpiry } = parameters
@@ -1058,21 +1085,37 @@ async function getKeysToAuthorize(parameters: {
 
   // Otherwise, authorize the provided keys.
   return await Promise.all(
-    authorizeKeys.map(async (key) => {
-      const expiry = key?.expiry ?? defaultExpiry
-      const role = key?.role ?? 'session'
-      if (key?.publicKey)
-        return Key.from({
-          ...key,
-          canSign: false,
+    authorizeKeys
+      .map(async (k) => {
+        const role = k?.role ?? 'session'
+        const type = k?.key?.type ?? 'secp256k1'
+        const expiry = k?.expiry ?? (role === 'admin' ? 0 : defaultExpiry)
+
+        let publicKey = k?.key?.publicKey ?? '0x'
+        // If the public key is not an address for secp256k1, convert it to an address.
+        if (
+          type === 'secp256k1' &&
+          publicKey !== '0x' &&
+          !Address.validate(publicKey)
+        )
+          publicKey = Address.fromPublicKey(publicKey)
+
+        const key = Key.fromRpc({
+          ...k,
           expiry,
+          publicKey,
           role,
+          type,
         })
-      return await Key.createWebCryptoP256({
-        callScopes: key?.callScopes,
-        expiry,
-        role: 'session',
+        if (k.key) return key
+        if (role === 'admin')
+          throw new Error('must provide `key` to authorize admin keys.')
+        return await Key.createWebCryptoP256({
+          ...key,
+          expiry,
+          role: 'session',
+        })
       })
-    }),
+      .filter(Boolean),
   )
 }

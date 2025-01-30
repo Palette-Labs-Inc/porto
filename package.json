@@ -13,10 +13,10 @@
     "check:knip": "knip --production",
     "check:repo": "sherif",
     "check:size": "size-limit",
-    "check:types": "tsc --noEmit",
+    "check:types": "pnpm run --r --parallel check:types && tsc --noEmit",
     "clean": "rm -rf src/_dist ./tsconfig.build.tsbuildinfo src/tsconfig.build.tsbuildinfo",
     "deps": "pnpx taze -r",
-    "dev": "pnpm preconstruct && pnpm --filter playground dev",
+    "dev": "pnpm preconstruct && pnpm --filter playground --filter app dev",
     "dev:wagmi": "pnpm preconstruct && pnpm --filter wagmi-example dev",
     "format": "biome format --write",
     "postinstall": "git submodule update --init --recursive && pnpm preconstruct",
@@ -35,20 +35,19 @@
     "@changesets/cli": "^2.27.7",
     "@size-limit/preset-big-lib": "^11.1.6",
     "@tanstack/react-query": "catalog:",
-    "@types/node": "^22.5.4",
+    "@types/node": "^22.10.7",
     "@types/react": "catalog:",
     "@vitest/coverage-v8": "2.1.8",
     "@wagmi/cli": "^2.1.18",
-    "eslint": "^8.57.0",
-    "jest": "^29.0.0",
+    "@wagmi/core": "catalog:",
     "knip": "^5.30.6",
-    "ox": "^0.6.0",
+    "ox": "catalog:",
     "prool": "^0.0.16",
     "publint": "^0.2.12",
     "sherif": "^0.11.0",
     "simple-git-hooks": "^2.11.1",
     "size-limit": "^11.1.6",
-    "tsx": "^4.17.0",
+    "tsx": "^4.19.2",
     "typescript": "catalog:",
     "viem": "catalog:",
     "vitest": "^2.1.8",
@@ -67,9 +66,10 @@
     "pre-commit": "pnpm check"
   },
   "knip": {
-    "entry": ["src/{index,wagmi/index}.ts!"],
+    "entry": ["src/{index,remote/index,test/index,wagmi/index}.ts!"],
     "project": ["src/**"],
     "ignore": [
+      "app/**",
       "**/internal/**",
       "playground/**",
       "src/core/internal/generated.ts"
@@ -81,7 +81,7 @@
       "name": "import * from 'ox'",
       "path": "./src/_dist/index.js",
       "import": "*",
-      "limit": "60 kB"
+      "limit": "62 kB"
     }
   ]
 }

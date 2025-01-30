@@ -1,5 +1,6 @@
 import { AbiFunction, Hex, Json, TypedData, Value } from 'ox'
 import { Porto } from 'porto'
+import { Implementation } from 'porto'
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import { createClient, custom } from 'viem'
 import {
@@ -11,18 +12,30 @@ import { verifyMessage, verifyTypedData } from 'viem/actions'
 
 import { ExperimentERC20 } from './contracts'
 
-export const porto = Porto.create()
+const porto = Porto.create({
+  implementation: Implementation.dialog({
+    host: import.meta.env.VITE_HOST ?? 'https://exp.porto.sh',
+  }),
+})
 
 const client = createClient({
   transport: custom(porto.provider),
 })
 
-const callScopes = [
-  {
-    signature: 'mint(address,uint256)',
-    to: ExperimentERC20.address,
-  },
-] as const
+const permissions = {
+  calls: [
+    {
+      to: ExperimentERC20.address,
+    },
+  ],
+  spend: [
+    {
+      limit: Hex.fromNumber(Value.fromEther('50')),
+      period: 'minute',
+      token: ExperimentERC20.address,
+    },
+  ],
+} as const
 
 export function App() {
   return (
@@ -30,24 +43,30 @@ export function App() {
       <State />
       <Events />
       <GetCapabilities />
-      <p>
+      <div>
+        <br />
         <hr />
-      </p>
+        <br />
+      </div>
       <Connect />
       <Login />
       <Register />
       <Accounts />
       <Disconnect />
       <UpgradeAccount />
-      <p>
+      <div>
+        <br />
         <hr />
-      </p>
+        <br />
+      </div>
       <AuthorizeKey />
       <GetKeys />
       <RevokeKey />
-      <p>
+      <div>
+        <br />
         <hr />
-      </p>
+        <br />
+      </div>
       <SendCalls />
       <SendTransaction />
       <SignMessage />
@@ -140,7 +159,7 @@ function Connect() {
                 params: [
                   {
                     capabilities: {
-                      authorizeKey: authorizeKey ? { callScopes } : undefined,
+                      authorizeKey: authorizeKey ? { permissions } : undefined,
                     },
                   },
                 ],
@@ -159,7 +178,7 @@ function Connect() {
                 params: [
                   {
                     capabilities: {
-                      authorizeKey: authorizeKey ? { callScopes } : undefined,
+                      authorizeKey: authorizeKey ? { permissions } : undefined,
                       createAccount: true,
                     },
                   },
@@ -277,9 +296,6 @@ function AuthorizeKey() {
       <form
         onSubmit={async (e) => {
           e.preventDefault()
-          const formData = new FormData(e.target as HTMLFormElement)
-          const expiry = Number(formData.get('expiry'))
-
           const [account] = await porto.provider.request({
             method: 'eth_accounts',
           })
@@ -288,22 +304,13 @@ function AuthorizeKey() {
             params: [
               {
                 address: account,
-                key: {
-                  callScopes,
-                  expiry: Math.floor(Date.now() / 1000) + expiry,
-                },
+                permissions,
               },
             ],
           })
           setResult(result)
         }}
       >
-        <input
-          required
-          placeholder="expiry (seconds)"
-          name="expiry"
-          type="number"
-        />
         <button type="submit">Authorize a Session Key</button>
       </form>
       {result && <pre>key: {JSON.stringify(result, null, 2)}</pre>}
@@ -415,7 +422,7 @@ function UpgradeAccount() {
                 {
                   address: account.address,
                   capabilities: {
-                    authorizeKey: authorizeKey ? { callScopes } : undefined,
+                    authorizeKey: authorizeKey ? { permissions } : undefined,
                   },
                 },
               ],

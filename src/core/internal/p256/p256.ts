@@ -1,7 +1,7 @@
 import { PublicKey } from 'ox'
 import type * as Hex from 'ox/Hex'
 import * as WebCryptoP256 from 'ox/WebCryptoP256'
-import type { CallScopes, Key, createWebCryptoP256 } from '../key.js'
+import type { Key, Permissions, createWebCryptoP256 } from '../key.js'
 import { from } from '../key.js'
 
 export const createKeyPair = async <const role extends Key['role']>(
@@ -67,13 +67,12 @@ export function fromWebCryptoP256<const role extends Key['role']>(
   const publicKey = PublicKey.toHex(keyPair.publicKey, {
     includePrefix: false,
   })
-
   return from({
-    callScopes: parameters.callScopes,
+    canSign: true,
     expiry: parameters.expiry ?? 0,
+    permissions: parameters.permissions,
     publicKey,
     role: parameters.role as Key['role'],
-    canSign: true,
     privateKey,
     type: 'p256',
   })
@@ -81,12 +80,12 @@ export function fromWebCryptoP256<const role extends Key['role']>(
 
 export declare namespace fromWebCryptoP256 {
   type Parameters<role extends Key['role']> = {
-    /** Call scopes. */
-    callScopes?: CallScopes | undefined
     /** Expiry. */
     expiry?: Key['expiry'] | undefined
     /** P256 private key. */
     keyPair: Awaited<ReturnType<typeof WebCryptoP256.createKeyPair>>
+    /** Permissions. */
+    permissions?: Permissions | undefined
     /** Role. */
     role: role | Key['role']
   }

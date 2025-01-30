@@ -5,7 +5,9 @@
       "contracts/lib",
       "src/core/internal/generated.ts",
       "tsconfig.json",
-      "tsconfig.*.json"
+      "tsconfig.*.json",
+      "app/src/routeTree.gen.ts",
+      "app/dist"
     ]
   },
   "organizeImports": {
@@ -22,6 +24,11 @@
       "recommended": true,
       "complexity": {
         "noBannedTypes": "off"
+      },
+      "nursery": {
+        "useSortedClasses": {
+          "level": "error"
+        }
       },
       "performance": {
         "noDelete": "off"

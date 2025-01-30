@@ -17,7 +17,7 @@ export function bufferSourceToBase64(buffer: BufferSource): string {
  * @internal
  */
 export function base64ToArrayBuffer(base64: string): ArrayBuffer {
-  return Base64.toBytes(base64).buffer
+  return Base64.toBytes(base64).buffer as ArrayBuffer
 }
 
 /**

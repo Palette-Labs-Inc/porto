@@ -10,7 +10,6 @@ import * as RpcRequest from 'ox/RpcRequest'
 import * as RpcSchema from 'ox/RpcSchema'
 import * as Secp256k1 from 'ox/Secp256k1'
 import * as TypedData from 'ox/TypedData'
-import * as WebAuthnP256 from 'ox/WebAuthnP256'
 import { readContract } from 'viem/actions'
 
 import * as Dialog from './Dialog.js'
@@ -23,6 +22,8 @@ import * as Key from './internal/key.js'
 import type * as Porto from './internal/porto.js'
 import type * as RpcSchema_porto from './internal/rpcSchema.js'
 import type { Compute, PartialBy } from './internal/types.js'
+import { keystoreResolver } from './internal/keystore/index.js'
+import * as WebAuthNModule from './internal/webauthn'
 
 type Request = RpcSchema.ExtractRequest<RpcSchema_porto.Schema>
 
@@ -169,15 +170,9 @@ export declare namespace from {
  * @returns Implementation.
  */
 export function local(parameters: local.Parameters = {}) {
-  const keystoreHost = (() => {
-    if (parameters.keystoreHost === 'self') return undefined
-    if (
-      typeof window !== 'undefined' &&
-      window.location.hostname === 'localhost'
-    )
-      return undefined
-    return parameters.keystoreHost
-  })()
+  const keystoreHost = keystoreResolver.resolveKeystoreHost(
+    parameters.keystoreHost,
+  )
 
   return from({
     actions: {
@@ -281,7 +276,6 @@ export function local(parameters: local.Parameters = {}) {
       async loadAccounts(parameters) {
         const { authorizeKeys, internal } = parameters
         const { client } = internal
-
         const { address, credentialId } = await (async () => {
           // If the address and credentialId are provided, we can skip the
           // WebAuthn discovery step.
@@ -293,10 +287,11 @@ export function local(parameters: local.Parameters = {}) {
 
           // Discovery step. We will sign a random challenge. We need to do this
           // to extract the user id (ie. the address) to query for the Account's keys.
-          const credential = await WebAuthnP256.sign({
+          const credential = await WebAuthNModule.sign({
             challenge: '0x',
             rpId: keystoreHost,
           })
+
           const response = credential.raw
             .response as AuthenticatorAssertionResponse
 
@@ -334,7 +329,11 @@ export function local(parameters: local.Parameters = {}) {
             }
             // Assume that the first key is the admin WebAuthn key.
             if (i === 0 && key.type === 'webauthn-p256')
-              return Key.fromWebAuthnP256({ ...key, credential })
+              return Key.fromWebAuthnP256({
+                ...key,
+                credential,
+                rpId: keystoreHost,
+              })
             // Add credential to session key to be able to restore from storage later
             if (key.type === 'p256' && key.role === 'session')
               return { ...key, credential } as typeof key

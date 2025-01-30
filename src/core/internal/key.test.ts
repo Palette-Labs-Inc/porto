@@ -14,6 +14,7 @@ import { client, delegation } from '../../../test/src/porto.js'
 import * as Call from './call.js'
 import * as Delegation from './delegation.js'
 import * as Key from './key.js'
+import { fromWebCryptoP256 } from './p256/p256.js'
 
 describe('createP256', () => {
   test('default', () => {
@@ -51,6 +52,7 @@ describe('createP256', () => {
         }),
       ],
       delegation,
+      chain: undefined,
     })
 
     const payload = Hex.random(32)
@@ -104,6 +106,7 @@ describe('createSecp256k1', () => {
         }),
       ],
       delegation,
+      chain: undefined,
     })
 
     const payload = Hex.random(32)
@@ -222,6 +225,7 @@ describe('createWebCryptoP256', () => {
         }),
       ],
       delegation,
+      chain: undefined,
     })
 
     const payload = Hex.random(32)
@@ -530,7 +534,7 @@ describe('fromWebCryptoP256', () => {
   test('default', async () => {
     const keyPair = await WebCryptoP256.createKeyPair()
 
-    const key = Key.fromWebCryptoP256({
+    const key = fromWebCryptoP256({
       keyPair: {
         privateKey: keyPair.privateKey,
         publicKey: {
@@ -555,6 +559,8 @@ describe('fromWebCryptoP256', () => {
     `)
   })
 })
+
+// TODO, add tests for native P256 Key.
 
 describe('serialize', () => {
   test('default', () => {

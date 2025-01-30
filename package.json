@@ -24,7 +24,9 @@
     "preinstall": "pnpx only-allow pnpm",
     "prepare": "pnpm simple-git-hooks",
     "test": "vitest -c ./test/vitest.config.ts",
-    "test:ci": "CI=true vitest -c ./test/vitest.config.ts --retry=3 --bail=1"
+    "test:ci": "CI=true vitest -c ./test/vitest.config.ts --retry=3 --bail=1",
+    "ios:debug": "USE_PORTO_SOURCE=true EXPO_USE_METRO_WORKSPACE_ROOT=1 pnpm --filter porto-expo ios:debug",
+    "android:debug": "USE_PORTO_SOURCE=true EXPO_USE_METRO_WORKSPACE_ROOT=1 pnpm --filter porto-expo android:debug"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.17.1",
@@ -49,7 +51,12 @@
     "typescript": "catalog:",
     "viem": "catalog:",
     "vitest": "^2.1.8",
-    "wagmi": "catalog:"
+    "wagmi": "catalog:",
+    "@porto/expo-webauthn": "workspace:*",
+    "@porto/expo-p256": "workspace:*",
+    "expo-modules-core": "catalog:",
+    "expo-module-scripts": "catalog:",
+    "expo": "catalog:"
   },
   "packageManager": "pnpm@9.15.0",
   "engines": {

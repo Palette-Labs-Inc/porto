@@ -8,13 +8,16 @@ import * as P256 from 'ox/P256'
 import * as PublicKey from 'ox/PublicKey'
 import * as Secp256k1 from 'ox/Secp256k1'
 import * as Signature from 'ox/Signature'
-import * as WebAuthnP256 from 'ox/WebAuthnP256'
-import * as WebCryptoP256 from 'ox/WebCryptoP256'
 import type { OneOf, Undefined } from './types.js'
+
+// Platform specific modules and import changes.
+import type { WebAuthnP256, WebCryptoP256 } from 'ox'
+import * as P256Module from './p256'
+import * as WebAuthNModule from './webauthn'
 
 type PrivateKeyFn = () => Hex.Hex
 
-export type Key = OneOf<P256Key | Secp256k1Key | WebCryptoKey | WebAuthnKey>
+export type Key = OneOf<P256Key | Secp256k1Key | WebCryptoKey | WebAuthnKey | NativeCryptoKey>
 export type P256Key = BaseKey<'p256', { privateKey: PrivateKeyFn }>
 export type Secp256k1Key = BaseKey<'secp256k1', { privateKey: PrivateKeyFn }>
 export type WebCryptoKey = BaseKey<
@@ -31,6 +34,12 @@ export type WebAuthnKey = BaseKey<
   {
     credential: Pick<WebAuthnP256.P256Credential, 'id' | 'publicKey'>
     rpId: string | undefined
+  }
+>
+export type NativeCryptoKey = BaseKey<
+  'p256',
+  {
+    privateKeyStorageKey: string
   }
 >
 
@@ -244,7 +253,7 @@ export async function createWebAuthnP256<const role extends Key['role']>(
 ) {
   const { createFn, label, rpId, userId } = parameters
 
-  const credential = await WebAuthnP256.createCredential({
+  const credential = await WebAuthNModule.createCredential({
     authenticatorSelection: {
       requireResidentKey: false,
       residentKey: 'preferred',
@@ -322,11 +331,7 @@ export declare namespace createWebAuthnP256 {
 export async function createWebCryptoP256<const role extends Key['role']>(
   parameters: createWebCryptoP256.Parameters<role>,
 ) {
-  const keyPair = await WebCryptoP256.createKeyPair()
-  return fromWebCryptoP256({
-    ...parameters,
-    keyPair,
-  })
+  return await P256Module.createKeyPair(parameters)
 }
 
 export declare namespace createWebCryptoP256 {
@@ -619,65 +624,6 @@ export declare namespace fromWebAuthnP256 {
 }
 
 /**
- * Instantiates a WebCryptoP256 key from its parameters.
- *
- * @example
- * ```ts
- * import { WebCryptoP256 } from 'ox'
- * import * as Key from './key.js'
- *
- * const keyPair = await WebCryptoP256.createKeyPair()
- *
- * // Admin Key
- * const key = Key.fromWebCryptoP256({
- *   keyPair,
- *   role: 'admin',
- * })
- *
- * // Session Key
- * const key = Key.fromWebCryptoP256({
- *   expiry: 1714857600,
- *   keyPair,
- *   role: 'session',
- * })
- * ```
- *
- * @param parameters - Key parameters.
- * @returns WebCryptoP256 key.
- */
-export function fromWebCryptoP256<const role extends Key['role']>(
-  parameters: fromWebCryptoP256.Parameters<role>,
-) {
-  const { keyPair } = parameters
-  const { privateKey } = keyPair
-  const publicKey = PublicKey.toHex(keyPair.publicKey, {
-    includePrefix: false,
-  })
-  return from({
-    canSign: true,
-    expiry: parameters.expiry ?? 0,
-    permissions: parameters.permissions,
-    publicKey,
-    role: parameters.role as Key['role'],
-    privateKey,
-    type: 'p256',
-  })
-}
-
-export declare namespace fromWebCryptoP256 {
-  type Parameters<role extends Key['role']> = {
-    /** Expiry. */
-    expiry?: Key['expiry'] | undefined
-    /** P256 private key. */
-    keyPair: Awaited<ReturnType<typeof WebCryptoP256.createKeyPair>>
-    /** Permissions. */
-    permissions?: Permissions | undefined
-    /** Role. */
-    role: role | Key['role']
-  }
-}
-
-/**
  * Hashes a key.
  *
  * @example
@@ -751,12 +697,8 @@ export async function sign(
           Signature.toHex(P256.sign({ payload, privateKey: privateKey() })),
           false,
         ]
-      if (privateKey instanceof CryptoKey) {
-        const signature = Signature.toHex(
-          await WebCryptoP256.sign({ payload, privateKey }),
-        )
-        return [signature, true]
-      }
+      const signature = Signature.toHex(await P256Module.sign({ payload, key }))
+      return [signature, true]
     }
     if (keyType === 'secp256k1') {
       const { privateKey } = key
@@ -771,7 +713,7 @@ export async function sign(
         signature: { r, s },
         raw,
         metadata,
-      } = await WebAuthnP256.sign({
+      } = await WebAuthNModule.sign({
         challenge: payload,
         credentialId: credential.id,
         rpId,

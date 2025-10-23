@@ -67,7 +67,8 @@ const withAndroidPlugin: ConfigPlugin<Props> = (config, props = {}) => {
 
     // Add lint block if requested and missing
     if (disableReleaseLint && !/\n\s*lint\s*\{/.test(src)) {
-      const lint = '    lint {\n        checkReleaseBuilds false\n        abortOnError false\n    }'
+      const lint =
+        '    lint {\n        checkReleaseBuilds false\n        abortOnError false\n    }'
       const r1 = mergeContents({
         tag: 'with-android-plugin-lint',
         src,

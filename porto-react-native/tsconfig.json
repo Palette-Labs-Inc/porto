@@ -1,0 +1,44 @@
+{
+  "extends": [
+    "expo/tsconfig.base"
+  ],
+  "compilerOptions": {
+    "noUnusedLocals": false,
+    "module": "ESNext",
+    "noUnusedParameters": false,
+    "exactOptionalPropertyTypes": false,
+    "strict": true,
+    "strictNullChecks": true,
+    "noUncheckedIndexedAccess": true,
+    "allowImportingTsExtensions": true,
+    "resolvePackageJsonExports": true,
+    "resolvePackageJsonImports": true,
+    "resolveJsonModule": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "baseUrl": ".",
+    "paths": {
+      "#*": [
+        "./src/*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "server/**/*",
+    "./scripts/**/*",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ],
+  "files": [
+    "env.d.ts",
+    "index.ts",
+    "app.config.ts",
+    "metro.config.js",
+    "babel.config.js"
+  ],
+  "exclude": [
+    "**/_/**",
+    "node_modules",
+    "**/node_modules/**"
+  ]
+}

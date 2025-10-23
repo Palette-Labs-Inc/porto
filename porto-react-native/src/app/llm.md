@@ -1,0 +1,274 @@
+# Mode
+
+## Built-in Modes
+
+| Mode | Uses | Best for |
+|------|------|----------|
+| `Mode.dialog` (default)    | Hosted Porto Dialog | Applications |
+| `Mode.relay` | Direct to Relay | Wallets or Account Managers |
+| `Mode.reactNative` | React Native | React Native Applications (Android, iOS) |
+
+## Mode.dialog
+
+Dialog mode embeds the hosted Porto Dialog (an iframe pointing to `id.porto.sh`) and forwards every request that requires user interaction to that dialog.
+
+### Diagram
+
+In the diagram below, `Mode.dialog` is utilized within the Application to communicate with the Porto Dialog (`id.porto.sh`).
+
+<img alt="Mode.dialog" className="dark:hidden" src="/mode-dialog-light.svg" />
+<img alt="Mode.dialog" className="hidden dark:block" src="/mode-dialog-dark.svg" />
+
+### Usage
+
+```ts twoslash
+import { Porto, Mode } from 'porto'
+
+const porto = Porto.create({
+  mode: Mode.dialog(), // [!code focus]
+})
+```
+
+### Options
+
+#### fallback
+
+- **Type**: `Mode.Mode`
+- **Default**: `Mode.relay()`
+
+Mode to fall back to if the renderer does not support background operations (e.g. popups and web views).
+
+#### host
+
+- **Type**: `string`
+- **Default**: `"https://id.porto.sh/dialog"`
+
+URL of the dialog embed.
+
+:::tip
+While the application uses `Mode.dialog` to communicate to the Dialog, the dialog host (e.g. `https://id.porto.sh/dialog`) utilizes the `Mode.relay` mode to [communicate](#diagram-1) with the Relay.
+:::
+
+```ts twoslash
+import { Porto, Mode } from 'porto'
+
+const porto = Porto.create({
+  mode: Mode.dialog({
+    host: 'https://account.my-wallet.com/dialog', // [!code focus]
+  }),
+})
+```
+
+#### renderer
+
+- **Type**: `Dialog.Dialog`
+- **Default**: `Dialog.iframe()`
+
+The [renderer](/sdk/api/dialog) to use for the dialog. Available: [`Dialog.iframe`](/sdk/api/dialog#dialogiframe), [`Dialog.popup`](/sdk/api/dialog#dialogpopup)
+
+```ts twoslash
+import { Dialog, Porto, Mode } from 'porto'
+
+const porto = Porto.create({
+  mode: Mode.dialog({
+    renderer: Dialog.popup(), // [!code focus]
+  }),
+})
+```
+
+#### theme
+
+- **Type**: `ThemeFragment | undefined`
+
+A custom theme to apply to the dialog, where only `colorScheme` is required. See the [Theme](/sdk/api/theme) API for the list of styling properties that can be defined.
+
+#### themeController
+
+- **Type**: `Dialog.ThemeController | undefined`
+
+A controller to manage the dialog theme, created by `Dialog.createThemeController()`. It can be used to change the theme of the dialog without reinitializing it, with `themeController.setTheme()`. This is intended for advanced use cases, `theme` should be sufficient in regular scenarios.
+
+## Mode.reactNative
+
+React Native mode is used to communicate with React Native applications. Setup assumes the use of [`expo`](https://expo.dev).
+
+### Usage
+
+Install required dependencies:
+
+```sh
+pnpm expo install expo-web-browser expo-auth-session expo-crypto
+```
+
+Since we rely on a few Web Crypto APIs such as [`crypto.randomUUID`](https://developer.mozilla.org/en-US/docs/Web/API/Crypto/randomUUID)
+and [`crypto.getRandomValues`](https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues),
+we need to polyfill those at the earliest possible stage. So in your entrypoint file (i.e., root `index.ts` / `index.native.ts`):
+
+```ts
+import 'porto/react-native/register'
+
+// ...
+```
+
+Then import `Porto` anywhere in your application:
+
+```ts twoslash
+import { Porto, Mode } from 'porto'
+
+const porto = Porto.create({
+  mode: Mode.reactNative(), // [!code focus]
+})
+```
+
+or
+
+```ts twoslash
+import { Porto } from 'porto/react-native'
+
+const porto = Porto.create()
+```
+
+#### Wagmi usage
+
+```ts twoslash
+import { baseSepolia } from 'porto/core/Chains'
+import { Mode } from 'porto/react-native'
+import { porto } from 'porto/wagmi'
+import { Platform } from 'react-native'
+import { createConfig, http } from 'wagmi'
+
+const config = createConfig({
+  chains: [baseSepolia],
+  connectors: [
+    porto({
+      ...Platform.select({
+        web: { mode: Mode.dialog() },
+        default: { mode: Mode.reactNative() },
+      })
+    })
+  ],
+  multiInjectedProviderDiscovery: false,
+  transports: {
+    [baseSepolia.id]: http(),
+  },
+})
+```
+
+:::tip
+Use [`expo-sqlite/kv-store`](https://docs.expo.dev/versions/latest/sdk/sqlite) or [`@react-native-async-storage/async-storage`](https://react-native-async-storage.github.io/async-storage) for storage.
+You can use it for both Wagmi's config and [`@tanstack/react-query`](https://tanstack.com/query/latest/docs/framework/react/plugins/createAsyncStoragePersister) persisted query client.
+:::
+
+### Examples
+
+- [With `Mode.reactNative` (dialog) - Wagmi usage](https://github.com/ithacaxyz/porto/tree/main/examples/react-native)
+- [With `Mode.relay` (headless) - EIP1193 usage](https://github.com/ithacaxyz/porto/tree/main/examples/react-native-relay-mode)
+
+### Options
+
+#### host
+
+- **Type**: `string`
+- **Default**: `"https://id.porto.sh/dialog"`
+
+URL of the dialog embed.
+
+#### redirectUri
+
+- **Type**: `{ scheme: string, path?: string } | undefined`
+
+Where to redirect the user after operations are completed.
+Defaults to the result of [`AuthSession.makeRedirectUri({ path: '/' })`](https://docs.expo.dev/versions/latest/sdk/auth-session/#authsessionmakeredirecturioptions) if no value is passed.
+
+#### requestOptions
+
+- **Type**: `WebBrowser.AuthSessionOpenOptions | undefined`
+
+Configure style, presentation and certain behaviors of the browser auth session for Android, iOS, and Web. [See details](https://docs.expo.dev/versions/latest/sdk/webbrowser/#authsessionopenoptions).
+
+#### theme
+
+- **Type**: `ThemeFragment | undefined`
+
+A custom theme to apply to the dialog, where only `colorScheme` is required. See the [Theme](/sdk/api/theme) API for the list of styling properties that can be defined.
+
+#### themeController
+
+- **Type**: `Dialog.ThemeController | undefined`
+
+A controller to manage the dialog theme, created by `Dialog.createThemeController()`. It can be used to change the theme of the dialog without reinitializing it, with `themeController.setTheme()`. This is intended for advanced use cases, `theme` should be sufficient in regular scenarios.
+
+## Mode.relay
+
+Interacts with the **Porto Relay** directly. Signing is performed via the SDK. Account management, chain interop, and transaction management is orchestrated on the Relay.
+
+:::tip
+
+The `Mode.relay` mode is used internally by the Porto Dialog (`id.porto.sh`). It is possible
+for Wallet vendors to use `Mode.relay` to create their own Dialog.
+
+:::
+
+### Diagram
+
+In the diagram below, `Mode.relay` is utilized within the Porto Dialog (`id.porto.sh`) to communicate with the Relay.
+
+<img alt="Mode.relay" className="dark:hidden" src="/mode-relay-light.svg" />
+<img alt="Mode.relay" className="hidden dark:block" src="/mode-relay-dark.svg" />
+
+### Usage
+
+```ts twoslash
+import { Porto, Mode } from 'porto'
+
+const porto = Porto.create({
+  mode: Mode.relay(), // [!code focus]
+})
+```
+
+### Caveats
+
+- When you run `Mode.relay` the Passkey Host (WebAuthn Relying Party) becomes **your domain**, not `id.porto.sh`. Credentials created here cannot be asserted on other domains, which means **users cannot reuse their Porto account** created on `id.porto.sh`.
+
+### Options
+
+#### keystoreHost
+
+- **Type**: `string`
+- **Default**: `"self"`
+
+Keystore host (WebAuthn relying party).
+
+```ts twoslash
+import { Porto, Mode } from 'porto'
+
+const porto = Porto.create({
+  mode: Mode.relay({
+    keystoreHost: 'https://account.my-wallet.com', // [!code focus]
+  }),
+})
+```
+
+#### webAuthn
+
+#### webAuthn.createFn
+
+- **Type**: `WebAuthnP256.createCredential.Options['createFn']`
+
+WebAuthn create credential function. Defaults to `navigator.credentials.create`.
+
+:::tip
+You can override this with a custom implementation of the WebAuthn API.
+For example, you can use [`react-native-passkeys`](https://github.com/peterferguson/react-native-passkeys) for React Native.
+:::
+
+#### webAuthn.getFn
+
+- **Type**: `WebAuthnP256.sign.Options['getFn']`
+
+WebAuthn get credential function. Defaults to `navigator.credentials.get`.
+
+:::tip
+You can override this with a custom implementation of the WebAuthn API.
+For example, you can use [`react-native-passkeys`](https://github.com/peterferguson/react-native-passkeys) for React Native.
+:::

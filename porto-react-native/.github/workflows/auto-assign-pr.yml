@@ -1,0 +1,12 @@
+name: PR triage
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+jobs:
+  auto-assign:
+    permissions:
+      issues: write
+      pull-requests: write
+    uses: ithacaxyz/ci/.github/workflows/auto-assign-pr.yml@main

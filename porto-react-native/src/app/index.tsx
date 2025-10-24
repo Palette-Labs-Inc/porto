@@ -120,7 +120,7 @@ function Pre(props: { text?: unknown }) {
 
 function Connect() {
   const [email, setEmail] = React.useState<boolean>(true)
-  const [grantPermissions, setGrantPermissions] = React.useState<boolean>(false)
+  const [grantPermissions, setGrantPermissions] = React.useState<boolean>(true)
   const [result, setResult] = React.useState<unknown | null>(null)
   const [error, setError] = React.useState<string | null>(null)
 
@@ -172,7 +172,7 @@ function Connect() {
               .then(setResult)
               .catch((error) => {
                 console.info(payload)
-                console.error(error)
+                console.error(error?.message)
                 setError(
                   Json.stringify({ error: error.message, payload }, null, 2),
                 )
@@ -355,19 +355,44 @@ function GrantPermissions() {
 
 function GetPermissions() {
   const [result, setResult] = React.useState<unknown | null>(null)
+  const [error, setError] = React.useState<string | null>(null)
 
   return (
     <View>
       <Text>wallet_getPermissions</Text>
       <Button
-        onPress={() =>
-          porto.provider
-            .request({ method: 'wallet_getPermissions' })
-            .then(setResult)
-        }
+        onPress={async () => {
+          try {
+            setError(null)
+            setResult(null)
+            
+            // Check if connected first
+            const accounts = await porto.provider.request({
+              method: 'eth_accounts',
+            })
+            
+            if (!accounts || accounts.length === 0) {
+              setError('Please connect your account first')
+              return
+            }
+            
+            const result = await porto.provider.request({
+              method: 'wallet_getPermissions',
+            })
+            setResult(result)
+          } catch (err: any) {
+            console.error('wallet_getPermissions error:', err)
+            setError(err?.message || String(err))
+          }
+        }}
         title="Get Permissions"
       />
-      {result ? <Pre text={result} /> : null}
+      <Pre text={result} />
+      {error && (
+        <View style={{ padding: 16, backgroundColor: '#fee', borderRadius: 8 }}>
+          <Text style={{ fontSize: 14, color: '#c00' }}>Error: {error}</Text>
+        </View>
+      )}
     </View>
   )
 }
@@ -377,34 +402,41 @@ function RevokePermissions() {
   const [permissions, setPermissions] = React.useState<
     Array<{ id: string; [key: string]: unknown }>
   >([])
+  const [isLoading, setIsLoading] = React.useState(false)
 
-  // Load permissions when component mounts
-  React.useEffect(() => {
-    porto.provider
-      .request({ method: 'wallet_getPermissions' })
-      .then((result) => {
-        // Handle undefined or non-array responses
-        if (Array.isArray(result)) {
-          setPermissions(result as any)
-        } else {
-          setPermissions([])
-        }
+  const loadPermissions = async () => {
+    setIsLoading(true)
+    try {
+      const result = await porto.provider.request({ 
+        method: 'wallet_getPermissions' 
       })
-      .catch((error) => {
-        console.error('Error fetching permissions:', error)
+      if (Array.isArray(result)) {
+        setPermissions(result as any)
+      } else {
         setPermissions([])
-      })
-  }, [])
+      }
+    } catch (error) {
+      console.error('Error fetching permissions:', error)
+      setPermissions([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <View>
       <Text>wallet_revokePermissions</Text>
+      <Button
+        disabled={isLoading}
+        onPress={loadPermissions}
+        title={isLoading ? 'Loading...' : 'Load Permissions'}
+      />
       <Text style={{ fontSize: 12, color: '#666', marginVertical: 8 }}>
         Tap a permission to revoke it:
       </Text>
       {!permissions || permissions.length === 0 ? (
         <Text style={{ fontSize: 12, color: '#999' }}>
-          No permissions found. Grant some first!
+          No permissions loaded. Click "Load Permissions" first!
         </Text>
       ) : (
         permissions.map((permission, index) => (
@@ -499,7 +531,7 @@ function MintEXP2() {
               message: 'Minted 10 EXP2 tokens. Wait a moment for confirmation.',
             })
           } catch (error: any) {
-            setResult({ error: error.message })
+            setResult({ error: error?.message })
           } finally {
             setIsMinting(false)
           }
@@ -548,19 +580,43 @@ function GrantAdmin() {
 
 function GetAdmins() {
   const [result, setResult] = React.useState<unknown | null>(null)
+  const [error, setError] = React.useState<string | null>(null)
   return (
     <View>
       <Text>wallet_getAdmins</Text>
       <Button
         onPress={async () => {
-          const result = await porto.provider.request({
-            method: 'wallet_getAdmins',
-          })
-          setResult(result)
+          try {
+            setError(null)
+            setResult(null)
+            
+            // Check if connected first
+            const accounts = await porto.provider.request({
+              method: 'eth_accounts',
+            })
+            
+            if (!accounts || accounts.length === 0) {
+              setError('Please connect your account first')
+              return
+            }
+            
+            const result = await porto.provider.request({
+              method: 'wallet_getAdmins',
+            })
+            setResult(result)
+          } catch (err: any) {
+            console.error('wallet_getAdmins error:', err)
+            setError(err?.message || String(err))
+          }
         }}
         title="Get Admin Keys"
       />
       <Pre text={result} />
+      {error && (
+        <View style={{ padding: 16, backgroundColor: '#fee', borderRadius: 8 }}>
+          <Text style={{ fontSize: 14, color: '#c00' }}>Error: {error}</Text>
+        </View>
+      )}
     </View>
   )
 }
@@ -570,34 +626,41 @@ function RevokeAdmin() {
   const [admins, setAdmins] = React.useState<
     Array<{ id: string; [key: string]: unknown }>
   >([])
+  const [isLoading, setIsLoading] = React.useState(false)
 
-  // Load admins when component mounts
-  React.useEffect(() => {
-    porto.provider
-      .request({ method: 'wallet_getAdmins' })
-      .then((result) => {
-        // Handle undefined or non-array responses
-        if (Array.isArray(result)) {
-          setAdmins(result as any)
-        } else {
-          setAdmins([])
-        }
+  const loadAdmins = async () => {
+    setIsLoading(true)
+    try {
+      const result = await porto.provider.request({ 
+        method: 'wallet_getAdmins' 
       })
-      .catch((error) => {
-        console.error('Error fetching admins:', error)
+      if (Array.isArray(result)) {
+        setAdmins(result as any)
+      } else {
         setAdmins([])
-      })
-  }, [])
+      }
+    } catch (error) {
+      console.error('Error fetching admins:', error)
+      setAdmins([])
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <View>
       <Text>wallet_revokeAdmin</Text>
+      <Button
+        disabled={isLoading}
+        onPress={loadAdmins}
+        title={isLoading ? 'Loading...' : 'Load Admin Keys'}
+      />
       <Text style={{ fontSize: 12, color: '#666', marginVertical: 8 }}>
         Tap an admin to revoke it:
       </Text>
       {!admins || admins.length === 0 ? (
         <Text style={{ fontSize: 12, color: '#999' }}>
-          No admin keys found. Grant some first!
+          No admin keys loaded. Click "Load Admin Keys" first!
         </Text>
       ) : (
         admins.map((admin, index) => (

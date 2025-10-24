@@ -349,7 +349,6 @@ function GetAssets() {
               method: 'eth_accounts',
             })
             if (!accounts[0]) return
-            console.log('accounts', JSON.stringify(accounts[0], null, 2))
             const result = await porto.provider.request({
               method: 'wallet_getAssets',
               params: [{ account: accounts[0] }],
@@ -363,7 +362,14 @@ function GetAssets() {
         title="Get Assets"
       />
       {error && (
-        <View style={{ padding: 16, backgroundColor: '#fee', borderRadius: 8, marginTop: 8 }}>
+        <View
+          style={{
+            padding: 16,
+            backgroundColor: '#fee',
+            borderRadius: 8,
+            marginTop: 8,
+          }}
+        >
           <Text style={{ fontSize: 14, color: '#c00' }}>Error: {error}</Text>
         </View>
       )}

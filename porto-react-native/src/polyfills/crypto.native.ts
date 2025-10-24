@@ -2,6 +2,8 @@
 import { Buffer } from 'buffer'
 import { Crypto, CryptoKey } from '@peculiar/webcrypto'
 import { Platform } from 'react-native'
+// biome-ignore lint/style/useNodejsImportProtocol: React Native requires 'util' package
+import { TextDecoder, TextEncoder } from 'util'
 
 if (Platform.OS !== 'web') {
   if (typeof globalThis.Buffer === 'undefined')
@@ -9,6 +11,12 @@ if (Platform.OS !== 'web') {
 
   if (typeof (globalThis as any).CryptoKey === 'undefined')
     (globalThis as any).CryptoKey = CryptoKey
+
+  if (typeof (globalThis as any).TextDecoder === 'undefined')
+    (globalThis as any).TextDecoder = TextDecoder
+
+  if (typeof (globalThis as any).TextEncoder === 'undefined')
+    (globalThis as any).TextEncoder = TextEncoder
 
   if (globalThis.crypto && !globalThis.crypto.subtle)
     Object.defineProperty(globalThis.crypto, 'subtle', {

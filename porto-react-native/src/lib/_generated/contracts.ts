@@ -1713,3 +1713,17 @@ export const expNftAddress = {
  * - [__View Contract on Op Sepolia Blockscout__](https://optimism-sepolia.blockscout.com/address/0x1B8276D9De24FaAAdC7cB4fF626e01bD4E037E41)
  */
 export const expNftConfig = { abi: expNftAbi, address: expNftAddress } as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// delegation (local relay)
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Local relay delegation proxy address (chain ID 31337)
+ * 
+ * This address is deployed by the local Porto relay and synced via `pnpm relay:sync`.
+ * Only available for local Anvil development (chain ID 31337).
+ */
+export const delegationAddress = {
+  31337: '0xb19b36b1456E65E3A6D514D3F715f204BD59f431',
+} as const

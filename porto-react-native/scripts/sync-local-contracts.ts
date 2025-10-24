@@ -60,18 +60,21 @@ async function main() {
   // Extract addresses from the YAML text directly using regex (avoids YAML parsing hex issues)
   const exp1Match = relayYaml.match(/exp:\s+address:\s+(0x[0-9a-fA-F]+)/m)
   const exp2Match = relayYaml.match(/exp2:\s+address:\s+(0x[0-9a-fA-F]+)/m)
+  const delegationMatch = relayYaml.match(/delegation_proxy:\s+(0x[0-9a-fA-F]+)/m)
   
   const exp1Address = exp1Match?.[1]
   const exp2Address = exp2Match?.[1]
+  const delegationAddress = delegationMatch?.[1]
 
-  if (!exp1Address || !exp2Address) {
+  if (!exp1Address || !exp2Address || !delegationAddress) {
     console.error('❌ Could not find contract addresses in relay config\n')
     process.exit(1)
   }
 
   console.log('✅ Found addresses:')
   console.log(`   EXP1: ${exp1Address}`)
-  console.log(`   EXP2: ${exp2Address}\n`)
+  console.log(`   EXP2: ${exp2Address}`)
+  console.log(`   Delegation: ${delegationAddress}\n`)
 
   // Update contracts.ts file
   const contractsPath = 'src/lib/_generated/contracts.ts'
@@ -92,13 +95,38 @@ async function main() {
     `$1${exp2Address}$2`
   )
 
+  // Update or add delegationAddress for chain 31337
+  if (contractsFile.includes('export const delegationAddress')) {
+    // Update existing delegationAddress
+    contractsFile = contractsFile.replace(
+      /(export const delegationAddress = \{[^\}]*31337: ')0x[0-9a-fA-F]+(')/,
+      `$1${delegationAddress}$2`
+    )
+  } else {
+    // Add delegationAddress export if it doesn't exist
+    const delegationExport = `
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// delegation (local relay)
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Local relay delegation proxy address (chain ID 31337)
+ */
+export const delegationAddress = {
+  ${CHAIN_ID}: '${delegationAddress}',
+} as const
+`
+    contractsFile = contractsFile + delegationExport
+  }
+
   // Write updated file
   writeFileSync(contractsPath, contractsFile, 'utf-8')
 
   console.log('✅ Successfully updated contract addresses!\n')
   console.log('📝 Changes:')
   console.log(`   exp1Address[${CHAIN_ID}] = ${exp1Address}`)
-  console.log(`   exp2Address[${CHAIN_ID}] = ${exp2Address}\n`)
+  console.log(`   exp2Address[${CHAIN_ID}] = ${exp2Address}`)
+  console.log(`   delegationAddress[${CHAIN_ID}] = ${delegationAddress}\n`)
   console.log('💡 Restart your app to use the new addresses:')
   console.log('   pnpm start\n')
 }

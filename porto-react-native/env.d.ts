@@ -13,9 +13,10 @@ interface EnvironmentVariables {
   readonly EXPO_TUNNEL_URL: string
 
   // Porto Relay Configuration
-  readonly LOCAL_RELAY?: 'true' | 'false'
-  readonly LOCAL_RELAY_URL?: string
-  readonly PRODUCTION_RELAY_URL?: string
+  // Note: Use EXPO_PUBLIC_ prefix for variables accessible in the app
+  readonly EXPO_PUBLIC_LOCAL_RELAY?: 'true' | 'false'
+  readonly EXPO_PUBLIC_LOCAL_RELAY_URL?: string
+  readonly EXPO_PUBLIC_PRODUCTION_RELAY_URL?: string
 }
 
 declare namespace NodeJS {

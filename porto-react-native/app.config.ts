@@ -35,19 +35,16 @@ export default (context: ConfigContext): ExpoConfig => ({
     buildNumber: pkg.version,
     supportsTablet: true,
     appleTeamId: 'JYD77N4AR8',
-    bundleIdentifier: 'com.yelo.noshDelivery',
-    associatedDomains: tunnelHost
-      ? [
-          `applinks:${tunnelHost}`,
-          `webcredentials:${tunnelHost}`,
-          `activitycontinuation:${tunnelHost}`,
-        ]
-      : undefined,
+    bundleIdentifier: 'com.perhats.wallet',
+    associatedDomains: [
+      'applinks:mperhats.github.io',
+      'webcredentials:mperhats.github.io',
+    ],
   },
   android: {
     newArchEnabled: true,
     edgeToEdgeEnabled: true,
-    package: 'com.yelo.noshDelivery',
+    package: 'com.perhats.wallet',
   },
   web: {
     output: 'single',

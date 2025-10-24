@@ -1,5 +1,5 @@
 {
-  "name": "porto-react-native",
+  "name": "customer-native",
   "version": "1.0.0",
   "main": "index.ts",
   "imports": {
@@ -16,15 +16,13 @@
     "web": "expo start --web",
     "check": "biome check --write . --unsafe",
     "typecheck": "tsc --noEmit --project tsconfig.json",
-    "doctor": "pnpm expo install --fix && pnpm x expo-doctor --verbose --pnpm || pnpm expo install --check --pnpm"
+    "doctor": "bun expo install --fix && bun x expo-doctor --verbose --bun || bun expo install --check --bun"
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
     "@expo/ui": "~0.2.0-beta.4",
-    "@porto/expo-p256": "workspace:*",
-    "@porto/expo-webauthn": "workspace:*",
     "eruda": "^3.4.3",
-    "expo": "54.0.13",
+    "expo": "catalog:",
     "expo-application": "~7.0.7",
     "expo-auth-session": "~7.0.8",
     "expo-blob": "^0.1.6",
@@ -43,7 +41,7 @@
     "expo-status-bar": "~3.0.8",
     "expo-system-ui": "~6.0.7",
     "expo-web-browser": "~15.0.8",
-    "ox": "^0.9.7",
+    "ox": "catalog:",
     "porto": "^0.2.28",
     "react": "19.1.0",
     "react-dom": "19.1.0",

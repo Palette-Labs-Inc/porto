@@ -34,16 +34,20 @@ export default (context: ConfigContext): ExpoConfig => ({
     },
     buildNumber: pkg.version,
     supportsTablet: true,
-    bundleIdentifier: 'com.perhats.wallet',
-    associatedDomains: [
-      'applinks:mperhats.github.io',
-      'webcredentials:mperhats.github.io',
-    ],
+    appleTeamId: 'JYD77N4AR8',
+    bundleIdentifier: 'com.yelo.noshDelivery',
+    associatedDomains: tunnelHost
+      ? [
+          `applinks:${tunnelHost}`,
+          `webcredentials:${tunnelHost}`,
+          `activitycontinuation:${tunnelHost}`,
+        ]
+      : undefined,
   },
   android: {
     newArchEnabled: true,
     edgeToEdgeEnabled: true,
-    package: 'com.perhats.wallet',
+    package: 'com.yelo.noshDelivery',
   },
   web: {
     output: 'single',
@@ -88,14 +92,6 @@ export default (context: ConfigContext): ExpoConfig => ({
         configureAndroidBackup: true,
         faceIDPermission:
           'Allow $(PRODUCT_NAME) to access your Face ID biometric data.',
-      },
-    ],
-    [
-      '@porto/expo-p256',
-      {
-        configureAndroidBackup: true,
-        faceIDPermission:
-          'Allow Porto Wallet to access your Face ID biometric data.',
       },
     ],
     [

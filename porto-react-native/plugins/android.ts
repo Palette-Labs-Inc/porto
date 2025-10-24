@@ -31,8 +31,10 @@ const withAndroidPlugin: ConfigPlugin<Props> = (config, props = {}) => {
     enableReleaseSigning = true,
   } = props
 
+  let nextConfig = config
+
   // Gradle properties (memory & workers)
-  let next = withGradleProperties(config, (props) => {
+  nextConfig = withGradleProperties(nextConfig, (props) => {
     const items = props.modResults
     const keep = items.filter(
       (it) =>
@@ -55,7 +57,7 @@ const withAndroidPlugin: ConfigPlugin<Props> = (config, props = {}) => {
   })
 
   // build.gradle edits (debug suffix + lint + release signing)
-  next = withAppBuildGradle(next, (props) => {
+  nextConfig = withAppBuildGradle(nextConfig, (props) => {
     let src = props.modResults.contents
 
     // If debug suffix is disabled, proactively strip any previous suffix lines
@@ -178,7 +180,7 @@ const withAndroidPlugin: ConfigPlugin<Props> = (config, props = {}) => {
     return props
   })
 
-  return next
+  return nextConfig
 }
 
 export default withAndroidPlugin

@@ -1,11 +1,20 @@
 import { Hex, Value } from 'ox'
 import { Mode, Porto } from 'porto'
+import * as WebAuthN from '@porto/expo-webauthn'
 import { baseSepolia } from 'porto/core/Chains'
 
 import { exp1Address, exp2Address } from '#lib/_generated/contracts.ts'
 
 export const porto = Porto.create({
-  mode: Mode.reactNative(),
+  mode: Mode.relay({
+    // Use device-native WebAuthN via our Expo module
+    webAuthn: {
+      createFn: (options) => WebAuthN.createCredential(options),
+      getFn: (options) => WebAuthN.getCredential(options),
+    },
+    // Set RP ID to your associated domain host (no protocol)
+    keystoreHost: process.env.EXPO_PUBLIC_SERVER_DOMAIN,
+  }),
   chains: [baseSepolia],
 })
 

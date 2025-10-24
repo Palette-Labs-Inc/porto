@@ -10,12 +10,12 @@
   "main": "./build/WebAuthN.js",
   "types": "./build/WebAuthN.d.ts",
   "scripts": {
-    "build": "npm_config_user_agent=yarn expo-module build",
-    "clean": "npm_config_user_agent=yarn expo-module clean",
-    "lint": "npm_config_user_agent=yarn expo-module lint",
-    "test": "npm_config_user_agent=yarn expo-module test",
-    "prepare": "npm_config_user_agent=yarn expo-module prepare",
-    "prepublishOnly": "npm_config_user_agent=yarn expo-module prepublishOnly",
+    "build": "expo-module build",
+    "clean": "expo-module clean",
+    "lint": "expo-module lint",
+    "test": "expo-module test",
+    "prepare": "expo-module prepare",
+    "prepublishOnly": "expo-module prepublishOnly",
     "postinstall": "pnpm build"
   },
   "keywords": ["react-native", "expo", "passkeys"],

@@ -3,6 +3,7 @@
  * @typedef {import('expo/metro-config').MetroConfig} MetroConfig
  */
 const { getDefaultConfig } = require('expo/metro-config')
+const path = require('node:path')
 
 const defaultConfiguration = getDefaultConfig(__dirname)
 
@@ -38,6 +39,32 @@ module.exports = {
           type: 'sourceFile',
           filePath: require.resolve(moduleName),
         }
+
+      /**
+       * Resolve Porto's internal webauthn module to the workspace native source
+       * when requested from the Porto package. This ensures RN uses the native
+       * Expo-backed implementation without redirecting other Porto imports.
+       */
+      try {
+        const isFromPortoPackage =
+          typeof context.originModulePath === 'string' &&
+          context.originModulePath.includes(
+            `${path.sep}node_modules${path.sep}porto${path.sep}`,
+          )
+
+        const isPortoWebAuthnInternal =
+          moduleName === 'porto/core/internal/webauthn' ||
+          /^\.\/internal\/webauthn(\.js)?$/.test(moduleName)
+
+        if (isFromPortoPackage && isPortoWebAuthnInternal) {
+          const filePath = path.resolve(
+            __dirname,
+            '..',
+            'src/core/internal/webauthn/webauthn.native.ts',
+          )
+          return { type: 'sourceFile', filePath }
+        }
+      } catch {}
 
       return context.resolveRequest(context, moduleName, platform)
     },

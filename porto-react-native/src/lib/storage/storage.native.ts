@@ -19,9 +19,9 @@ function logEntireStore() {
   console.log('📦 MMKV Storage Contents (App Refresh)')
   // biome-ignore lint/suspicious/noConsoleLog: Debugging function
   console.log('========================================')
-  
+
   const allKeys = mmkv.getAllKeys()
-  
+
   if (allKeys.length === 0) {
     // biome-ignore lint/suspicious/noConsoleLog: Debugging function
     console.log('⚠️  Storage is empty')
@@ -30,7 +30,7 @@ function logEntireStore() {
     console.log(`📊 Total keys: ${allKeys.length}`)
     // biome-ignore lint/suspicious/noConsoleLog: Debugging function
     console.log('----------------------------------------')
-    
+
     for (const key of allKeys) {
       const value = mmkv.getString(key)
       try {
@@ -51,7 +51,7 @@ function logEntireStore() {
       }
     }
   }
-  
+
   // biome-ignore lint/suspicious/noConsoleLog: Debugging function
   console.log('\n========================================')
   // biome-ignore lint/suspicious/noConsoleLog: Debugging function

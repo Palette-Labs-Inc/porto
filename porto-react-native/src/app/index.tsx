@@ -365,17 +365,17 @@ function GetPermissions() {
           try {
             setError(null)
             setResult(null)
-            
+
             // Check if connected first
             const accounts = await porto.provider.request({
               method: 'eth_accounts',
             })
-            
+
             if (!accounts || accounts.length === 0) {
               setError('Please connect your account first')
               return
             }
-            
+
             const result = await porto.provider.request({
               method: 'wallet_getPermissions',
             })
@@ -407,8 +407,8 @@ function RevokePermissions() {
   const loadPermissions = async () => {
     setIsLoading(true)
     try {
-      const result = await porto.provider.request({ 
-        method: 'wallet_getPermissions' 
+      const result = await porto.provider.request({
+        method: 'wallet_getPermissions',
       })
       if (Array.isArray(result)) {
         setPermissions(result as any)
@@ -589,17 +589,17 @@ function GetAdmins() {
           try {
             setError(null)
             setResult(null)
-            
+
             // Check if connected first
             const accounts = await porto.provider.request({
               method: 'eth_accounts',
             })
-            
+
             if (!accounts || accounts.length === 0) {
               setError('Please connect your account first')
               return
             }
-            
+
             const result = await porto.provider.request({
               method: 'wallet_getAdmins',
             })
@@ -631,8 +631,8 @@ function RevokeAdmin() {
   const loadAdmins = async () => {
     setIsLoading(true)
     try {
-      const result = await porto.provider.request({ 
-        method: 'wallet_getAdmins' 
+      const result = await porto.provider.request({
+        method: 'wallet_getAdmins',
       })
       if (Array.isArray(result)) {
         setAdmins(result as any)

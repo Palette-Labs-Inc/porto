@@ -328,7 +328,7 @@ function AddFaucetFunds() {
         }}
         title={loading ? 'Requesting...' : 'Request 25 EXP from Faucet'}
       />
-      {result && <Pre text={result} />}
+      <Pre text={result} />
     </View>
   )
 }

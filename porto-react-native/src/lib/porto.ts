@@ -7,14 +7,29 @@ import * as Storage from '#lib/storage'
 
 import { exp1Address, exp2Address } from '#lib/_generated/contracts.ts'
 
-// Toggle between local and production relay
-// Set to true to use local relay (http://localhost:9200)
-// Set to false to use production relay (https://rpc.porto.sh)
-const USE_LOCAL_RELAY = false
+/**
+ * Toggle between local and production relay using environment variable.
+ * 
+ * Configuration is managed via .env file:
+ *   1. Copy .env.example to .env
+ *   2. Set LOCAL_RELAY=true for local development
+ *   3. Set LOCAL_RELAY=false for production
+ * 
+ * Convenience scripts:
+ *   pnpm relay:start  (starts local relay)
+ *   pnpm start        (starts app, reads LOCAL_RELAY from .env)
+ *   pnpm relay:stop   (stops local relay)
+ */
+const USE_LOCAL_RELAY = process.env.LOCAL_RELAY === 'true'
 
 const RELAY_URL = USE_LOCAL_RELAY
-  ? 'http://localhost:9200'
-  : 'https://rpc.porto.sh'
+  ? process.env.LOCAL_RELAY_URL || 'http://localhost:9200'
+  : process.env.PRODUCTION_RELAY_URL || 'https://rpc.porto.sh'
+
+// Log which relay is being used (dev only)
+if (__DEV__) {
+  console.info(`🔗 Porto Relay: ${USE_LOCAL_RELAY ? 'LOCAL' : 'PRODUCTION'} (${RELAY_URL})`)
+}
 
 export const porto = Porto.create({
   mode: Mode.relay({

@@ -15,6 +15,6 @@ rm -f .local-relay-config.yaml
 echo "✅ Local relay stopped"
 echo ""
 echo "💡 To start fresh (remove all data):"
-echo "   bun relay:clean"
+echo "   pnpm relay:clean"
 echo ""
 

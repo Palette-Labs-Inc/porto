@@ -11,6 +11,11 @@ interface EnvironmentVariables {
 
   // Full tunnel URL, e.g. "https://5650e3201c52.ngrok-free.app"
   readonly EXPO_TUNNEL_URL: string
+
+  // Porto Relay Configuration
+  readonly LOCAL_RELAY?: 'true' | 'false'
+  readonly LOCAL_RELAY_URL?: string
+  readonly PRODUCTION_RELAY_URL?: string
 }
 
 declare namespace NodeJS {

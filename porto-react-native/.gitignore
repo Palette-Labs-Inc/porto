@@ -63,4 +63,4 @@ android/
 
 *.gz
 *.app/
-_dist
+_dist.local-relay-config.yaml

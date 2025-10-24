@@ -16,7 +16,14 @@
     "web": "expo start --web",
     "check": "biome check --write . --unsafe",
     "typecheck": "tsc --noEmit --project tsconfig.json",
-    "doctor": "bun expo install --fix && bun x expo-doctor --verbose --bun || bun expo install --check --bun"
+    "doctor": "pnpm expo install --fix && pnpm exec expo-doctor --verbose || pnpm expo install --check",
+    "relay:start": "bash scripts/start-local-relay.sh",
+    "relay:stop": "bash scripts/stop-local-relay.sh",
+    "relay:clean": "bash scripts/clean-local-relay.sh",
+    "relay:status": "bash scripts/status-local-relay.sh",
+    "relay:logs": "docker compose logs -f",
+    "relay:logs:proxy": "docker compose logs -f proxy",
+    "relay:logs:anvil": "docker compose logs -f anvil"
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",

@@ -37,6 +37,7 @@ module.exports = {
           crypto: require.resolve('react-native-quick-crypto'),
           buffer: require.resolve('buffer'),
           stream: require.resolve('stream-browserify'),
+          util: require.resolve('util'),
         }
 
         if (nativePolyfills[moduleName]) {

@@ -1,3 +1,4 @@
+import { http } from 'viem'
 import * as WebAuthN from '@porto/expo-webauthn'
 import { Hex, Value } from 'ox'
 import { Mode, Porto } from 'porto'
@@ -5,6 +6,15 @@ import { baseSepolia } from 'porto/core/Chains'
 import * as Storage from '#lib/storage'
 
 import { exp1Address, exp2Address } from '#lib/_generated/contracts.ts'
+
+// Toggle between local and production relay
+// Set to true to use local relay (http://localhost:9200)
+// Set to false to use production relay (https://rpc.porto.sh)
+const USE_LOCAL_RELAY = false
+
+const RELAY_URL = USE_LOCAL_RELAY
+  ? 'http://localhost:9200'
+  : 'https://rpc.porto.sh'
 
 export const porto = Porto.create({
   mode: Mode.relay({
@@ -18,6 +28,13 @@ export const porto = Porto.create({
   chains: [baseSepolia],
   // Platform-specific storage: MMKV (native) or localStorage (web)
   storage: Storage.storage,
+  // Configure relay transport
+  transports: {
+    [baseSepolia.id]: {
+      default: http(),
+      relay: http(RELAY_URL),
+    } as any,
+  },
 })
 
 const chainId = baseSepolia.id

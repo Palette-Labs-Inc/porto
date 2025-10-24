@@ -22,6 +22,9 @@ export const porto = Porto.create({
 
 const chainId = baseSepolia.id
 
+/**
+ * Permissions configuration for session keys.
+ */
 export const permissions = () => {
   const exp1Token = exp1Address[chainId as keyof typeof exp1Address]
   if (!exp1Token) {
@@ -37,7 +40,7 @@ export const permissions = () => {
     expiry: Math.floor(Date.now() / 1_000) + 60 * 60, // 1 hour
     feeToken: {
       limit: '1',
-      symbol: 'EXP',
+      symbol: 'EXP2', // Changed to match exp2Token
     },
     permissions: {
       calls: [
@@ -56,7 +59,7 @@ export const permissions = () => {
         {
           limit: Hex.fromNumber(Value.fromEther('50')),
           period: 'minute',
-          token: exp1Token,
+          token: exp2Token,
         },
       ],
     },

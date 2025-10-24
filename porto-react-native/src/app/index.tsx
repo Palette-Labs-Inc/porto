@@ -29,7 +29,6 @@ export default function Page() {
             >
               Account Management
             </Text>
-            <NativeWebAuthNTest />
             <Connect />
             <Login />
             <Divider />
@@ -100,62 +99,6 @@ function Pre(props: { text?: unknown }) {
       <Text style={{ fontSize: 14, color: '#666', fontFamily: 'monospace' }}>
         {Json.stringify(props.text, null, 2)}
       </Text>
-    </View>
-  )
-}
-
-function NativeWebAuthNTest() {
-  const [result, setResult] = React.useState<unknown | null>(null)
-  const [error, setError] = React.useState<string | null>(null)
-
-  return (
-    <View style={{ marginBottom: 12 }}>
-      <Text>Native WebAuthN (direct)</Text>
-      <Button
-        title="Create Native Credential"
-        onPress={async () => {
-          setResult(null)
-          setError(null)
-          try {
-            // Create a random challenge
-            const challengeBytes = await ExpoCrypto.getRandomBytesAsync(32)
-            // Base64url encode without padding
-            const challenge = Base64.fromBytes(challengeBytes, {
-              url: true,
-              pad: false,
-            })
-            const userId = Base64.fromBytes(
-              await ExpoCrypto.getRandomBytesAsync(32),
-              {
-                url: true,
-                pad: false,
-              },
-            )
-
-            const response = await ExpoWebAuthN.createCredential({
-              rp: { id: 'mperhats.github.io', name: 'mperhats.github.io' },
-              user: {
-                id: userId,
-                name: 'Test User',
-                displayName: 'Test User',
-              },
-              challenge,
-              pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
-              authenticatorSelection: {
-                requireResidentKey: true,
-                residentKey: 'required',
-                userVerification: 'required',
-              },
-              attestation: 'none',
-            })
-            setResult(response)
-          } catch (e: any) {
-            setError(String(e?.message ?? e))
-          }
-        }}
-      />
-      <Pre text={result} />
-      <Pre text={error} />
     </View>
   )
 }

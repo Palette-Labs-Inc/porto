@@ -1,12 +1,11 @@
 // Learn more https://docs.expo.io/guides/customizing-metro
-/**
- * @typedef {import('expo/metro-config').MetroConfig} MetroConfig
- */
 const { getDefaultConfig } = require('expo/metro-config')
+const MetroSymlinksResolver = require('@rnx-kit/metro-resolver-symlinks')
 
 const defaultConfiguration = getDefaultConfig(__dirname)
+const symlinksResolver = MetroSymlinksResolver()
 
-/** @type {MetroConfig} */
+/** @type {import('expo/metro-config').MetroConfig} */
 module.exports = {
   ...defaultConfiguration,
   transformer: {
@@ -14,6 +13,16 @@ module.exports = {
   },
   resolver: {
     ...defaultConfiguration.resolver,
+    sourceExts: [
+      'ts',
+      'tsx',
+      'js',
+      'jsx',
+      'json',
+      'cjs',
+      'mjs',
+      ...(defaultConfiguration.resolver?.sourceExts || []),
+    ],
     unstable_enablePackageExports: true,
     unstable_conditionNames: [
       ...(defaultConfiguration.resolver?.unstable_conditionNames || []),
@@ -21,13 +30,27 @@ module.exports = {
     ],
     resolveRequest: (context, moduleName, platform) => {
       /**
-       * if `node:crypto`, replace it with `expo-crypto`
+       * Polyfill Node.js modules for React Native
        */
-      if (moduleName.startsWith('node:crypto'))
-        return {
-          type: 'sourceFile',
-          filePath: require.resolve('expo-crypto'),
+      if (platform !== 'web') {
+        const nativePolyfills = {
+          crypto: require.resolve('react-native-quick-crypto'),
+          buffer: require.resolve('buffer'),
+          stream: require.resolve('stream-browserify'),
         }
+
+        if (nativePolyfills[moduleName]) {
+          try {
+            const polyfillPath = nativePolyfills[moduleName]
+            const symlinkResolution = symlinksResolver(
+              context,
+              polyfillPath,
+              platform,
+            )
+            if (symlinkResolution) return symlinkResolution
+          } catch {}
+        }
+      }
 
       /**
        * Prefer CJS for `ox` or `@noble/hashes` to avoid `window.*` usage in ESM builds
@@ -38,6 +61,16 @@ module.exports = {
           type: 'sourceFile',
           filePath: require.resolve(moduleName),
         }
+
+      // Try symlinks resolution
+      try {
+        const symlinkResolution = symlinksResolver(
+          context,
+          moduleName,
+          platform,
+        )
+        if (symlinkResolution) return symlinkResolution
+      } catch {}
 
       return context.resolveRequest(context, moduleName, platform)
     },

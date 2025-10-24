@@ -1,13 +1,17 @@
 import * as WebAuthN from '@porto/expo-webauthn'
-import type { Chain } from 'porto/core/Chains'
 import { Hex, Value } from 'ox'
 import { Mode, Porto } from 'porto'
+import type { Chain } from 'porto/core/Chains'
 import { baseSepolia } from 'porto/core/Chains'
 import { http, relayProxy } from 'porto/core/Transport'
 import { foundry } from 'viem/chains'
 import * as Storage from '#lib/storage'
 
-import { delegationAddress, exp1Address, exp2Address } from '#lib/_generated/contracts.ts'
+import {
+  delegationAddress,
+  exp1Address,
+  exp2Address,
+} from '#lib/_generated/contracts.ts'
 
 /**
  * Toggle between local and production relay using environment variable.

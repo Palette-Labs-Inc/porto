@@ -1,9 +1,9 @@
 // biome-ignore lint/style/useNodejsImportProtocol: React Native requires 'buffer' package
 import { Buffer } from 'buffer'
-import { Crypto, CryptoKey } from '@peculiar/webcrypto'
-import { Platform } from 'react-native'
 // biome-ignore lint/style/useNodejsImportProtocol: React Native requires 'util' package
 import { TextDecoder, TextEncoder } from 'util'
+import { Crypto, CryptoKey } from '@peculiar/webcrypto'
+import { Platform } from 'react-native'
 
 if (Platform.OS !== 'web') {
   if (typeof globalThis.Buffer === 'undefined')

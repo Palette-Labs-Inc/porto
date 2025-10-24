@@ -4,6 +4,7 @@ import { Mode, Porto } from 'porto'
 import { baseSepolia } from 'porto/core/Chains'
 
 import { exp1Address, exp2Address } from '#lib/_generated/contracts.ts'
+import { storage } from '#lib/storage/index.ts'
 
 export const porto = Porto.create({
   mode: Mode.relay({
@@ -15,6 +16,8 @@ export const porto = Porto.create({
     keystoreHost: 'mperhats.github.io',
   }),
   chains: [baseSepolia],
+  // Platform-specific storage: MMKV (native) or localStorage (web)
+  storage,
 })
 
 const chainId = baseSepolia.id

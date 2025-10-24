@@ -1,3 +1,11 @@
+// Porto React Native Playground - Mode.relay
+// This app uses Mode.relay() which is headless (no dialog UI).
+// 
+// Note: Some methods require Mode.reactNative() or Mode.dialog():
+// - wallet_addFunds (removed - requires payment provider integration)
+//
+// All other standard Porto methods are supported in relay mode.
+
 // Workspace-local import to call the native module directly
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -32,7 +40,6 @@ export default function Page() {
             <Connect />
             <Login />
             <Divider />
-            <AddFunds />
             <GetAssets />
             <Accounts />
             <Disconnect />
@@ -205,33 +212,6 @@ function Login() {
   )
 }
 
-function AddFunds() {
-  const [result, setResult] = React.useState<unknown | null>(null)
-  return (
-    <View>
-      <Text>wallet_addFunds</Text>
-      <Button
-        onPress={async () => {
-          porto.provider
-            .request({
-              method: 'wallet_addFunds',
-              params: [
-                {
-                  value: '100',
-                },
-              ],
-            })
-            .then(setResult)
-        }}
-        title="Add Funds"
-      />
-      {result && typeof result === 'object' && 'id' in result ? (
-        <Pre text={result} />
-      ) : null}
-    </View>
-  )
-}
-
 function GetAssets() {
   const [result, setResult] = React.useState<unknown | null>(null)
   return (
@@ -344,7 +324,7 @@ function GrantPermissions() {
   const [result, setResult] = React.useState<unknown | null>(null)
   return (
     <View>
-      <Text>wallet_grantPermissions</Text>
+      <Text>experimental_authorizeKey</Text>
       <Button
         onPress={async () => {
           const p = permissions()
@@ -353,12 +333,12 @@ function GrantPermissions() {
             return
           }
           const result = await porto.provider.request({
-            method: 'wallet_grantPermissions',
+            method: 'experimental_authorizeKey',
             params: [p],
           })
           setResult(result)
         }}
-        title="Grant Permissions"
+        title="Authorize Key (Grant Permissions)"
       />
       <Pre text={result} />
     </View>
@@ -370,14 +350,14 @@ function GetPermissions() {
 
   return (
     <View>
-      <Text>wallet_getPermissions</Text>
+      <Text>experimental_keys</Text>
       <Button
         onPress={() =>
           porto.provider
-            .request({ method: 'wallet_getPermissions' })
+            .request({ method: 'experimental_keys' })
             .then(setResult)
         }
-        title="Get Permissions"
+        title="Get Keys (Permissions)"
       />
       {result ? <Pre text={result} /> : null}
     </View>
@@ -386,23 +366,23 @@ function GetPermissions() {
 
 function RevokePermissions() {
   const [revoked, setRevoked] = React.useState(false)
-  const [id, setId] = React.useState('')
+  const [publicKey, setPublicKey] = React.useState('')
   return (
     <View>
-      <Text>wallet_revokePermissions</Text>
+      <Text>experimental_revokeKey</Text>
       <Button
         onPress={async () => {
-          if (!id) return
+          if (!publicKey) return
           setRevoked(false)
           await porto.provider.request({
-            method: 'wallet_revokePermissions',
-            params: [{ id: id as `0x${string}` }],
+            method: 'experimental_revokeKey',
+            params: [{ publicKey: publicKey as `0x${string}` }],
           })
           setRevoked(true)
         }}
-        title="Revoke Permissions"
+        title="Revoke Key (Remove Permission)"
       />
-      {revoked && <Text>Permissions revoked.</Text>}
+      {revoked && <Text>Key revoked.</Text>}
     </View>
   )
 }
@@ -411,7 +391,7 @@ function GrantAdmin() {
   const [result, setResult] = React.useState<unknown | null>(null)
   return (
     <View>
-      <Text>wallet_grantAdmin</Text>
+      <Text>experimental_authorizeKey (admin)</Text>
       <Button
         onPress={async () => {
           const accounts = await porto.provider.request({
@@ -419,19 +399,20 @@ function GrantAdmin() {
           })
           if (!accounts[0]) return
           const result = await porto.provider.request({
-            method: 'wallet_grantAdmin',
+            method: 'experimental_authorizeKey',
             params: [
               {
                 key: {
                   publicKey: accounts[0],
-                  type: 'address',
+                  type: 'secp256k1',
                 },
+                role: 'admin',
               },
             ],
           })
           setResult(result)
         }}
-        title="Grant Admin"
+        title="Authorize Admin Key"
       />
       <Pre text={result} />
     </View>
@@ -442,12 +423,17 @@ function GetAdmins() {
   const [result, setResult] = React.useState<unknown | null>(null)
   return (
     <View>
-      <Text>wallet_getAdmins</Text>
+      <Text>experimental_keys (filter admins)</Text>
       <Button
-        onPress={() => {
-          porto.provider.request({ method: 'wallet_getAdmins' }).then(setResult)
+        onPress={async () => {
+          const keys = (await porto.provider.request({ 
+            method: 'experimental_keys' 
+          })) as Array<{ role: string; [key: string]: unknown }>
+          // Filter to show only admin keys
+          const adminKeys = keys.filter((key) => key.role === 'admin')
+          setResult(adminKeys)
         }}
-        title="Get Admins"
+        title="Get Admin Keys"
       />
       <Pre text={result} />
     </View>
@@ -456,23 +442,23 @@ function GetAdmins() {
 
 function RevokeAdmin() {
   const [revoked, setRevoked] = React.useState(false)
-  const [id, setId] = React.useState('')
+  const [publicKey, setPublicKey] = React.useState('')
   return (
     <View>
-      <Text>wallet_revokeAdmin</Text>
+      <Text>experimental_revokeKey (admin)</Text>
       <Button
         onPress={async () => {
-          if (!id) return
+          if (!publicKey) return
           setRevoked(false)
           await porto.provider.request({
-            method: 'wallet_revokeAdmin',
-            params: [{ id: id as `0x${string}` }],
+            method: 'experimental_revokeKey',
+            params: [{ publicKey: publicKey as `0x${string}` }],
           })
           setRevoked(true)
         }}
-        title="Revoke Admin"
+        title="Revoke Admin Key"
       />
-      {revoked && <Text>Admin revoked.</Text>}
+      {revoked && <Text>Admin key revoked.</Text>}
     </View>
   )
 }

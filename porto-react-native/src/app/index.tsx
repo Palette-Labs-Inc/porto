@@ -1,4 +1,9 @@
+// Workspace-local import to call the native module directly
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import ExpoWebAuthN from '@porto/expo-webauthn/src/ExpoWebAuthN'
 import { Checkbox } from 'expo-checkbox'
+import * as ExpoCrypto from 'expo-crypto'
 import { Link } from 'expo-router'
 import { AbiFunction, Base64, Hex, Json, Value } from 'ox'
 import * as React from 'react'
@@ -6,11 +11,6 @@ import { Button, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import { exp1Abi, exp1Address } from '#lib/_generated/contracts.ts'
 import { permissions, porto } from '#lib/porto.ts'
-import * as ExpoCrypto from 'expo-crypto'
-// Workspace-local import to call the native module directly
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import ExpoWebAuthN from '@porto/expo-webauthn/src/ExpoWebAuthN'
 
 export default function Page() {
   return (
@@ -124,10 +124,13 @@ function NativeWebAuthNTest() {
               url: true,
               pad: false,
             })
-            const userId = Base64.fromBytes(await ExpoCrypto.getRandomBytesAsync(32), {
-              url: true,
-              pad: false,
-            })
+            const userId = Base64.fromBytes(
+              await ExpoCrypto.getRandomBytesAsync(32),
+              {
+                url: true,
+                pad: false,
+              },
+            )
 
             const response = await ExpoWebAuthN.createCredential({
               rp: { id: 'mperhats.github.io', name: 'mperhats.github.io' },

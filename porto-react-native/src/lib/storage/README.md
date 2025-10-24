@@ -76,19 +76,15 @@ Uses Porto's built-in storage backends with automatic fallback:
 
 ### Implementation
 ```typescript
-export const storage = (() => {
-  if (typeof window === 'undefined') {
-    return Storage.memory()
-  }
-
-  const hasIndexedDB = typeof indexedDB !== 'undefined'
-  const hasLocalStorage = // ... test localStorage
-
-  if (hasIndexedDB) return Storage.idb()      // Best
-  if (hasLocalStorage) return Storage.localStorage()  // Good
-  return Storage.memory()                     // Fallback
-})()
+export const storage =
+  typeof indexedDB !== 'undefined'
+    ? Storage.idb()
+    : typeof window !== 'undefined' && window.localStorage
+      ? Storage.localStorage()
+      : Storage.memory()
 ```
+
+Simple, elegant, and lets Porto handle the heavy lifting!
 
 ## Utilities
 

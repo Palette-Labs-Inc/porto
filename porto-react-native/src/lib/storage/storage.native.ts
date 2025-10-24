@@ -5,15 +5,7 @@ import { replacer, reviver } from './utils.ts'
 
 /**
  * MMKV-based storage for React Native (iOS/Android)
- *
- * MMKV is ~30x faster than AsyncStorage and provides:
- * - Fully synchronous operations (no async/await needed)
- * - High performance C++ implementation using JSI
- * - Encryption support for secure storage
- * - Multiple instances support
- * - Web fallback support (via Porto's built-in storage)
  */
-
 // Create MMKV instance
 const mmkv = createMMKV()
 

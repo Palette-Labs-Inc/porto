@@ -373,29 +373,76 @@ function GetPermissions() {
 
 function RevokePermissions() {
   const [revoked, setRevoked] = React.useState(false)
-  const [id, setId] = React.useState('')
+  const [permissions, setPermissions] = React.useState<
+    Array<{ id: string; [key: string]: unknown }>
+  >([])
+
+  // Load permissions when component mounts
+  React.useEffect(() => {
+    porto.provider
+      .request({ method: 'wallet_getPermissions' })
+      .then((result) => {
+        // Handle undefined or non-array responses
+        if (Array.isArray(result)) {
+          setPermissions(result as any)
+        } else {
+          setPermissions([])
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching permissions:', error)
+        setPermissions([])
+      })
+  }, [])
+
   return (
     <View>
       <Text>wallet_revokePermissions</Text>
-      <TextInput
-        onChangeText={setId}
-        placeholder="Permission ID (0x...)"
-        style={styles.input}
-        value={id}
-      />
-      <Button
-        onPress={async () => {
-          if (!id) return
-          setRevoked(false)
-          await porto.provider.request({
-            method: 'wallet_revokePermissions',
-            params: [{ id: id as `0x${string}` }],
-          })
-          setRevoked(true)
-        }}
-        title="Revoke Permission"
-      />
-      {revoked && <Text>Permission revoked.</Text>}
+      <Text style={{ fontSize: 12, color: '#666', marginVertical: 8 }}>
+        Tap a permission to revoke it:
+      </Text>
+      {!permissions || permissions.length === 0 ? (
+        <Text style={{ fontSize: 12, color: '#999' }}>
+          No permissions found. Grant some first!
+        </Text>
+      ) : (
+        permissions.map((permission, index) => (
+          <View
+            key={permission.id}
+            style={{
+              borderWidth: 1,
+              borderColor: '#ccc',
+              borderRadius: 4,
+              padding: 8,
+              marginVertical: 4,
+            }}
+          >
+            <Text style={{ fontSize: 10, fontFamily: 'monospace' }}>
+              ID: {permission.id}
+            </Text>
+            <Button
+              onPress={async () => {
+                setRevoked(false)
+                await porto.provider.request({
+                  method: 'wallet_revokePermissions',
+                  params: [{ id: permission.id as `0x${string}` }],
+                })
+                setRevoked(true)
+                // Remove from list immediately
+                setPermissions((prev) =>
+                  prev.filter((p) => p.id !== permission.id),
+                )
+              }}
+              title={`Revoke Permission ${index + 1}`}
+            />
+          </View>
+        ))
+      )}
+      {revoked && (
+        <Text style={{ color: 'green', marginTop: 8 }}>
+          Permission revoked!
+        </Text>
+      )}
     </View>
   )
 }
@@ -452,29 +499,72 @@ function GetAdmins() {
 
 function RevokeAdmin() {
   const [revoked, setRevoked] = React.useState(false)
-  const [id, setId] = React.useState('')
+  const [admins, setAdmins] = React.useState<
+    Array<{ id: string; [key: string]: unknown }>
+  >([])
+
+  // Load admins when component mounts
+  React.useEffect(() => {
+    porto.provider
+      .request({ method: 'wallet_getAdmins' })
+      .then((result) => {
+        // Handle undefined or non-array responses
+        if (Array.isArray(result)) {
+          setAdmins(result as any)
+        } else {
+          setAdmins([])
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching admins:', error)
+        setAdmins([])
+      })
+  }, [])
+
   return (
     <View>
       <Text>wallet_revokeAdmin</Text>
-      <TextInput
-        onChangeText={setId}
-        placeholder="Admin ID (0x...)"
-        style={styles.input}
-        value={id}
-      />
-      <Button
-        onPress={async () => {
-          if (!id) return
-          setRevoked(false)
-          await porto.provider.request({
-            method: 'wallet_revokeAdmin',
-            params: [{ id: id as `0x${string}` }],
-          })
-          setRevoked(true)
-        }}
-        title="Revoke Admin Key"
-      />
-      {revoked && <Text>Admin key revoked.</Text>}
+      <Text style={{ fontSize: 12, color: '#666', marginVertical: 8 }}>
+        Tap an admin to revoke it:
+      </Text>
+      {!admins || admins.length === 0 ? (
+        <Text style={{ fontSize: 12, color: '#999' }}>
+          No admin keys found. Grant some first!
+        </Text>
+      ) : (
+        admins.map((admin, index) => (
+          <View
+            key={admin.id}
+            style={{
+              borderWidth: 1,
+              borderColor: '#ccc',
+              borderRadius: 4,
+              padding: 8,
+              marginVertical: 4,
+            }}
+          >
+            <Text style={{ fontSize: 10, fontFamily: 'monospace' }}>
+              ID: {admin.id}
+            </Text>
+            <Button
+              onPress={async () => {
+                setRevoked(false)
+                await porto.provider.request({
+                  method: 'wallet_revokeAdmin',
+                  params: [{ id: admin.id as `0x${string}` }],
+                })
+                setRevoked(true)
+                // Remove from list immediately
+                setAdmins((prev) => prev.filter((a) => a.id !== admin.id))
+              }}
+              title={`Revoke Admin ${index + 1}`}
+            />
+          </View>
+        ))
+      )}
+      {revoked && (
+        <Text style={{ color: 'green', marginTop: 8 }}>Admin key revoked!</Text>
+      )}
     </View>
   )
 }

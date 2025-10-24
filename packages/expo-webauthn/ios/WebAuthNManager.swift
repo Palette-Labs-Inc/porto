@@ -35,7 +35,8 @@ class WebAuthNResponder: NSObject, ASAuthorizationControllerDelegate, ASAuthoriz
             case .notHandled:
                 promise.reject(AuthorizationNotHandledException())
             case .failed:
-                promise.reject(AuthorizationFailedException())
+                // Surface underlying error detail for diagnostics
+                promise.reject(AuthenticationFailedException(error.localizedDescription))
             case .notInteractive:
                 promise.reject(NotInteractiveException())
             case .unknown:
@@ -94,6 +95,7 @@ public class WebAuthNManager {
     
     public func createCredential(options: CredentialCreationOptions, promise: Promise) {
         do {
+            print("[ExpoWebAuthN] createCredential rp.id=\(options.rp.id) user.name=\(options.user.name) challenge.len=\(options.challenge.count)")
             guard let challenge = Data(base64URLEncoded: options.challenge) else {
                 throw InvalidChallengeException()
             }
@@ -123,6 +125,7 @@ public class WebAuthNManager {
     
     public func getCredential(options: CredentialRequestOptions, promise: Promise) {
         do {
+            print("[ExpoWebAuthN] getCredential rpId=\(options.rpId) challenge.len=\(options.challenge.count)")
             guard let challenge = Data(base64URLEncoded: options.challenge) else {
                 throw InvalidChallengeException()
             }

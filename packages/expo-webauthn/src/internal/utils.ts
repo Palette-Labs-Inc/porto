@@ -13,6 +13,17 @@ export function bufferSourceToBase64(buffer: BufferSource): string {
 }
 
 /**
+ * Converts a BufferSource to a base64url string (unpadded).
+ */
+export function bufferSourceToBase64URL(buffer: BufferSource): string {
+  const uint8Array =
+    buffer instanceof Uint8Array
+      ? buffer
+      : new Uint8Array(buffer instanceof ArrayBuffer ? buffer : buffer.buffer)
+  return Base64.fromBytes(uint8Array, { url: true, pad: false })
+}
+
+/**
  * Converts a base64 string to an ArrayBuffer
  * @internal
  */

@@ -7,13 +7,12 @@ import { exp1Address, exp2Address } from '#lib/_generated/contracts.ts'
 
 export const porto = Porto.create({
   mode: Mode.relay({
-    // Use device-native WebAuthN via our Expo module
     webAuthn: {
       createFn: (options) => WebAuthN.createCredential(options),
       getFn: (options) => WebAuthN.getCredential(options),
     },
     // Set RP ID to your associated domain host (no protocol)
-    keystoreHost: process.env.EXPO_PUBLIC_SERVER_DOMAIN,
+    keystoreHost: 'mperhats.github.io',
   }),
   chains: [baseSepolia],
 })

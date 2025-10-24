@@ -21,9 +21,9 @@
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
     "@expo/ui": "~0.2.0-beta.4",
+    "@porto/expo-webauthn": "workspace:*",
     "eruda": "^3.4.3",
     "expo": "catalog:",
-    "@porto/expo-webauthn": "workspace:*",
     "expo-application": "~7.0.7",
     "expo-auth-session": "~7.0.8",
     "expo-blob": "^0.1.6",

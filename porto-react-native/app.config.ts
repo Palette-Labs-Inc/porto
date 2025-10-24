@@ -35,7 +35,7 @@ export default (context: ConfigContext): ExpoConfig => ({
     buildNumber: pkg.version,
     supportsTablet: true,
     appleTeamId: 'JYD77N4AR8',
-    bundleIdentifier: 'com.perhats.wallet',
+    bundleIdentifier: 'com.palettelabs.nosh',
     associatedDomains: [
       'applinks:mperhats.github.io',
       'webcredentials:mperhats.github.io',
@@ -44,7 +44,7 @@ export default (context: ConfigContext): ExpoConfig => ({
   android: {
     newArchEnabled: true,
     edgeToEdgeEnabled: true,
-    package: 'com.perhats.wallet',
+    package: 'com.palettelabs.nosh',
   },
   web: {
     output: 'single',

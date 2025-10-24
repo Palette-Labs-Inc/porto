@@ -253,22 +253,27 @@ function AddFaucetFunds() {
             )
 
             // Token addresses for faucet (from capabilities response)
-            const faucetTokens: Record<number, { address: string, symbol: string }> = {
-              84532: { // Base Sepolia - using EXP token
+            const faucetTokens: Record<
+              number,
+              { address: string; symbol: string }
+            > = {
+              84532: {
+                // Base Sepolia - using EXP token
                 address: '0xfca413a634c4df6b98ebb970a44d9a32f8f5c64e',
-                symbol: 'EXP'
+                symbol: 'EXP',
               },
-              11155420: { // Optimism Sepolia - needs to be confirmed
+              11155420: {
+                // Optimism Sepolia - needs to be confirmed
                 address: '0x6795f10304557a454b94a5c04e9217677cc9b598',
-                symbol: 'TETH'
-              }
+                symbol: 'TETH',
+              },
             }
 
             const token = faucetTokens[chainId]
             if (!token) {
-              setResult({ 
+              setResult({
                 error: `Faucet not available on this chain (${chainId})`,
-                hint: 'Switch to Base Sepolia (84532) or Optimism Sepolia (11155420)'
+                hint: 'Switch to Base Sepolia (84532) or Optimism Sepolia (11155420)',
               })
               return
             }
@@ -295,17 +300,19 @@ function AddFaucetFunds() {
             })
 
             const faucetResult = await response.json()
-            console.log('wallet_addFaucetFunds response:', JSON.stringify(faucetResult, null, 2))
 
             if (faucetResult.error) {
               console.error('Faucet error:', faucetResult.error)
-              throw new Error(faucetResult.error.message || JSON.stringify(faucetResult.error))
+              throw new Error(
+                faucetResult.error.message ||
+                  JSON.stringify(faucetResult.error),
+              )
             }
-
-            console.log('Faucet success:', faucetResult.result)
             setResult({
               success: true,
-              message: faucetResult.result?.message || 'Faucet funds requested! 25 EXP tokens should arrive shortly.',
+              message:
+                faucetResult.result?.message ||
+                'Faucet funds requested! 25 EXP tokens should arrive shortly.',
               transactionHash: faucetResult.result?.transactionHash,
               details: faucetResult.result,
             })
@@ -344,7 +351,6 @@ function GetAssets() {
             })
             .then((result) => {
               setResult(result)
-              console.log('wallet_getAssets result:', JSON.stringify(result, null, 2))
             })
             .catch((error) => {
               console.error('wallet_getAssets error:', error)
@@ -446,8 +452,9 @@ function GrantPermissions() {
     <View>
       <Text>wallet_grantPermissions</Text>
       <Text style={{ fontSize: 12, color: '#f00', marginVertical: 4 }}>
-        ⚠️ WARNING: Porto v0.2.28-0.2.30 in relay mode creates p256 session keys that the relay cannot sign with.
-        Use the admin WebAuthn key for operations instead, or upgrade to a newer version of porto.
+        ⚠️ WARNING: Porto v0.2.28-0.2.30 in relay mode creates p256 session keys
+        that the relay cannot sign with. Use the admin WebAuthn key for
+        operations instead, or upgrade to a newer version of porto.
       </Text>
       <Button
         onPress={async () => {
@@ -496,7 +503,6 @@ function GetPermissions() {
               method: 'wallet_getPermissions',
             })
             setResult(result)
-            console.log('wallet_getPermissions result:', JSON.stringify(result, null, 2))
           } catch (err: any) {
             console.error('wallet_getPermissions error:', err)
             setError(err?.message || String(err))
@@ -605,7 +611,8 @@ function MintEXP2() {
     <View>
       <Text>Mint EXP2 Tokens (Required for Admin Operations)</Text>
       <Text style={{ fontSize: 12, color: '#666', marginVertical: 4 }}>
-        Note: Uses requiredFunds capability - Porto will automatically source ETH from other chains if needed.
+        Note: Uses requiredFunds capability - Porto will automatically source
+        ETH from other chains if needed.
       </Text>
       <Button
         disabled={isMinting}
@@ -642,10 +649,12 @@ function MintEXP2() {
                   ],
                   capabilities: {
                     // Porto will automatically source ETH from supported chains
-                    requiredFunds: [{
-                      symbol: 'ETH',
-                      value: '0.001', // Request 0.001 ETH for gas
-                    }]
+                    requiredFunds: [
+                      {
+                        symbol: 'ETH',
+                        value: '0.001', // Request 0.001 ETH for gas
+                      },
+                    ],
                   },
                   from: accounts[0],
                   version: '1',
@@ -659,10 +668,13 @@ function MintEXP2() {
             })
           } catch (error: any) {
             console.error('Mint EXP2 error:', error)
-            if (error?.message?.includes('p256') || error?.message?.includes('not supported')) {
-              setResult({ 
+            if (
+              error?.message?.includes('p256') ||
+              error?.message?.includes('not supported')
+            ) {
+              setResult({
                 error: error?.message,
-                hint: 'Revoke any p256 session permissions using "Revoke Permissions" and try again.'
+                hint: 'Revoke any p256 session permissions using "Revoke Permissions" and try again.',
               })
             } else {
               setResult({ error: error?.message })
@@ -1012,7 +1024,8 @@ function GetCapabilities() {
     <View>
       <Text>wallet_getCapabilities</Text>
       <Text style={{ fontSize: 12, color: '#666', marginVertical: 4 }}>
-        Shows supported capabilities like requiredFunds (cross-chain sourcing) and feeToken.
+        Shows supported capabilities like requiredFunds (cross-chain sourcing)
+        and feeToken.
       </Text>
       <Button
         onPress={() =>
@@ -1033,7 +1046,6 @@ function GetCapabilities() {
               })
               .then((result) => {
                 setResult(result)
-                console.log('wallet_getCapabilities result:', JSON.stringify(result, null, 2))
               })
               .catch(console.error)
           }
@@ -1050,15 +1062,24 @@ function GetCapabilities() {
             try {
               const caps = Object.values(result)[0] as any
               return (
-                <View style={{ padding: 8, backgroundColor: '#f0f0f0', borderRadius: 4, marginTop: 4 }}>
+                <View
+                  style={{
+                    padding: 8,
+                    backgroundColor: '#f0f0f0',
+                    borderRadius: 4,
+                    marginTop: 4,
+                  }}
+                >
                   {caps?.requiredFunds?.supported && (
                     <Text style={{ fontSize: 11 }}>
-                      ✅ requiredFunds: {caps.requiredFunds.tokens?.length || 0} tokens available for cross-chain sourcing
+                      ✅ requiredFunds: {caps.requiredFunds.tokens?.length || 0}{' '}
+                      tokens available for cross-chain sourcing
                     </Text>
                   )}
                   {caps?.feeToken?.supported && (
                     <Text style={{ fontSize: 11 }}>
-                      ✅ feeToken: {caps.feeToken.tokens?.length || 0} tokens available for gas payment
+                      ✅ feeToken: {caps.feeToken.tokens?.length || 0} tokens
+                      available for gas payment
                     </Text>
                   )}
                   {caps?.permissions?.supported && (

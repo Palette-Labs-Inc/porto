@@ -10,10 +10,9 @@ Automated scripts for managing the local Porto relay infrastructure.
 | `stop-local-relay.sh` | Stops Docker containers |
 | `clean-local-relay.sh` | Stops containers and removes all data |
 | `status-local-relay.sh` | Shows current status and configuration |
+| `sync-local-contracts.ts` | Syncs deployed contract addresses to TypeScript |
 
 ## How Contract Addresses Are Generated
-
-You asked about where these values come from in `docker-compose.yml`:
 
 ```bash
 --funder-signing-key 0x2a871d0798f97d79848a013d4936a73bf4cc922c825d33c1cf7073dff6d409c6
@@ -79,16 +78,29 @@ chains:
         address: 0xf7Cd8fa9b94DB2Aa972023b379c7f72c65E4De9D
 ```
 
-#### 5. **Automatic Extraction**
+#### 5. **Automatic Extraction & Sync** ✨
 
-The `start-local-relay.sh` script extracts this config:
+The `start-local-relay.sh` script:
 
+**A. Extracts configuration:**
 ```bash
 docker run --rm -v porto_state:/app alpine cat /app/relay.yaml \
     > .local-relay-config.yaml
 ```
 
-This creates `.local-relay-config.yaml` in your project root for reference.
+**B. Auto-syncs to TypeScript:**
+```bash
+tsx scripts/sync-local-contracts.ts
+```
+
+This **automatically updates** `src/lib/_generated/contracts.ts` with the correct addresses for chain 31337!
+
+**What gets synced:**
+- `exp1Address[31337]` → Address from relay deployment
+- `exp2Address[31337]` → Address from relay deployment
+
+**Why this matters:**
+Your app's contract calls will work immediately without manual configuration. The addresses in your TypeScript code always match what's deployed on the local relay.
 
 ## Important Notes
 

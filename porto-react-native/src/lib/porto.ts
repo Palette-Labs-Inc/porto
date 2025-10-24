@@ -9,12 +9,12 @@ import { exp1Address, exp2Address } from '#lib/_generated/contracts.ts'
 
 /**
  * Toggle between local and production relay using environment variable.
- * 
+ *
  * Configuration is managed via .env file:
  *   1. Copy .env.example to .env
  *   2. Set LOCAL_RELAY=true for local development
  *   3. Set LOCAL_RELAY=false for production
- * 
+ *
  * Convenience scripts:
  *   pnpm relay:start  (starts local relay)
  *   pnpm start        (starts app, reads LOCAL_RELAY from .env)
@@ -28,7 +28,9 @@ const RELAY_URL = USE_LOCAL_RELAY
 
 // Log which relay is being used (dev only)
 if (__DEV__) {
-  console.info(`🔗 Porto Relay: ${USE_LOCAL_RELAY ? 'LOCAL' : 'PRODUCTION'} (${RELAY_URL})`)
+  console.info(
+    `🔗 Porto Relay: ${USE_LOCAL_RELAY ? 'LOCAL' : 'PRODUCTION'} (${RELAY_URL})`,
+  )
 }
 
 export const porto = Porto.create({

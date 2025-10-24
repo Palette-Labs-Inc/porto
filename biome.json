@@ -7,7 +7,9 @@
       "tsconfig.json",
       "tsconfig.*.json",
       "app/src/routeTree.gen.ts",
-      "app/dist"
+      "app/dist",
+      "porto-react-native/scripts/sync-local-contracts.ts",
+      "porto-react-native/src/lib/_generated/contracts.ts"
     ]
   },
   "organizeImports": {

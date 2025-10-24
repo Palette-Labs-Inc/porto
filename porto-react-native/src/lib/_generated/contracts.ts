@@ -1019,7 +1019,7 @@ export const exp1Abi = [
  * - [__View Contract on Op Sepolia Blockscout__](https://optimism-sepolia.blockscout.com/address/0xfca413a634c4df6b98ebb970a44d9a32f8f5c64e)
  */
 export const exp1Address = {
-  31337: '0x8ce361602B935680E8DeC218b820ff5056BeB7af',
+  31337: '0xeD1DB453C3156Ff3155a97AD217b3087D5Dc5f6E',
   31338: '0x8ce361602B935680E8DeC218b820ff5056BeB7af',
   31339: '0x8ce361602B935680E8DeC218b820ff5056BeB7af',
   84532: '0xfCA413a634C4dF6B98ebb970A44d9a32F8f5c64E',
@@ -1353,7 +1353,7 @@ export const exp2Abi = [
  * - [__View Contract on Op Sepolia Blockscout__](https://optimism-sepolia.blockscout.com/address/0xacb60ce1e9d71c15a34c3afd903f552520b4a28f)
  */
 export const exp2Address = {
-  31337: '0xe1Aa25618fA0c7A1CFDab5d6B456af611873b629',
+  31337: '0xf7Cd8fa9b94DB2Aa972023b379c7f72c65E4De9D',
   31338: '0xe1Aa25618fA0c7A1CFDab5d6B456af611873b629',
   31339: '0xe1Aa25618fA0c7A1CFDab5d6B456af611873b629',
   84532: '0xaCB60Ce1E9d71C15A34c3AFD903F552520B4A28f',

@@ -52,6 +52,14 @@ else
     echo "⚠️  Could not extract relay configuration (this is optional)"
 fi
 
+# Sync contract addresses to TypeScript
+echo "🔄 Syncing contract addresses to TypeScript..."
+if command -v tsx &> /dev/null; then
+    tsx scripts/sync-local-contracts.ts 2>/dev/null || echo "⚠️  Could not auto-sync contracts (run manually: pnpm relay:sync)"
+else
+    echo "⚠️  tsx not found - run 'pnpm relay:sync' manually to update contract addresses"
+fi
+
 echo ""
 echo "✨ Local Porto relay is ready!"
 echo ""

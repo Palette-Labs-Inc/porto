@@ -10,5 +10,5 @@
  * - storage.ts for web platform
  */
 
-export { storage } from './storage.ts'
-export * from './utils.ts'
+export { storage } from './storage'
+export * from './utils'

@@ -19,6 +19,7 @@
     "doctor": "bun expo install --fix && bun x expo-doctor --verbose --bun || bun expo install --check --bun"
   },
   "dependencies": {
+    "@peculiar/webcrypto": "^1.5.0",
     "@expo/metro-runtime": "~6.1.2",
     "@expo/ui": "~0.2.0-beta.4",
     "@porto/expo-webauthn": "workspace:*",

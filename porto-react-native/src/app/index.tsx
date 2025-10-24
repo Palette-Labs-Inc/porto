@@ -24,7 +24,7 @@ import {
   View,
 } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
-import { exp1Abi, exp1Address } from '#lib/_generated/contracts.ts'
+import { exp1Abi, exp1Address, exp2Address } from '#lib/_generated/contracts.ts'
 import { permissions, porto } from '#lib/porto.ts'
 
 export default function Page() {
@@ -73,6 +73,7 @@ export default function Page() {
             >
               Admins
             </Text>
+            <MintEXP2 />
             <GrantAdmin />
             <GetAdmins />
             <RevokeAdmin />
@@ -447,11 +448,78 @@ function RevokePermissions() {
   )
 }
 
+function MintEXP2() {
+  const [result, setResult] = React.useState<unknown | null>(null)
+  const [isMinting, setIsMinting] = React.useState(false)
+
+  return (
+    <View>
+      <Text>Mint EXP2 Tokens (Required for Admin Operations)</Text>
+      <Button
+        disabled={isMinting}
+        onPress={async () => {
+          setIsMinting(true)
+          try {
+            const accounts = await porto.provider.request({
+              method: 'eth_accounts',
+            })
+            if (!accounts[0]) return
+            const chainId = Hex.toNumber(
+              await porto.provider.request({
+                method: 'eth_chainId',
+              }),
+            )
+            const exp2Token = exp2Address[chainId as keyof typeof exp2Address]
+            if (!exp2Token) {
+              setResult({ error: 'EXP2 token not found for this chain' })
+              return
+            }
+
+            const callResult = await porto.provider.request({
+              method: 'wallet_sendCalls',
+              params: [
+                {
+                  calls: [
+                    {
+                      data: AbiFunction.encodeData(
+                        AbiFunction.fromAbi(exp1Abi, 'mint'),
+                        [accounts[0], Value.fromEther('10')],
+                      ),
+                      to: exp2Token,
+                    },
+                  ],
+                  from: accounts[0],
+                  version: '1',
+                },
+              ],
+            })
+            setResult({
+              success: true,
+              callId: callResult.id,
+              message: 'Minted 10 EXP2 tokens. Wait a moment for confirmation.',
+            })
+          } catch (error: any) {
+            setResult({ error: error.message })
+          } finally {
+            setIsMinting(false)
+          }
+        }}
+        title={isMinting ? 'Minting...' : 'Mint 10 EXP2 Tokens'}
+      />
+      <Pre text={result} />
+    </View>
+  )
+}
+
 function GrantAdmin() {
   const [result, setResult] = React.useState<unknown | null>(null)
   return (
     <View>
       <Text>wallet_grantAdmin</Text>
+      <Text style={{ fontSize: 12, color: '#999', marginVertical: 4 }}>
+        Note: Requires EXP2 tokens for transaction fees. Mint tokens first if
+        you get an asset deficit error.
+      </Text>
       <Button
         onPress={async () => {
           const accounts = await porto.provider.request({

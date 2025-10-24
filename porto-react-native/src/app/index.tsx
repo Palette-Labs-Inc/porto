@@ -335,29 +335,38 @@ function AddFaucetFunds() {
 
 function GetAssets() {
   const [result, setResult] = React.useState<unknown | null>(null)
+  const [error, setError] = React.useState<string | null>(null)
+
   return (
     <View>
       <Text>wallet_getAssets</Text>
       <Button
         onPress={async () => {
-          const accounts = await porto.provider.request({
-            method: 'eth_accounts',
-          })
-          if (!accounts[0]) return
-          porto.provider
-            .request({
+          setError(null)
+          setResult(null)
+          try {
+            const accounts = await porto.provider.request({
+              method: 'eth_accounts',
+            })
+            if (!accounts[0]) return
+            console.log('accounts', JSON.stringify(accounts[0], null, 2))
+            const result = await porto.provider.request({
               method: 'wallet_getAssets',
               params: [{ account: accounts[0] }],
             })
-            .then((result) => {
-              setResult(result)
-            })
-            .catch((error) => {
-              console.error('wallet_getAssets error:', error)
-            })
+            setResult(result)
+          } catch (error: any) {
+            console.error('wallet_getAssets error:', error)
+            setError(error?.message || 'Failed to get assets')
+          }
         }}
         title="Get Assets"
       />
+      {error && (
+        <View style={{ padding: 16, backgroundColor: '#fee', borderRadius: 8, marginTop: 8 }}>
+          <Text style={{ fontSize: 14, color: '#c00' }}>Error: {error}</Text>
+        </View>
+      )}
       {result ? <Pre text={result} /> : null}
     </View>
   )

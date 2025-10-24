@@ -1,8 +1,8 @@
 // TODO: Export from wagmi internals
 export function filterQueryOptions(options) {
-    // destructuring is super fast
-    // biome-ignore format: no formatting
-    const { 
+  // destructuring is super fast
+  // biome-ignore format: no formatting
+  const { 
     // import('@tanstack/query-core').QueryOptions
     _defaulted, behavior, gcTime, initialData, initialDataUpdatedAt, maxPages, meta, networkMode, queryFn, queryHash, queryKey, queryKeyHashFn, retry, retryDelay, structuralSharing, 
     // import('@tanstack/query-core').InfiniteQueryObserverOptions
@@ -13,5 +13,5 @@ export function filterQueryOptions(options) {
     // wagmi
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     config, connector, query, ...rest } = options;
-    return rest;
+  return rest
 }

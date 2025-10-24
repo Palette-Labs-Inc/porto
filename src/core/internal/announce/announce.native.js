@@ -8,8 +8,8 @@
  * 3. Use different patterns for wallet connections
  */
 export const announcer = {
-    announce: (_provider) => {
-        // No-op for native platforms
-        return () => { };
-    },
-};
+  announce: (_provider) => {
+    // No-op for native platforms
+    return () => {}
+  },
+}

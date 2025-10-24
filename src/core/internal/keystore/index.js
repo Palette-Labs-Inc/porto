@@ -1,1 +1,1 @@
-export { keystoreResolver } from './keystore';
+export { keystoreResolver } from './keystore'

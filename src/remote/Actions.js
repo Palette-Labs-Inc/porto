@@ -1,5 +1,5 @@
-import * as Provider from 'ox/Provider';
-import * as RpcResponse from 'ox/RpcResponse';
+import * as Provider from 'ox/Provider'
+import * as RpcResponse from 'ox/RpcResponse'
 /**
  * Action to reject an RPC request.
  *
@@ -7,15 +7,18 @@ import * as RpcResponse from 'ox/RpcResponse';
  * @param request - Request to reject.
  */
 export async function reject(porto, request) {
-    const { messenger } = porto;
-    messenger.send('rpc-response', RpcResponse.from({
-        id: request.request.id,
-        jsonrpc: '2.0',
-        error: {
-            code: Provider.UserRejectedRequestError.code,
-            message: 'User rejected the request.',
-        },
-    }));
+  const { messenger } = porto
+  messenger.send(
+    'rpc-response',
+    RpcResponse.from({
+      id: request.request.id,
+      jsonrpc: '2.0',
+      error: {
+        code: Provider.UserRejectedRequestError.code,
+        message: 'User rejected the request.',
+      },
+    }),
+  )
 }
 /**
  * Action to reject all RPC requests.
@@ -23,10 +26,9 @@ export async function reject(porto, request) {
  * @param porto - Porto instance.
  */
 export async function rejectAll(porto) {
-    const { _internal } = porto;
-    const requests = _internal.remoteStore.getState().requests;
-    for (const request of requests)
-        await reject(porto, request);
+  const { _internal } = porto
+  const requests = _internal.remoteStore.getState().requests
+  for (const request of requests) await reject(porto, request)
 }
 /**
  * Action to respond to an RPC request.
@@ -35,15 +37,14 @@ export async function rejectAll(porto) {
  * @param request - Request to respond to.
  */
 export async function respond(porto, request) {
-    const { messenger, provider } = porto;
-    const shared = { id: request.request.id, jsonrpc: '2.0' };
-    try {
-        const result = await provider.request(request.request);
-        messenger.send('rpc-response', RpcResponse.from({ ...shared, result }));
-    }
-    catch (e) {
-        const error = e;
-        messenger.send('rpc-response', RpcResponse.from({ ...shared, error }));
-        throw error;
-    }
+  const { messenger, provider } = porto
+  const shared = { id: request.request.id, jsonrpc: '2.0' }
+  try {
+    const result = await provider.request(request.request)
+    messenger.send('rpc-response', RpcResponse.from({ ...shared, result }))
+  } catch (e) {
+    const error = e
+    messenger.send('rpc-response', RpcResponse.from({ ...shared, error }))
+    throw error
+  }
 }

@@ -1,6 +1,6 @@
 // Porto React Native Playground - Mode.relay
 // This app uses Mode.relay() which is headless (no dialog UI).
-// 
+//
 // Note: Some methods require Mode.reactNative() or Mode.dialog():
 // - wallet_addFunds (removed - requires payment provider integration)
 //
@@ -426,8 +426,8 @@ function GetAdmins() {
       <Text>experimental_keys (filter admins)</Text>
       <Button
         onPress={async () => {
-          const keys = (await porto.provider.request({ 
-            method: 'experimental_keys' 
+          const keys = (await porto.provider.request({
+            method: 'experimental_keys',
           })) as Array<{ role: string; [key: string]: unknown }>
           // Filter to show only admin keys
           const adminKeys = keys.filter((key) => key.role === 'admin')

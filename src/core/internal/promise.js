@@ -1,10 +1,10 @@
 /** @internal */
 export function withResolvers() {
-    let resolve = () => undefined;
-    let reject = () => undefined;
-    const promise = new Promise((resolve_, reject_) => {
-        resolve = resolve_;
-        reject = reject_;
-    });
-    return { promise, resolve, reject };
+  let resolve = () => undefined
+  let reject = () => undefined
+  const promise = new Promise((resolve_, reject_) => {
+    resolve = resolve_
+    reject = reject_
+  })
+  return { promise, resolve, reject }
 }

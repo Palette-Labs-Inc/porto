@@ -31,4 +31,3 @@ export const storage = Storage.from({
   // MMKV is highly efficient and can handle large amounts of data
   sizeLimit: 1024 * 1024 * 50, // ≈50MB
 })
-

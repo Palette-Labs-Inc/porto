@@ -7,11 +7,10 @@
  * @returns Unsubscribe function.
  */
 export function onInitialized(porto, cb) {
-    const { messenger } = porto;
-    return messenger.on('__internal', (payload) => {
-        if (payload.type === 'init')
-            cb(payload);
-    });
+  const { messenger } = porto
+  return messenger.on('__internal', (payload) => {
+    if (payload.type === 'init') cb(payload)
+  })
 }
 /**
  * Event listener which is triggered when the remote context receives
@@ -22,10 +21,10 @@ export function onInitialized(porto, cb) {
  * @returns Unsubscribe function.
  */
 export function onRequests(porto, cb) {
-    const { messenger, _internal } = porto;
-    return messenger.on('rpc-requests', (payload) => {
-        const requests = payload;
-        _internal.remoteStore.setState({ requests });
-        cb(requests);
-    });
+  const { messenger, _internal } = porto
+  return messenger.on('rpc-requests', (payload) => {
+    const requests = payload
+    _internal.remoteStore.setState({ requests })
+    cb(requests)
+  })
 }

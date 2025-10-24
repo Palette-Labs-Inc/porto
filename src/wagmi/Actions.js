@@ -1,1 +1,8 @@
-export { authorizeKey, connect, createAccount, disconnect, upgradeAccount, keys, } from './internal/core.js';
+export {
+  authorizeKey,
+  connect,
+  createAccount,
+  disconnect,
+  upgradeAccount,
+  keys,
+} from './internal/core.js'

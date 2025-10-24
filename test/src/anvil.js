@@ -1,67 +1,71 @@
-import { resolve } from 'node:path';
-import { Provider, RpcTransport } from 'ox';
-import { createServer } from 'prool';
-import { anvil } from 'prool/instances';
-import { http, createClient, formatTransaction, } from 'viem';
-import { privateKeyToAccount } from 'viem/accounts';
-import { prepareTransactionRequest, signTransaction } from 'viem/actions';
+import { resolve } from 'node:path'
+import { Provider, RpcTransport } from 'ox'
+import { createServer } from 'prool'
+import { anvil } from 'prool/instances'
+import { http, createClient, formatTransaction } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { prepareTransactionRequest, signTransaction } from 'viem/actions'
 export const anvilMainnet = defineAnvil({
-    forkUrl: getEnv('VITE_ANVIL_FORK_URL', 'https://eth.merkle.io'),
-    forkBlockNumber: 19868020n,
-    port: 8545,
-    loadState: resolve(import.meta.dirname, 'anvil.json'),
-});
+  forkUrl: getEnv('VITE_ANVIL_FORK_URL', 'https://eth.merkle.io'),
+  forkBlockNumber: 19868020n,
+  port: 8545,
+  loadState: resolve(import.meta.dirname, 'anvil.json'),
+})
 /////////////////////////////////////////////////////////////////
 // Utilities
 /////////////////////////////////////////////////////////////////
 function getEnv(key, fallback) {
-    if (typeof process.env[key] === 'string')
-        return process.env[key];
-    console.warn(`\`process.env.${key}\` not found. Falling back to \`${fallback}\`.`);
-    return fallback;
+  if (typeof process.env[key] === 'string') return process.env[key]
+  console.warn(
+    `\`process.env.${key}\` not found. Falling back to \`${fallback}\`.`,
+  )
+  return fallback
 }
 function defineAnvil(parameters) {
-    const { port } = parameters;
-    const poolId = Number(process.env.VITEST_POOL_ID ?? 1) *
-        Number(process.env.VITEST_SHARD_ID ?? 1);
-    const rpcUrl = `http://127.0.0.1:${port}/${poolId}`;
-    const config = {
-        ...parameters,
-        odyssey: true,
-        hardfork: 'Prague',
-    };
-    const client = createClient({
-        transport: http(rpcUrl),
-    });
-    const transport = RpcTransport.fromHttp(rpcUrl);
-    const provider = Provider.from({
-        async request(args) {
-            if (args.method === 'eth_sendTransaction') {
-                const transaction = formatTransaction(args.params[0]);
-                const request = await prepareTransactionRequest(client, {
-                    ...transaction,
-                    account: privateKeyToAccount('0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'),
-                    chain: null,
-                });
-                const serialized = await signTransaction(client, request);
-                args.method = 'eth_sendRawTransaction';
-                args.params = [serialized];
-            }
-            return transport.request(args);
-        },
-    });
-    return {
-        config,
-        request: provider.request,
-        async restart() {
-            await fetch(`${rpcUrl}/restart`);
-        },
-        rpcUrl,
-        async start() {
-            return await createServer({
-                instance: anvil(config),
-                port,
-            }).start();
-        },
-    };
+  const { port } = parameters
+  const poolId =
+    Number(process.env.VITEST_POOL_ID ?? 1) *
+    Number(process.env.VITEST_SHARD_ID ?? 1)
+  const rpcUrl = `http://127.0.0.1:${port}/${poolId}`
+  const config = {
+    ...parameters,
+    odyssey: true,
+    hardfork: 'Prague',
+  }
+  const client = createClient({
+    transport: http(rpcUrl),
+  })
+  const transport = RpcTransport.fromHttp(rpcUrl)
+  const provider = Provider.from({
+    async request(args) {
+      if (args.method === 'eth_sendTransaction') {
+        const transaction = formatTransaction(args.params[0])
+        const request = await prepareTransactionRequest(client, {
+          ...transaction,
+          account: privateKeyToAccount(
+            '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80',
+          ),
+          chain: null,
+        })
+        const serialized = await signTransaction(client, request)
+        args.method = 'eth_sendRawTransaction'
+        args.params = [serialized]
+      }
+      return transport.request(args)
+    },
+  })
+  return {
+    config,
+    request: provider.request,
+    async restart() {
+      await fetch(`${rpcUrl}/restart`)
+    },
+    rpcUrl,
+    async start() {
+      return await createServer({
+        instance: anvil(config),
+        port,
+      }).start()
+    },
+  }
 }

@@ -1,1 +1,1 @@
-export { announcer } from './announce';
+export { announcer } from './announce'

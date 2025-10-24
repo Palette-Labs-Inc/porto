@@ -1,7 +1,6 @@
 export const keystoreResolver = {
-    resolveKeystoreHost: (keystoreHost) => {
-        if (keystoreHost === 'self')
-            return undefined;
-        return keystoreHost;
-    },
-};
+  resolveKeystoreHost: (keystoreHost) => {
+    if (keystoreHost === 'self') return undefined
+    return keystoreHost
+  },
+}

@@ -1,6 +1,6 @@
-import { Platform } from 'react-native'
-import * as ExpoCrypto from 'expo-crypto'
 import { Crypto } from '@peculiar/webcrypto'
+import * as ExpoCrypto from 'expo-crypto'
+import { Platform } from 'react-native'
 
 if (Platform.OS !== 'web') {
   type CryptoShim = Partial<Crypto> & {
@@ -18,15 +18,16 @@ if (Platform.OS !== 'web') {
     value: {
       // keep existing values if already set by porto/expo-crypto shim
       getRandomValues:
-        existing?.getRandomValues ?? ((array: ArrayBufferView) => ExpoCrypto.getRandomValues(array as any)),
+        existing?.getRandomValues ??
+        ((array: ArrayBufferView) => ExpoCrypto.getRandomValues(array as any)),
       randomUUID: existing?.randomUUID ?? (() => ExpoCrypto.randomUUID()),
       digest:
         // ExpoCrypto.digest expects (algorithm, data)
-        existing?.digest ?? ((algorithm: string, data: ArrayBuffer) => ExpoCrypto.digest(algorithm as any, data as any)),
+        existing?.digest ??
+        ((algorithm: string, data: ArrayBuffer) =>
+          ExpoCrypto.digest(algorithm as any, data as any)),
       // the missing piece required by ox WebAuthn code paths
       subtle,
     },
   })
 }
-
-

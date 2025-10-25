@@ -281,7 +281,7 @@ function AddFaucetFunds() {
             // Call Porto RPC directly (not through provider)
             // Convert 25 EXP to wei (25 * 10^18) and stringify for JSON
             const valueInWei = Value.fromEther('25').toString()
-            
+
             const response = await fetch('https://rpc.porto.sh', {
               method: 'POST',
               headers: {
@@ -310,16 +310,16 @@ function AddFaucetFunds() {
                   JSON.stringify(faucetResult.error),
               )
             }
-            
+
             const txHash = faucetResult.result?.transactionHash
-            
+
             setResult({
               success: true,
               message:
                 faucetResult.result?.message ||
                 'Faucet funds requested! 25 EXP tokens should arrive shortly.',
               transactionHash: txHash,
-              blockExplorer: txHash 
+              blockExplorer: txHash
                 ? `https://sepolia.basescan.org/tx/${txHash}`
                 : undefined,
             })
@@ -343,7 +343,9 @@ function AddFaucetFunds() {
 function GetAssets() {
   const [result, setResult] = React.useState<unknown | null>(null)
   const [error, setError] = React.useState<string | null>(null)
-  const [directExpBalance, setDirectExpBalance] = React.useState<string | null>(null)
+  const [directExpBalance, setDirectExpBalance] = React.useState<string | null>(
+    null,
+  )
 
   return (
     <View>
@@ -363,7 +365,14 @@ function GetAssets() {
           <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#2e7d32' }}>
             ⚡ Real-time EXP Balance (direct blockchain query):
           </Text>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#2e7d32', marginTop: 4 }}>
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: 'bold',
+              color: '#2e7d32',
+              marginTop: 4,
+            }}
+          >
             {directExpBalance}
           </Text>
         </View>
@@ -378,29 +387,36 @@ function GetAssets() {
               method: 'eth_accounts',
             })
             if (!accounts[0]) return
-            
+
             const chainId = Hex.toNumber(
               await porto.provider.request({ method: 'eth_chainId' }),
             )
-            
+
             // Direct blockchain query for EXP (real-time balance)
             if (chainId === 84532) {
-              const expTokenAddress = '0xfca413a634c4df6b98ebb970a44d9a32f8f5c64e'
+              const expTokenAddress =
+                '0xfca413a634c4df6b98ebb970a44d9a32f8f5c64e'
               try {
-                const balanceData = `0x70a08231000000000000000000000000${accounts[0].slice(2)}` as `0x${string}`
+                const balanceData =
+                  `0x70a08231000000000000000000000000${accounts[0].slice(2)}` as `0x${string}`
                 const balance = await porto.provider.request({
                   method: 'eth_call',
-                  params: [{ to: expTokenAddress, data: balanceData }, 'latest'],
+                  params: [
+                    { to: expTokenAddress, data: balanceData },
+                    'latest',
+                  ],
                 })
-                
-                const balanceNum = Number(Hex.toBigInt(balance as `0x${string}`))
+
+                const balanceNum = Number(
+                  Hex.toBigInt(balance as `0x${string}`),
+                )
                 const balanceFormatted = (balanceNum / 1e18).toFixed(4)
                 setDirectExpBalance(`${balanceFormatted} EXP`)
               } catch (err) {
                 console.error('Direct balance query failed:', err)
               }
             }
-            
+
             // Get all assets from Porto indexer
             const result = await porto.provider.request({
               method: 'wallet_getAssets',

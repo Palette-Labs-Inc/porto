@@ -1,9 +1,7 @@
 /**
- * BigInt serialization helpers for MMKV storage (native platforms)
+ * Serialization helpers for MMKV storage on React Native
  *
- * Required for properly storing blockchain-related values that use BigInt.
- * Porto's built-in storage (IndexedDB, localStorage) handles this automatically,
- * but MMKV requires manual serialization.
+ * Handles BigInt values that JSON.stringify can't serialize natively.
  */
 
 export const replacer = (_key: string, value: any) => {

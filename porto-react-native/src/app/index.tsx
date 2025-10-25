@@ -279,6 +279,9 @@ function AddFaucetFunds() {
             }
 
             // Call Porto RPC directly (not through provider)
+            // Convert 25 EXP to wei (25 * 10^18) and stringify for JSON
+            const valueInWei = Value.fromEther('25').toString()
+            
             const response = await fetch('https://rpc.porto.sh', {
               method: 'POST',
               headers: {
@@ -293,7 +296,7 @@ function AddFaucetFunds() {
                     address: accounts[0],
                     chainId,
                     tokenAddress: token.address,
-                    value: 25, // Default amount from docs
+                    value: valueInWei, // "25000000000000000000" (25 EXP in wei)
                   },
                 ],
               }),
@@ -302,19 +305,23 @@ function AddFaucetFunds() {
             const faucetResult = await response.json()
 
             if (faucetResult.error) {
-              console.error('Faucet error:', faucetResult.error)
               throw new Error(
                 faucetResult.error.message ||
                   JSON.stringify(faucetResult.error),
               )
             }
+            
+            const txHash = faucetResult.result?.transactionHash
+            
             setResult({
               success: true,
               message:
                 faucetResult.result?.message ||
                 'Faucet funds requested! 25 EXP tokens should arrive shortly.',
-              transactionHash: faucetResult.result?.transactionHash,
-              details: faucetResult.result,
+              transactionHash: txHash,
+              blockExplorer: txHash 
+                ? `https://sepolia.basescan.org/tx/${txHash}`
+                : undefined,
             })
           } catch (error: any) {
             console.error('wallet_addFaucetFunds error:', error)
@@ -336,19 +343,65 @@ function AddFaucetFunds() {
 function GetAssets() {
   const [result, setResult] = React.useState<unknown | null>(null)
   const [error, setError] = React.useState<string | null>(null)
+  const [directExpBalance, setDirectExpBalance] = React.useState<string | null>(null)
 
   return (
     <View>
       <Text>wallet_getAssets</Text>
+      <Text style={{ fontSize: 12, color: '#666', marginVertical: 4 }}>
+        Shows all assets from Porto's indexer (may lag behind blockchain)
+      </Text>
+      {directExpBalance && (
+        <View
+          style={{
+            padding: 12,
+            backgroundColor: '#e8f5e9',
+            borderRadius: 8,
+            marginVertical: 8,
+          }}
+        >
+          <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#2e7d32' }}>
+            ⚡ Real-time EXP Balance (direct blockchain query):
+          </Text>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#2e7d32', marginTop: 4 }}>
+            {directExpBalance}
+          </Text>
+        </View>
+      )}
       <Button
         onPress={async () => {
           setError(null)
           setResult(null)
+          setDirectExpBalance(null)
           try {
             const accounts = await porto.provider.request({
               method: 'eth_accounts',
             })
             if (!accounts[0]) return
+            
+            const chainId = Hex.toNumber(
+              await porto.provider.request({ method: 'eth_chainId' }),
+            )
+            
+            // Direct blockchain query for EXP (real-time balance)
+            if (chainId === 84532) {
+              const expTokenAddress = '0xfca413a634c4df6b98ebb970a44d9a32f8f5c64e'
+              try {
+                const balanceData = `0x70a08231000000000000000000000000${accounts[0].slice(2)}` as `0x${string}`
+                const balance = await porto.provider.request({
+                  method: 'eth_call',
+                  params: [{ to: expTokenAddress, data: balanceData }, 'latest'],
+                })
+                
+                const balanceNum = Number(Hex.toBigInt(balance as `0x${string}`))
+                const balanceFormatted = (balanceNum / 1e18).toFixed(4)
+                setDirectExpBalance(`${balanceFormatted} EXP`)
+              } catch (err) {
+                console.error('Direct balance query failed:', err)
+              }
+            }
+            
+            // Get all assets from Porto indexer
             const result = await porto.provider.request({
               method: 'wallet_getAssets',
               params: [{ account: accounts[0] }],
@@ -466,11 +519,6 @@ function GrantPermissions() {
   return (
     <View>
       <Text>wallet_grantPermissions</Text>
-      <Text style={{ fontSize: 12, color: '#f00', marginVertical: 4 }}>
-        ⚠️ WARNING: Porto v0.2.28-0.2.30 in relay mode creates p256 session keys
-        that the relay cannot sign with. Use the admin WebAuthn key for
-        operations instead, or upgrade to a newer version of porto.
-      </Text>
       <Button
         onPress={async () => {
           const p = permissions()
@@ -484,7 +532,7 @@ function GrantPermissions() {
           })
           setResult(result)
         }}
-        title="Grant Permissions (Not Working in Relay Mode)"
+        title="Grant Permissions"
       />
       <Pre text={result} />
     </View>
@@ -627,7 +675,7 @@ function MintEXP2() {
       <Text>Mint EXP2 Tokens (Required for Admin Operations)</Text>
       <Text style={{ fontSize: 12, color: '#666', marginVertical: 4 }}>
         Note: Uses requiredFunds capability - Porto will automatically source
-        ETH from other chains if needed.
+        EXP tokens from supported chains if needed.
       </Text>
       <Button
         disabled={isMinting}
@@ -663,11 +711,11 @@ function MintEXP2() {
                     },
                   ],
                   capabilities: {
-                    // Porto will automatically source ETH from supported chains
+                    // Porto will automatically source EXP tokens from supported chains
                     requiredFunds: [
                       {
-                        symbol: 'ETH',
-                        value: '0.001', // Request 0.001 ETH for gas
+                        symbol: 'EXP',
+                        value: '2', // Request 2 EXP for gas fees
                       },
                     ],
                   },
@@ -683,17 +731,7 @@ function MintEXP2() {
             })
           } catch (error: any) {
             console.error('Mint EXP2 error:', error)
-            if (
-              error?.message?.includes('p256') ||
-              error?.message?.includes('not supported')
-            ) {
-              setResult({
-                error: error?.message,
-                hint: 'Revoke any p256 session permissions using "Revoke Permissions" and try again.',
-              })
-            } else {
-              setResult({ error: error?.message })
-            }
+            setResult({ error: error?.message })
           } finally {
             setIsMinting(false)
           }

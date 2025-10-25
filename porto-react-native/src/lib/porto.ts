@@ -2,7 +2,6 @@ import * as WebAuthN from '@porto/expo-webauthn'
 import { Hex, Value } from 'ox'
 import { Mode, Porto } from 'porto'
 import { baseSepolia } from 'porto/core/Chains'
-import { http } from 'viem'
 import * as Storage from '#lib/storage'
 
 import { exp1Address, exp2Address } from '#lib/_generated/contracts.ts'
